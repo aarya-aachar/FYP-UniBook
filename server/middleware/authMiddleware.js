@@ -21,6 +21,7 @@ function verifyAdmin(req, res, next) {
   if (req.user && req.user.role === 'admin') {
     next();
   } else {
+    console.warn(`Admin Access Denied: User role is '${req.user?.role || 'undefined'}'`);
     return res.status(403).json({ message: 'Admin access required' });
   }
 }

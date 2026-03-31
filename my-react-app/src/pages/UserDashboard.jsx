@@ -7,132 +7,143 @@ import { getProfile } from "../services/authService";
 const UserDashboard = () => {
   const [appointments, setAppointments] = useState([]);
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    document.title = "User | Dashboard - UniBook";
     setUser(getProfile());
     const fetchBookings = async () => {
       try {
+        setLoading(true);
         const data = await getUserBookings();
         // filter out cancelled
         const active = data.filter(b => b.status !== 'cancelled');
         setAppointments(active.slice(0, 3)); // show top 3 upcoming
       } catch (err) {
         console.error("Failed to load dashboard bookings", err);
+      } finally {
+        setLoading(false);
       }
     };
     fetchBookings();
   }, []);
 
+  const stats = [
+    { label: 'Active Bookings', value: appointments.length, icon: '📅', color: 'from-blue-500 to-indigo-600' },
+    { label: 'Pending confirmed', value: appointments.filter(a => a.status === 'pending').length, icon: '⏳', color: 'from-amber-500 to-orange-600' },
+  ];
+
   return (
-    <div className="flex min-h-screen bg-gray-100">
-      {/* Sidebar */}
-      <UserSidebar />
+    <>
+      <style>{`
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideIn { from { transform: translateX(-30px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+      `}</style>
 
-      {/* Main Content */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex min-h-screen" style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%)' }}>
+        <UserSidebar />
 
-        {/* Welcome Section */}
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-14 px-6 text-center">
-          <h1 className="text-4xl font-extrabold mb-2">
-            Welcome Back, {user?.name || 'User'} 👋
-          </h1>
-          <p className="text-lg">
-            Manage your appointments and profile with ease
-          </p>
-        </div>
-
-        <div className="max-w-6xl mx-auto px-6 py-12">
-
-          {/* Quick Actions */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-            <Link
-              to="/services"
-              className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition transform hover:-translate-y-1 p-8 text-center"
-            >
-              <img
-                src="/images/booking-icon.png"
-                alt="Book"
-                className="h-16 w-16 mx-auto mb-4"
-              />
-              <h2 className="text-xl font-bold mb-1">
-                Book Appointment
-              </h2>
-              <p className="text-gray-600">
-                Find and book services easily
-              </p>
-            </Link>
-
-            <Link
-              to="/profile"
-              className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition transform hover:-translate-y-1 p-8 text-center"
-            >
-              <img
-                src="/images/profile-icon.png"
-                alt="Profile"
-                className="h-16 w-16 mx-auto mb-4"
-              />
-              <h2 className="text-xl font-bold mb-1">
-                My Profile
-              </h2>
-              <p className="text-gray-600">
-                Update your personal information
-              </p>
-            </Link>
-
-            <Link
-              to="/appointments"
-              className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition transform hover:-translate-y-1 p-8 text-center"
-            >
-              <img
-                src="/images/appointments-icon.png"
-                alt="Appointments"
-                className="h-16 w-16 mx-auto mb-4"
-              />
-              <h2 className="text-xl font-bold mb-1">
-                My Appointments
-              </h2>
-              <p className="text-gray-600">
-                View or check appointment status
-              </p>
-            </Link>
+        <div className="flex-1 px-10 py-12 max-w-7xl mx-auto w-full">
+          
+          {/* Welcome Header */}
+          <div className="mb-12" style={{ animation: 'fadeIn 0.6s ease-out' }}>
+            <div className="inline-block px-4 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-black uppercase tracking-widest mb-4">
+              ✨ Welcome back
+            </div>
+            <h1 className="text-6xl font-black text-white tracking-tighter leading-none">
+              Hello, <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-500">{user?.name || 'User'}</span>
+            </h1>
+            <p className="text-white/30 text-xl font-medium mt-3">What would you like to book today?</p>
           </div>
 
-          {/* Upcoming Appointments */}
-          <h2 className="text-2xl font-bold mb-6">
-            Upcoming Appointments
-          </h2>
-
-          {appointments.length ? (
-            appointments.map((a) => (
-              <div
-                key={a.id}
-                className="bg-white rounded-xl shadow-md p-5 mb-4 flex flex-col md:flex-row justify-between items-start md:items-center border-l-4 border-blue-500 hover:shadow-lg transition"
-              >
-                <div>
-                  <h3 className="font-bold text-lg">
-                    {a.provider_name}
-                  </h3>
-                  <p className="text-gray-600">
-                    {a.category} • {new Date(a.booking_date).toLocaleDateString()} at {a.booking_time}
-                  </p>
-                </div>
-
-                <Link
-                  to={`/dashboard/user/appointments`}
-                  className="mt-4 md:mt-0 bg-blue-50 text-blue-600 font-semibold px-6 py-2 rounded-lg hover:bg-blue-100 transition"
-                >
-                  Manage
-                </Link>
+          <div className="grid lg:grid-cols-3 gap-10">
+            {/* Left Column: Quick Actions & Stats */}
+            <div className="lg:col-span-2 space-y-10">
+              
+              {/* Quick Actions Grid */}
+              <div className="grid sm:grid-cols-2 gap-5">
+                {[
+                  { to: '/services', label: 'Book New', sub: 'Find expert services', icon: '✨', gradient: 'hover:border-blue-500/40' },
+                  { to: '/my-appointments', label: 'My Bookings', sub: 'Manage appointments', icon: '📅', gradient: 'hover:border-indigo-500/40' },
+                  { to: '/profile', label: 'My Profile', sub: 'Update your info', icon: '👤', gradient: 'hover:border-purple-500/40' },
+                  { to: '/my-reports', label: 'Analytics', sub: 'View booking trends', icon: '📊', gradient: 'hover:border-emerald-500/40' },
+                ].map((item, i) => (
+                  <Link key={i} to={item.to} 
+                    className={`group bg-white/5 backdrop-blur-md border border-white/10 rounded-[2.5rem] p-8 transition-all duration-300 shadow-xl flex flex-col gap-4 ${item.gradient} hover:bg-white/10`}
+                    style={{ animation: `fadeIn 0.6s ease-out ${0.2 + i * 0.1}s forwards`, opacity: 0 }}>
+                    <div className="text-5xl group-hover:scale-110 group-hover:rotate-6 transition-transform duration-500">{item.icon}</div>
+                    <div>
+                      <h3 className="text-white font-black text-2xl mb-1">{item.label}</h3>
+                      <p className="text-white/30 text-sm font-medium leading-relaxed">{item.sub}</p>
+                    </div>
+                  </Link>
+                ))}
               </div>
-            ))
-          ) : (
-            <p className="text-gray-600">
-              No upcoming appointments.
-            </p>
-          )}
+
+              {/* Snapshot Stats */}
+              <div className="grid sm:grid-cols-2 gap-5">
+                {stats.map((s, i) => (
+                  <div key={i} className="bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl p-6 flex items-center gap-5"
+                       style={{ animation: `fadeIn 0.6s ease-out ${0.6 + i * 0.1}s forwards`, opacity: 0 }}>
+                    <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${s.color} flex items-center justify-center text-2xl shadow-lg`}>
+                      {s.icon}
+                    </div>
+                    <div>
+                      <p className="text-white/30 text-xs font-bold uppercase tracking-widest">{s.label}</p>
+                      <p className="text-3xl font-black text-white">{loading ? '...' : s.value}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Right Column: Upcoming Sidebar */}
+            <div className="space-y-6">
+              <div className="flex items-center justify-between px-2">
+                <h3 className="text-xl font-black text-white tracking-tight">Timeline</h3>
+                <Link to="/my-appointments" className="text-blue-400 text-xs font-black uppercase tracking-widest hover:text-blue-300 transition-colors">See all →</Link>
+              </div>
+
+              <div className="space-y-4">
+                {loading ? (
+                  [1,2].map(i => <div key={i} className="h-32 bg-white/5 rounded-3xl animate-pulse border border-white/10" />)
+                ) : appointments.length > 0 ? (
+                  appointments.map((a, i) => (
+                    <div key={a.id} 
+                      className="group bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl p-6 transition-all duration-300 hover:bg-white/10 hover:border-white/20 shadow-lg"
+                      style={{ animation: `slideIn 0.5s ease-out ${0.8 + i * 0.1}s forwards`, opacity: 0 }}>
+                      <div className="flex justify-between items-start mb-3">
+                        <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-xl">
+                          {a.category === 'Restaurants' ? '🍽️' : a.category === 'Futsal' ? '⚽' : a.category === 'Hospitals' ? '🏥' : '💆'}
+                        </div>
+                        <span className={`text-[10px] uppercase font-black px-2 py-0.5 rounded-md border 
+                          ${a.status === 'confirmed' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border-amber-500/20'}`}>
+                          {a.status}
+                        </span>
+                      </div>
+                      <h4 className="font-black text-white text-lg tracking-tight truncate">{a.provider_name}</h4>
+                      <div className="mt-2 space-y-1">
+                        <p className="text-white/40 text-xs font-bold uppercase flex items-center gap-2">
+                          <span className="opacity-40 tracking-normal text-sm">🗓️</span> {new Date(a.booking_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                        </p>
+                        <p className="text-white/40 text-xs font-bold uppercase flex items-center gap-2">
+                          <span className="opacity-40 tracking-normal text-sm">⏰</span> {a.booking_time}
+                        </p>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-12 bg-white/5 rounded-[2.5rem] border border-white/10 border-dashed">
+                    <p className="text-4xl mb-3">📭</p>
+                    <p className="text-white/30 text-sm font-bold uppercase tracking-widest">No upcoming events</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

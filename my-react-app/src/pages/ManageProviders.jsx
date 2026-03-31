@@ -270,7 +270,10 @@ const ManageProviders = () => {
     finally { setLoading(false); }
   }, []);
 
-  useEffect(() => { fetchProviders(); }, [fetchProviders]);
+  useEffect(() => { 
+    document.title = "Admin | Manage Providers - UniBook";
+    fetchProviders(); 
+  }, [fetchProviders]);
 
   const displayed = providers.filter(p => {
     const mc = filter === 'All' || p.category === filter;

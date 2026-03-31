@@ -8,11 +8,12 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchUser = async () => {
+    const fetchUser = () => {
       try {
-        const { data } = await getProfile();
-        setUser(data.user);
-      } catch {
+        const profile = getProfile();
+        setUser(profile);
+      } catch (err) {
+        console.error("AuthContext sync error:", err);
         setUser(null);
       } finally {
         setLoading(false);

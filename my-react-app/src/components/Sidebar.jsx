@@ -1,33 +1,66 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 
 const Sidebar = () => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = () => {
-    // Clear auth info here if needed
-    // e.g., localStorage.removeItem('adminToken');
-    navigate('/login'); // Redirect to login page
+    localStorage.removeItem('token');
+    navigate('/login');
   };
 
+  const navItems = [
+    { path: '/dashboard/admin', label: 'Dashboard', icon: '📊' },
+    { path: '/dashboard/admin/providers', label: 'Providers', icon: '🏢' },
+    { path: '/dashboard/admin/users', label: 'Users', icon: '👥' },
+    { path: '/dashboard/admin/bookings', label: 'Bookings', icon: '📅' },
+    { path: '/dashboard/admin/reports', label: 'Reports', icon: '📈' },
+  ];
+
   return (
-    <div className="bg-gray-100 w-64 min-h-screen p-6 flex flex-col justify-between">
+    <div className="w-80 min-h-screen p-8 flex flex-col justify-between sticky top-0 h-screen border-r border-white/10"
+         style={{ background: 'rgba(15, 23, 42, 0.95)', backdropFilter: 'blur(10px)' }}>
+      
       <div>
-        <h2 className="text-xl font-bold mb-6">UniBook</h2>
-        <nav className="flex flex-col space-y-3">
-          <Link to="/dashboard/admin" className="hover:bg-blue-600 hover:text-white p-2 rounded">Dashboard</Link>
-          <Link to="/dashboard/admin/providers" className="hover:bg-blue-600 hover:text-white p-2 rounded">Manage Providers</Link>
-          <Link to="/dashboard/admin/users" className="hover:bg-blue-600 hover:text-white p-2 rounded">Manage Users</Link>
-          <Link to="/dashboard/admin/bookings" className="hover:bg-blue-600 hover:text-white p-2 rounded">Manage Bookings</Link>
-          <Link to="/dashboard/admin/reports" className="hover:bg-blue-600 hover:text-white p-2 rounded">Reports</Link>
+        {/* Branding */}
+        <div className="flex items-center gap-3 mb-12 px-2">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-xl shadow-lg shadow-blue-500/20">
+            🌌
+          </div>
+          <h2 className="text-2xl font-black text-white tracking-tighter uppercase">UniBook</h2>
+        </div>
+
+        {/* Navigation */}
+        <nav className="space-y-2">
+          {navItems.map((item) => {
+            const isActive = location.pathname === item.path;
+            return (
+              <Link 
+                key={item.path} 
+                to={item.path} 
+                className={`flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-300 font-bold group
+                  ${isActive 
+                    ? 'bg-gradient-to-r from-blue-600/20 to-indigo-600/10 text-white border border-blue-500/30' 
+                    : 'text-white/40 hover:text-white/70 hover:bg-white/5 border border-transparent'}`}
+              >
+                <span className={`text-2xl transition-transform group-hover:scale-110 ${isActive ? 'opacity-100' : 'opacity-40'}`}>
+                  {item.icon}
+                </span>
+                <span className="text-base tracking-wide">{item.label}</span>
+                {isActive && <div className="ml-auto w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_10px_#3b82f6]" />}
+              </Link>
+            );
+          })}
         </nav>
       </div>
 
-      {/* Logout button at the bottom */}
-    <button
+      {/* Logout */}
+      <button
         onClick={handleLogout}
-        className="mt-6 w-full bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300 transition font-semibold"
+        className="group mt-12 w-full flex items-center gap-4 px-5 py-4 rounded-2xl bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 transition-all font-bold"
       >
-        Logout
+        <span className="text-2xl group-hover:rotate-12 transition-transform">🚪</span>
+        <span className="text-base">Logout System</span>
       </button>
     </div>
   );

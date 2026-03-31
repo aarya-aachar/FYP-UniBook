@@ -1,3 +1,11 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+html {
+  font-size: 110%; /* Makes all rem-based fonts slightly larger (default 16px -> 17.6px) */
+}
+
+body {
+  @apply antialiased text-slate-200;
+}

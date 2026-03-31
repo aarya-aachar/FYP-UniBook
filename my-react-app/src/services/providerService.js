@@ -14,11 +14,14 @@ export const getProviderById = async (id) => {
 // Build FormData so we can include an image file if provided
 const buildFormData = (data, imageFile) => {
   const fd = new FormData();
-  if (data.name)        fd.append('name', data.name);
-  if (data.category)    fd.append('category', data.category);
-  if (data.address)     fd.append('address', data.address);
+  if (data.name)               fd.append('name', data.name);
+  if (data.category)           fd.append('category', data.category);
+  if (data.address)            fd.append('address', data.address);
   if (data.description !== undefined) fd.append('description', data.description);
-  if (imageFile)        fd.append('image', imageFile);
+  if (data.base_price !== undefined)  fd.append('base_price', data.base_price);
+  if (data.opening_time)       fd.append('opening_time', data.opening_time);
+  if (data.closing_time)       fd.append('closing_time', data.closing_time);
+  if (imageFile)               fd.append('image', imageFile);
   return fd;
 };
 

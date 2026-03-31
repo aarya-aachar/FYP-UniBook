@@ -73,7 +73,7 @@ router.get('/providers/:id', async (req, res) => {
 // ─── POST create provider (admin only, with optional image upload) ─────────────
 router.post('/providers', authenticateToken, verifyAdmin, upload.single('image'), async (req, res) => {
   try {
-    const { name, category, description, address } = req.body;
+    const { name, category, description, address, base_price, opening_time, closing_time } = req.body;
 
     if (!name || !address || !category) {
       return res.status(400).json({ message: 'Name, address, and category are required' });
@@ -85,8 +85,17 @@ router.post('/providers', authenticateToken, verifyAdmin, upload.single('image')
 
     const pool = getPool();
     const [result] = await pool.query(
-      'INSERT INTO providers (name, category, description, image, address) VALUES (?, ?, ?, ?, ?)',
-      [name.trim(), category, description || '', imageUrl, address.trim()]
+      'INSERT INTO providers (name, category, description, image, address, base_price, opening_time, closing_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      [
+        name.trim(), 
+        category, 
+        description || '', 
+        imageUrl, 
+        address.trim(), 
+        base_price || 0, 
+        opening_time || '09:00:00', 
+        closing_time || '18:00:00'
+      ]
     );
 
     res.status(201).json({ message: 'Provider created successfully', id: result.insertId, imageUrl });
@@ -102,7 +111,7 @@ router.post('/providers', authenticateToken, verifyAdmin, upload.single('image')
 // ─── PUT update provider (admin only, with optional image upload) ──────────────
 router.put('/providers/:id', authenticateToken, verifyAdmin, upload.single('image'), async (req, res) => {
   try {
-    const { name, category, description, address } = req.body;
+    const { name, category, description, address, base_price, opening_time, closing_time } = req.body;
     const pool = getPool();
 
     // Check duplicate name (exclude self)
@@ -124,6 +133,9 @@ router.put('/providers/:id', authenticateToken, verifyAdmin, upload.single('imag
     if (category)    { fields.push('category = ?');    values.push(category); }
     if (description !== undefined) { fields.push('description = ?'); values.push(description); }
     if (address)     { fields.push('address = ?');     values.push(address.trim()); }
+    if (base_price !== undefined)  { fields.push('base_price = ?');   values.push(base_price); }
+    if (opening_time) { fields.push('opening_time = ?'); values.push(opening_time); }
+    if (closing_time) { fields.push('closing_time = ?'); values.push(closing_time); }
     if (req.file)    { fields.push('image = ?');       values.push(`/uploads/${req.file.filename}`); }
 
     if (fields.length === 0) {

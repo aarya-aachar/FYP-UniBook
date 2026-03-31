@@ -49,6 +49,9 @@ async function initDB() {
         description TEXT,
         image VARCHAR(255),
         address VARCHAR(255),
+        base_price DECIMAL(10,2) DEFAULT 0.00,
+        opening_time TIME DEFAULT '09:00:00',
+        closing_time TIME DEFAULT '18:00:00',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `;

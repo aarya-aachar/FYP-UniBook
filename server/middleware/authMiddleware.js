@@ -18,10 +18,12 @@ function authenticateToken(req, res, next) {
 }
 
 function verifyAdmin(req, res, next) {
-  if (req.user && req.user.role === 'admin') {
+  console.log('>>> [AUTH] Verifying Admin role for:', req.user?.email);
+  if (req.user && (req.user.role?.toLowerCase() === 'admin' || req.user.role?.toLowerCase() === 'administrator')) {
+    console.log('>>> [AUTH] Success: Role is', req.user.role);
     next();
   } else {
-    console.warn(`Admin Access Denied: User role is '${req.user?.role || 'undefined'}'`);
+    console.warn(`>>> [AUTH] DENIED: User role is '${req.user?.role || 'undefined'}'`);
     return res.status(403).json({ message: 'Admin access required' });
   }
 }

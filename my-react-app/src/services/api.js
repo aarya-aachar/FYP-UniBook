@@ -1,7 +1,14 @@
 import axios from 'axios';
 
+// Detect host to handle network IP or localhost correctly
+const host = window.location.hostname || 'localhost';
+const PORT = 4001; 
+const baseURL = `http://${host}:${PORT}/api`;
+
+console.log(`>>> [API] Connection Base URL: ${baseURL}`);
+
 const api = axios.create({
-  baseURL: 'http://localhost:4000/api',
+  baseURL: baseURL,
   headers: {
     'Content-Type': 'application/json',
   },

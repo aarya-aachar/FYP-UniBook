@@ -36,9 +36,8 @@ const ViewAppointments = () => {
     if(!window.confirm("Are you sure you want to cancel this booking?")) return;
     try {
       await updateBookingStatus(id, 'cancelled');
-      setAppointments(
-        appointments.map(a => a.id === id ? { ...a, status: 'cancelled' } : a)
-      );
+      // Remove from the current view as requested
+      setAppointments(prev => prev.filter(a => a.id !== id));
       toast('Booking cancelled successfully');
     } catch (err) {
       toast("Failed to cancel booking.", 'error');
@@ -130,11 +129,15 @@ const ViewAppointments = () => {
                 </div>
 
                 <div className="flex items-center gap-3 w-full md:w-auto">
-                  {a.status !== 'cancelled' ? (
+                  {a.status?.toLowerCase() === 'pending' ? (
                     <button onClick={() => cancelAppointment(a.id)} 
                       className="flex-1 md:flex-none px-6 py-3 rounded-xl bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 transition-all font-black text-xs uppercase tracking-widest">
                       Cancel
                     </button>
+                  ) : a.status?.toLowerCase() === 'confirmed' ? (
+                    <div className="flex-1 md:flex-none px-6 py-3 rounded-xl bg-emerald-500/5 text-emerald-400/40 border border-emerald-500/10 font-black text-xs uppercase tracking-widest cursor-default">
+                      Finalized
+                    </div>
                   ) : (
                     <div className="flex-1 md:flex-none px-6 py-3 rounded-xl bg-white/5 text-white/20 border border-white/5 font-black text-xs uppercase tracking-widest">
                       Closed

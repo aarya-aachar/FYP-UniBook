@@ -124,13 +124,13 @@ const ManageBookings = () => {
                 </div>
 
                 <div className="flex items-center gap-3">
-                  {b.status?.toLowerCase() !== 'confirmed' && (
+                  {b.status?.toLowerCase() === 'pending' && (
                     <button onClick={() => updateStatus(b.id, 'confirmed')} 
                       className="flex-1 md:flex-none px-6 py-3 rounded-2xl font-bold text-sm bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20 transition-all flex items-center gap-2">
                       ✅ Confirm
                     </button>
                   )}
-                  {b.status?.toLowerCase() !== 'cancelled' && (
+                  {b.status?.toLowerCase() === 'pending' && (
                     <button onClick={() => updateStatus(b.id, 'cancelled')} 
                             className="flex-1 md:flex-none px-6 py-3 rounded-2xl font-bold text-sm bg-rose-500/10 text-rose-400 border border-rose-500/20 hover:bg-rose-500/20 transition-all flex items-center gap-2">
                       ❌ Cancel

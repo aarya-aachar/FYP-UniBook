@@ -66,7 +66,7 @@ const Payment = () => {
           <div className="text-center text-gray-600 mb-6">
             <p>Provider ID: <strong>{providerId}</strong></p>
             {date && <p>Date: <strong>{date}</strong>, Time: <strong>{time}</strong></p>}
-            <p>Amount: <strong>Rs. 1500</strong></p>
+            <p>Amount: <strong>Rs. {location.state?.price || '0'}</strong></p>
             <p className="text-sm text-gray-500 mt-2">
               (Demo payment – frontend only)
             </p>

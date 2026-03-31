@@ -1,13 +1,27 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import UserSidebar from "../components/UserSidebar";
+import { getProviderById } from "../services/providerService";
 
 const Booking = () => {
   const { providerId } = useParams();
   const navigate = useNavigate();
+  const [provider, setProvider] = useState(null);
 
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
+
+  useEffect(() => {
+    const fetchProvider = async () => {
+      try {
+        const data = await getProviderById(providerId);
+        setProvider(data);
+      } catch (err) {
+        console.error("Failed to fetch provider details", err);
+      }
+    };
+    fetchProvider();
+  }, [providerId]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -20,7 +34,7 @@ const Booking = () => {
     // ❗ DO NOT confirm booking here
     // Redirect to payment page
     navigate(`/payment/${providerId}`, {
-      state: { date, time }
+      state: { date, time, price: provider?.base_price || 0 }
     });
   };
 
@@ -57,9 +71,9 @@ const Booking = () => {
                   </span>
                 </p>
                 <p>⭐ Rating: 4.5 / 5</p>
-                <p>📍 Location: Kathmandu, Nepal</p>
+                <p>📍 Location: {provider?.address || 'Kathmandu, Nepal'}</p>
                 <p className="font-semibold text-blue-700">
-                  Price: NPR 1,500
+                  Price: Rs. {provider?.base_price || '0.00'}
                 </p>
               </div>
             </div>

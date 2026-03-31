@@ -13,7 +13,15 @@ const CAT = {
   'Salon / Spa': { gradient: 'from-purple-400 to-pink-600',  bg: 'bg-purple-500',   badge: 'bg-purple-100 text-purple-700 border border-purple-200',   icon: '💆' },
 };
 
-const EMPTY_FORM = { name: '', address: '', description: '', category: 'Restaurants' };
+const EMPTY_FORM = { 
+  name: '', 
+  address: '', 
+  description: '', 
+  category: 'Restaurants',
+  base_price: 0,
+  opening_time: '09:00',
+  closing_time: '18:00'
+};
 
 // ─── Toast ────────────────────────────────────────────────────────────────────
 const Toast = ({ toasts }) => (
@@ -162,9 +170,28 @@ const ProviderModal = ({ open, mode, form, setForm, imageFile, setImageFile, onC
           {/* Description */}
           <div className="mt-4">
             <label className="block text-base font-semibold text-gray-200 mb-1.5">Description</label>
-            <textarea rows={3} placeholder="Brief description..." value={form.description}
+            <textarea rows={2} placeholder="Brief description..." value={form.description}
               onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
               className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/10 text-white placeholder-white/30 focus:outline-none focus:border-blue-400 transition-all resize-none" />
+          </div>
+
+          {/* New Fields: Price and Time Availability */}
+          <div className="grid grid-cols-2 gap-4 mt-4">
+            <div>
+              <label className="block text-sm font-semibold text-gray-200 mb-1.5">Booking Price (Rs.)</label>
+              <input type="number" step="0.01" min="0" value={form.base_price}
+                onChange={e => setForm(f => ({ ...f, base_price: e.target.value }))}
+                className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/10 text-white focus:border-blue-400 focus:outline-none" />
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div className="col-span-2"><label className="block text-sm font-semibold text-gray-200 mb-1.5">Availability Hours</label></div>
+              <input type="time" value={form.opening_time}
+                onChange={e => setForm(f => ({ ...f, opening_time: e.target.value }))}
+                className="px-2 py-3 rounded-xl bg-white/10 border border-white/10 text-white text-xs focus:border-blue-400" />
+              <input type="time" value={form.closing_time}
+                onChange={e => setForm(f => ({ ...f, closing_time: e.target.value }))}
+                className="px-2 py-3 rounded-xl bg-white/10 border border-white/10 text-white text-xs focus:border-blue-400" />
+            </div>
           </div>
 
           {/* Submit */}
@@ -207,6 +234,20 @@ const ProviderCard = ({ provider, onEdit, onDelete }) => {
         {provider.description && (
           <p className="text-white/30 text-sm mt-2 line-clamp-2">{provider.description}</p>
         )}
+        
+        {/* Price & Time Badge */}
+        <div className="mt-4 flex items-center justify-between py-3 px-4 rounded-xl bg-white/5 border border-white/10">
+           <div className="flex flex-col">
+             <span className="text-[10px] text-white/30 font-bold uppercase tracking-widest">Price</span>
+             <span className="text-white font-black text-sm">Rs. {provider.base_price || '0.00'}</span>
+           </div>
+           <div className="flex flex-col items-end text-right">
+             <span className="text-[10px] text-white/30 font-bold uppercase tracking-widest">Hours</span>
+             <span className="text-white/80 font-bold text-xs">
+               {(provider.opening_time || '09:00:00').substring(0,5)} - {(provider.closing_time || '18:00:00').substring(0,5)}
+             </span>
+           </div>
+        </div>
         {/* Actions */}
         <div className="flex gap-2 mt-4">
           <button onClick={() => onEdit(provider)}
@@ -287,7 +328,16 @@ const ManageProviders = () => {
   };
 
   const openEdit = (p) => {
-    setForm({ name: p.name || '', address: p.address || '', description: p.description || '', category: p.category || 'Restaurants', existingImage: p.image || '' });
+    setForm({ 
+      name: p.name || '', 
+      address: p.address || '', 
+      description: p.description || '', 
+      category: p.category || 'Restaurants', 
+      existingImage: p.image || '',
+      base_price: p.base_price || 0,
+      opening_time: (p.opening_time || '09:00:00').substring(0, 5),
+      closing_time: (p.closing_time || '18:00:00').substring(0, 5),
+    });
     setImageFile(null); setEditingId(p.id);
     setModalMode('edit'); setModalOpen(true);
   };
@@ -296,7 +346,15 @@ const ManageProviders = () => {
     if (!form.name.trim() || !form.address.trim()) { toast('Name and Address are required', 'error'); return; }
     try {
       setSubmitting(true);
-      const data = { name: form.name, category: form.category, address: form.address, description: form.description };
+      const data = { 
+        name: form.name, 
+        category: form.category, 
+        address: form.address, 
+        description: form.description,
+        base_price: form.base_price,
+        opening_time: form.opening_time,
+        closing_time: form.closing_time
+      };
       if (modalMode === 'edit') {
         await updateProvider(editingId, data, imageFile);
         toast(`"${form.name}" updated!`);

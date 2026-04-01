@@ -4,7 +4,7 @@ import { useAdminTheme } from '../context/AdminThemeContext';
 import { getUsers, updateUserStatus, updateUserRole } from '../services/adminService';
 
 // ─── Constants ──────────────────────────────────────────────────────────────
-const BACKEND_URL = 'http://localhost:4000';
+const BACKEND_URL = 'http://localhost:4001';
 
 const ROLE_CONFIG = {
   admin: { 

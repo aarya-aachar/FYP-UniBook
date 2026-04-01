@@ -5,7 +5,7 @@ import { getProviders, createProvider, updateProvider, deleteProvider } from '..
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const CATEGORIES = ['Restaurants', 'Futsal', 'Hospitals', 'Salon / Spa'];
-const BACKEND_URL = 'http://localhost:4000';
+const BACKEND_URL = 'http://localhost:4001';
 
 const CAT = {
   'Restaurants': { gradient: 'from-orange-400 to-red-500',   bg: 'bg-orange-500',   badge: 'bg-orange-100 text-orange-700 border border-orange-200', icon: '🍽️' },

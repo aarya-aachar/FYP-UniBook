@@ -14,7 +14,7 @@ const Navbar = () => {
         <Link to="/contact" className="hover:underline">Contact</Link>
         {user ? (
           <>
-            {user.role === 'admin' ? <Link to="/dashboard/admin" className="hover:underline">Admin Dashboard</Link> : <Link to="/dashboard/user" className="hover:underline">Dashboard</Link>}
+            {user.role === 'admin' ? <Link to="/dashboard/admin" className="hover:underline">Revenue Trends</Link> : <Link to="/dashboard/user" className="hover:underline">Dashboard</Link>}
             <Link to="/profile" className="hover:underline">Profile</Link>
           </>
         ) : (

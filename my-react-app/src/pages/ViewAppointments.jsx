@@ -7,7 +7,6 @@ const ViewAppointments = () => {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [toasts, setToasts] = useState([]);
-  const [activeFilter, setActiveFilter] = useState('All');
 
   const toast = (message, type = 'success') => {
     const id = Date.now();
@@ -55,19 +54,12 @@ const ViewAppointments = () => {
     }
   }
 
-  const filteredAppointments = appointments.filter(a => {
-    if (activeFilter === 'All') return true;
-    return a.status?.toLowerCase() === activeFilter.toLowerCase();
-  });
-
   return (
-    <div className="flex min-h-screen bg-[#0f172a] text-white font-inter">
+    <div className="flex min-h-screen bg-[#0f172a] text-white">
       <UserSidebar />
 
       <div className="flex-1 overflow-y-auto px-10 py-12 relative">
-        {/* Ambient Glows */}
-        <div className="absolute top-[20%] right-[10%] w-[500px] h-[500px] bg-blue-600/10 blur-[150px] rounded-full pointer-events-none" />
-        <div className="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] bg-purple-600/10 blur-[150px] rounded-full pointer-events-none" />
+        <div className="absolute top-[10%] right-[10%] w-96 h-96 bg-blue-600/10 blur-[120px] rounded-full pointer-events-none" />
 
         <style>{`
           @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
@@ -94,26 +86,13 @@ const ViewAppointments = () => {
           {/* Header & Controls */}
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 border-b border-white/5 pb-8">
             <div>
-              <h1 className="text-5xl font-black text-white tracking-tight mb-2">My Appointments</h1>
-              <p className="text-white/40 text-lg font-medium">Manage and view your service booking history.</p>
+              <h1 className="text-4xl font-black mb-4 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-white to-white/40">My Appointments</h1>
+              <p className="text-lg text-white/40 max-w-2xl leading-relaxed">Manage and view your service booking history.</p>
             </div>
             <Link to="/services" 
               className="px-6 py-4 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-blue-500/20 hover:scale-105 transition-all w-max whitespace-nowrap">
               + New Booking
             </Link>
-          </div>
-
-          {/* Filtering Tabs */}
-          <div className="flex flex-wrap gap-2 mb-8">
-            {['All', 'Confirmed', 'Pending', 'Cancelled'].map(filter => (
-              <button 
-                key={filter} 
-                onClick={() => setActiveFilter(filter)}
-                className={`px-5 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${activeFilter === filter ? 'bg-white text-[#0f172a] shadow-lg' : 'bg-white/5 border border-white/10 text-white/50 hover:bg-white/10 hover:text-white'}`}
-              >
-                {filter}
-              </button>
-            ))}
           </div>
 
           {/* Appointments List */}
@@ -124,13 +103,13 @@ const ViewAppointments = () => {
                    <div key={i} className="h-32 bg-white/5 rounded-[2.5rem] animate-pulse border border-white/10" />
                  ))}
                </div>
-            ) : filteredAppointments.length === 0 ? (
+            ) : appointments.length === 0 ? (
                <div className="text-center py-24 bg-white/5 rounded-[2.5rem] border border-white/10 border-dashed backdrop-blur-sm">
                  <div className="w-20 h-20 bg-white/5 border border-white/10 rounded-3xl flex items-center justify-center text-4xl mx-auto mb-6">📅</div>
-                 <h3 className="text-2xl font-black text-white/50">No bookings match this filter</h3>
-                 <p className="text-white/20 mt-2 font-medium">Try another filter or make a new booking.</p>
+                 <h3 className="text-2xl font-black text-white/50">No bookings found</h3>
+                 <p className="text-white/20 mt-2 font-medium">Make a new booking to get started.</p>
                </div>
-            ) : filteredAppointments.map((a, i) => {
+            ) : appointments.map((a, i) => {
               const cfg = getStatusConfig(a.status);
               return (
               <div key={a.id} 
@@ -142,8 +121,8 @@ const ViewAppointments = () => {
                     {a.category === 'Restaurants' ? '🍽️' : a.category === 'Futsal' ? '⚽' : a.category === 'Hospitals' ? '🏥' : '💆'}
                   </div>
                   <div className="min-w-0">
-                    <div className="flex items-center gap-3 mb-1">
-                      <h3 className="font-black text-white text-xl truncate tracking-tight">{a.provider_name}</h3>
+                    <div className="flex items-center gap-4 mb-2">
+                      <h3 className="text-xl font-bold truncate group-hover:text-blue-400 transition-colors">{a.provider_name}</h3>
                       <span className={`text-[10px] uppercase font-black px-3 py-1 rounded-full border flex items-center gap-1.5 whitespace-nowrap tracking-widest ${cfg.badge}`}>
                         <span>{cfg.icon}</span> {a.status}
                       </span>
@@ -155,27 +134,14 @@ const ViewAppointments = () => {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 w-full md:w-auto mt-4 md:mt-0 pt-4 md:pt-0 border-t border-white/10 md:border-none">
-                  {a.status?.toLowerCase() === 'confirmed' ? (
-                     <div className="flex-1 md:flex-none px-6 py-4 rounded-xl bg-emerald-500/5 text-emerald-400 border border-emerald-500/10 font-black text-[10px] uppercase tracking-[0.2em] cursor-default text-center">
-                        Checked Out
-                     </div>
-                  ) : a.status?.toLowerCase() === 'pending' ? (
+                {a.status?.toLowerCase() === 'pending' && (
+                  <div className="flex items-center gap-3 w-full md:w-auto mt-4 md:mt-0 pt-4 md:pt-0 border-t border-white/10 md:border-none">
                     <button onClick={() => cancelAppointment(a.id)} 
                       className="flex-1 md:flex-none px-6 py-4 rounded-xl bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 transition-all font-black text-[10px] uppercase tracking-[0.2em] text-center">
                       Cancel
                     </button>
-                  ) : (
-                    <div className="flex-1 md:flex-none px-6 py-4 rounded-xl bg-white/5 text-white/20 border border-white/5 font-black text-[10px] uppercase tracking-[0.2em] cursor-default text-center">
-                      Closed
-                    </div>
-                  )}
-                  
-                  <Link to={`/service/${a.provider_id}`} 
-                    className="flex-1 md:flex-none px-6 py-4 rounded-xl bg-white/5 text-white/60 border border-white/10 hover:bg-white hover:text-[#0f172a] transition-all font-black text-[10px] uppercase tracking-[0.2em] text-center whitespace-nowrap">
-                    Re-book
-                  </Link>
-                </div>
+                  </div>
+                )}
               </div>
             )})}
           </div>

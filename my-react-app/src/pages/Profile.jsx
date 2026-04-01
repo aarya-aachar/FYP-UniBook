@@ -80,8 +80,8 @@ const Profile = () => {
         <div className="flex-1 px-10 py-12 max-w-5xl mx-auto w-full overflow-y-auto">
           
           <div className="mb-10" style={{ animation: 'fadeIn 0.6s ease-out' }}>
-            <h1 className="text-5xl font-black text-white tracking-tight leading-none mb-2">My Profile</h1>
-            <p className="text-white/30 text-lg font-medium">Manage your personal identity and security</p>
+            <h1 className="text-4xl font-black text-white tracking-tight leading-none mb-2">My Profile</h1>
+            <p className="text-white/40 text-lg font-medium">Manage your personal identity and security</p>
           </div>
 
           <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-[3rem] p-10 shadow-2xl"

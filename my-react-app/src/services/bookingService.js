@@ -23,3 +23,13 @@ export const updateBookingStatus = async (id, status) => {
   const res = await api.put(`/bookings/${id}/status`, { status });
   return res.data;
 };
+
+export const getPastUserBookings = async () => {
+  const res = await api.get('/bookings/user/reports');
+  return res.data;
+};
+
+export const submitReview = async (booking_id, provider_id, rating, comment) => {
+  const res = await api.post('/reviews', { booking_id, provider_id, rating, comment });
+  return res.data;
+};

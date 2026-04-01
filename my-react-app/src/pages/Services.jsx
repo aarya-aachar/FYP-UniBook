@@ -51,58 +51,60 @@ const Services = () => {
           .fade-in { animation: fadeIn 0.5s ease-out forwards; }
         `}</style>
 
-        {/* Hero Section */}
-        <div className="mb-16 fade-in">
-          <h1 className="text-5xl font-black mb-4 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-white to-white/40">
-            Discover Our Services
-          </h1>
-          <p className="text-xl text-white/40 max-w-2xl leading-relaxed">
-            UniBook gives you instant access to a diverse ecosystem of lifestyle services. 
-            Choose a category to find premium providers near you.
-          </p>
-        </div>
+        <div className="max-w-6xl mx-auto w-full fade-in pt-4">
+          {/* Hero Section */}
+          <div className="mb-16">
+            <h1 className="text-4xl font-black mb-4 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-white to-white/40">
+              Discover Our Services
+            </h1>
+            <p className="text-lg text-white/40 max-w-2xl leading-relaxed">
+              UniBook gives you instant access to a diverse ecosystem of lifestyle services. 
+              Choose a category to find premium providers near you.
+            </p>
+          </div>
 
-        {/* Services Grid */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-8 fade-in [animation-delay:100ms]">
-          {services.map((service, idx) => (
-            <div
-              key={service.name}
-              onClick={() => navigate(`/services/${encodeURIComponent(service.name)}`)}
-              className="group cursor-pointer relative bg-white/5 backdrop-blur-md border border-white/10 rounded-[2.5rem] p-10 hover:border-white/20 transition-all duration-500 hover:-translate-y-2 shadow-2xl overflow-hidden"
-            >
-              <div className={`absolute inset-0 bg-gradient-to-br ${service.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-500`} />
-              
-              <div className="relative z-10">
-                <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-4xl mb-8 group-hover:scale-110 transition-transform duration-500">
-                  {service.icon}
-                </div>
-                <h2 className="text-2xl font-bold mb-4 group-hover:text-blue-400 transition-colors">
-                  {service.name}
-                </h2>
-                <p className="text-white/40 leading-relaxed font-medium mb-8">
-                  {service.description}
-                </p>
+          {/* Services Grid */}
+          <div className="grid sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-8 [animation-delay:100ms]">
+            {services.map((service) => (
+              <div
+                key={service.name}
+                onClick={() => navigate(`/services/${encodeURIComponent(service.name)}`)}
+                className="group cursor-pointer relative bg-white/5 backdrop-blur-md border border-white/10 rounded-[2.5rem] p-10 hover:border-white/20 transition-all duration-500 hover:-translate-y-2 shadow-2xl overflow-hidden"
+              >
+                <div className={`absolute inset-0 bg-gradient-to-br ${service.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-500`} />
+                
+                <div className="relative z-10">
+                  <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-4xl mb-8 group-hover:scale-110 transition-transform duration-500">
+                    {service.icon}
+                  </div>
+                  <h2 className="text-xl font-bold mb-4 group-hover:text-blue-400 transition-colors">
+                    {service.name}
+                  </h2>
+                  <p className="text-white/40 leading-relaxed font-medium mb-8">
+                    {service.description}
+                  </p>
 
-                <div className="flex items-center gap-2 text-sm font-black text-blue-400 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all duration-500 translate-x-[-10px] group-hover:translate-x-0">
-                  Explore Providers <span>→</span>
+                  <div className="flex items-center gap-2 text-sm font-black text-blue-400 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all duration-500 translate-x-[-10px] group-hover:translate-x-0">
+                    Explore Providers <span>→</span>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
 
-        {/* CTA Section */}
-        <div className="mt-20 p-12 rounded-[3.5rem] bg-gradient-to-r from-blue-600/10 to-indigo-600/5 border border-white/10 text-center fade-in [animation-delay:200ms]">
-          <h2 className="text-3xl font-black mb-4">Ready to manage your appointments?</h2>
-          <p className="text-white/40 mb-10 max-w-xl mx-auto font-medium">
-            Track your history, view reports, and manage all your bookings from your personal user dashboard.
-          </p>
-          <Link
-            to="/dashboard/user"
-            className="inline-block px-10 py-5 rounded-2xl bg-white text-slate-950 font-black uppercase tracking-widest text-sm hover:bg-white/90 transition-all hover:scale-105 active:scale-95 shadow-xl shadow-white/5"
-          >
-            Go to User Dashboard
-          </Link>
+          {/* CTA Section */}
+          <div className="mt-20 p-12 rounded-[3.5rem] bg-gradient-to-r from-blue-600/10 to-indigo-600/5 border border-white/10 text-center [animation-delay:200ms]">
+            <h2 className="text-2xl font-black mb-4">Ready to manage your appointments?</h2>
+            <p className="text-white/40 mb-10 max-w-xl mx-auto font-medium">
+              Track your history, view reports, and manage all your bookings from your personal user dashboard.
+            </p>
+            <Link
+              to="/dashboard/user"
+              className="inline-block px-12 py-5 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-black uppercase tracking-[0.2em] text-xs shadow-2xl shadow-blue-500/20 hover:scale-105 transition-all"
+            >
+              Go to Dashboard
+            </Link>
+          </div>
         </div>
 
       </div>

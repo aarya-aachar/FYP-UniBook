@@ -7,6 +7,7 @@ const authRoutes = require('./routes/authRoutes');
 const providerRoutes = require('./routes/providerRoutes');
 const bookingRoutes = require('./routes/bookingRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const reviewRoutes = require('./routes/reviewRoutes');
 
 const app = express();
 
@@ -45,6 +46,7 @@ async function bootstrap() {
     app.use('/api', providerRoutes);
     app.use('/api', bookingRoutes);
     app.use('/api', adminRoutes);
+    app.use('/api/reviews', reviewRoutes);
 
     // Global Error Handler
     app.use((err, req, res, next) => {

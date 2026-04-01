@@ -96,7 +96,7 @@ const Payment = () => {
                  
                  <div className="flex items-end justify-between pt-4 border-t border-white/10">
                     <span className="text-white/40 font-bold uppercase tracking-widest text-xs">Total Due</span>
-                    <span className="text-3xl font-black tracking-tighter text-emerald-400">Rs. {price || '0'}</span>
+                    <span className="text-2xl font-black tracking-tighter text-emerald-400">Rs. {price || '0'}</span>
                  </div>
               </div>
 

@@ -50,10 +50,10 @@ const UserDashboard = () => {
             <div className="inline-block px-4 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-black uppercase tracking-widest mb-4">
               ✨ Welcome back
             </div>
-            <h1 className="text-6xl font-black text-white tracking-tighter leading-none">
+            <h1 className="text-4xl font-black text-white tracking-tight leading-none mb-2">
               Hello, <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-500">{user?.name || 'User'}</span>
             </h1>
-            <p className="text-white/30 text-xl font-medium mt-3">What would you like to book today?</p>
+            <p className="text-white/40 text-lg font-medium mt-2">What would you like to book today?</p>
           </div>
 
           <div className="grid lg:grid-cols-3 gap-10">

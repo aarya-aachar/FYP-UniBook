@@ -143,28 +143,29 @@ const Booking = () => {
   const timeSlots = generateTimeSlots();
 
   return (
-    <div className="flex min-h-screen bg-[#0f172a] text-white font-inter">
+    <div className="flex min-h-screen bg-[#0f172a] text-white">
       <UserSidebar />
 
       <div className="flex-1 overflow-y-auto px-10 py-12 relative">
         {/* Ambient Glow */}
-        <div className="absolute top-[20%] right-[10%] w-[500px] h-[500px] bg-blue-600/10 blur-[150px] rounded-full pointer-events-none" />
-        <div className="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] bg-purple-600/10 blur-[150px] rounded-full pointer-events-none" />
+        <div className="absolute top-[10%] right-[10%] w-96 h-96 bg-blue-600/10 blur-[120px] rounded-full pointer-events-none" />
 
         <style>{`
           @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
           .slide-up { animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         `}</style>
 
-        <div className="max-w-6xl mx-auto slide-up">
+        <div className="max-w-6xl mx-auto w-full slide-up pt-4">
           
           {/* Header */}
-          <div className="mb-12">
-            <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-white/40 hover:text-white transition-colors font-bold mb-6 group">
-              <span className="group-hover:-translate-x-1 transition-transform">←</span> Back
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 border-b border-white/5 pb-8">
+            <div>
+              <h1 className="text-4xl font-black mb-4 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-white to-white/40">Check Availability</h1>
+              <p className="text-lg text-white/40 max-w-2xl leading-relaxed">Select a secure date and time for your appointment</p>
+            </div>
+            <button onClick={() => navigate(-1)} className="px-6 py-4 rounded-2xl bg-white/5 text-white/60 border border-white/10 hover:bg-white hover:text-slate-900 transition-all font-black text-xs uppercase tracking-[0.2em] whitespace-nowrap">
+              ← Go Back
             </button>
-            <h1 className="text-5xl font-black tracking-tight mb-2">Check Availability</h1>
-            <p className="text-white/40 text-lg font-medium">Select a secure date and time for your appointment</p>
           </div>
 
           <div className="grid lg:grid-cols-12 gap-10">
@@ -182,7 +183,7 @@ const Booking = () => {
                 <div className="w-16 h-16 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center text-3xl mb-6 shadow-xl backdrop-blur-md">
                    {provider?.category === 'Hospitals' ? '🏥' : provider?.category === 'Restaurants' ? '🍽️' : provider?.category === 'Futsal' ? '⚽' : '💆'}
                 </div>
-                <h2 className="text-3xl font-black mb-2">{provider?.name}</h2>
+                <h2 className="text-2xl font-black mb-2">{provider?.name}</h2>
                 <span className="inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border border-white/10 bg-white/10 w-max mb-6">
                    {provider?.category}
                 </span>
@@ -218,7 +219,7 @@ const Booking = () => {
                    </div>
                    <div className="mt-6 flex justify-between items-end">
                       <span className="text-white/40 font-bold uppercase tracking-widest text-xs">Total</span>
-                      <span className="text-2xl font-black text-emerald-400">Rs. {calculateTotal()}</span>
+                      <span className="text-xl font-black text-emerald-400">Rs. {calculateTotal()}</span>
                    </div>
                 </div>
               </div>
@@ -236,7 +237,7 @@ const Booking = () => {
                     min={today}
                     value={date}
                     onChange={(e) => setDate(e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-5 text-white font-bold text-lg outline-none focus:border-blue-500 focus:bg-white/10 transition-all cursor-pointer [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert"
+                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-5 text-white font-bold text-base outline-none focus:border-blue-500 focus:bg-white/10 transition-all cursor-pointer [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert"
                     required
                   />
                 </div>

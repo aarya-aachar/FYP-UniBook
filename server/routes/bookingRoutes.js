@@ -57,6 +57,7 @@ router.get('/bookings/user', authenticateToken, async (req, res) => {
       JOIN providers p ON b.provider_id = p.id
       LEFT JOIN services s ON b.service_id = s.id
       WHERE b.user_id = ?
+        AND NOT (b.status = 'confirmed' AND (b.booking_date < CURDATE() OR (b.booking_date = CURDATE() AND b.booking_time <= CURTIME())))
       ORDER BY b.booking_date DESC, b.booking_time DESC
     `;
 
@@ -64,6 +65,33 @@ router.get('/bookings/user', authenticateToken, async (req, res) => {
     res.json(bookings);
   } catch (error) {
     console.error('Get User Bookings Error:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+
+// Get user past/attended bookings for My Reports
+router.get('/bookings/user/reports', authenticateToken, async (req, res) => {
+  try {
+    const user_id = req.user.id;
+    const pool = getPool();
+
+    const query = `
+      SELECT b.*, p.name as provider_name, p.category, s.name as service_name,
+             r.rating, r.comment, r.id as review_id
+      FROM bookings b
+      JOIN providers p ON b.provider_id = p.id
+      LEFT JOIN services s ON b.service_id = s.id
+      LEFT JOIN reviews r ON b.id = r.booking_id
+      WHERE b.user_id = ? 
+        AND b.status = 'confirmed'
+        AND (b.booking_date < CURDATE() OR (b.booking_date = CURDATE() AND b.booking_time <= CURTIME()))
+      ORDER BY b.booking_date DESC, b.booking_time DESC
+    `;
+
+    const [bookings] = await pool.query(query, [user_id]);
+    res.json(bookings);
+  } catch (error) {
+    console.error('Get User Reports Bookings Error:', error);
     res.status(500).json({ message: 'Internal Server Error' });
   }
 });

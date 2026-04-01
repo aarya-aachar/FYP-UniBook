@@ -3,6 +3,8 @@ import { useState, useEffect } from "react";
 import UserSidebar from "../components/UserSidebar";
 import { getProviders } from "../services/providerService";
 
+const BACKEND_URL = 'http://localhost:4001';
+
 const CAT_CONFIG = {
   'Restaurants': { icon: '🍽️', gradient: 'from-orange-500/20 to-red-500/10', color: 'text-orange-400' },
   'Futsal':      { icon: '⚽', gradient: 'from-blue-500/20 to-indigo-500/10', color: 'text-blue-400' },
@@ -75,22 +77,39 @@ const ServiceProviders = () => {
                <div key={i} className="h-64 rounded-[2.5rem] bg-white/5 border border-white/10 animate-pulse" />
              ))
           ) : providers.length > 0 ? (
-            providers.map((p) => (
-              <div
-                key={p.id}
-                className="group relative bg-white/5 backdrop-blur-md border border-white/10 rounded-[2.5rem] p-8 flex flex-col hover:border-white/20 transition-all duration-500 hover:-translate-y-2 shadow-2xl overflow-hidden"
-              >
-                <div className={`absolute inset-0 bg-gradient-to-br ${cfg.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none`} />
-                
-                <div className="relative z-10 flex flex-col h-full">
-                  <div className="flex items-start justify-between mb-6">
-                    <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white/80 font-black text-xl group-hover:bg-white group-hover:text-slate-950 transition-all duration-500">
-                      {p.name.charAt(0)}
+            providers.map((p) => {
+              const imgSrc = p.image ? (p.image.startsWith('/uploads') ? `${BACKEND_URL}${p.image}` : p.image) : null;
+              
+              return (
+                <div
+                  key={p.id}
+                  className="group relative bg-white/5 backdrop-blur-md border border-white/10 rounded-[2.5rem] p-8 flex flex-col hover:border-white/20 transition-all duration-500 hover:-translate-y-2 shadow-2xl overflow-hidden"
+                >
+                  {/* Image Background */}
+                  {imgSrc && (
+                    <div className="absolute inset-0 opacity-20 group-hover:opacity-40 transition-opacity duration-700 pointer-events-none">
+                      <img src={imgSrc} alt={p.name} className="w-full h-full object-cover mix-blend-overlay" />
                     </div>
-                    <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border border-white/10 bg-white/5 ${cfg.color}`}>
-                      Featured
-                    </span>
-                  </div>
+                  )}
+                  
+                  <div className={`absolute inset-0 bg-gradient-to-br ${cfg.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none`} />
+                  
+                  <div className="relative z-10 flex flex-col h-full">
+                    <div className="flex items-start justify-between mb-6">
+                      {imgSrc ? (
+                        <div className="w-14 h-14 rounded-2xl border border-white/10 overflow-hidden shadow-lg group-hover:scale-110 transition-transform duration-500">
+                           <img src={imgSrc} alt={p.name} className="w-full h-full object-cover" />
+                        </div>
+                      ) : (
+                        <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white/80 font-black text-xl group-hover:bg-white group-hover:text-slate-950 transition-all duration-500">
+                          {p.name.charAt(0)}
+                        </div>
+                      )}
+                      
+                      <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border border-white/10 bg-white/5 ${cfg.color}`}>
+                        Featured
+                      </span>
+                    </div>
 
                   <h2 className="text-2xl font-bold mb-2 group-hover:text-white transition-colors">
                     {p.name}
@@ -100,7 +119,7 @@ const ServiceProviders = () => {
                     <span className="opacity-40 text-lg">📍</span> {p.address}
                   </p>
                   
-                  <p className="text-white/30 mb-8 text-sm leading-relaxed line-clamp-3 font-medium">
+                  <p className="text-white/60 mb-8 text-sm leading-relaxed line-clamp-3 font-medium">
                     {p.description || "Discover high-quality services and professional care at our location. Book your appointment now for a seamless experience."}
                   </p>
 
@@ -111,8 +130,9 @@ const ServiceProviders = () => {
                     Check Availability
                   </Link>
                 </div>
-              </div>
-            ))
+                </div>
+              );
+            })
           ) : (
             <div className="col-span-full py-32 text-center bg-white/5 border border-white/10 rounded-[3rem]">
               <div className="text-6xl mb-6 opacity-20">🏢</div>

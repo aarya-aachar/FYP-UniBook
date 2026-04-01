@@ -4,16 +4,38 @@ const { authenticateToken, verifyAdmin } = require('../middleware/authMiddleware
 
 const router = express.Router();
 
+// Get booked times for a provider on a specific date (Availability Engine)
+router.get('/bookings/provider/:provider_id/date/:date', authenticateToken, async (req, res) => {
+  try {
+    const { provider_id, date } = req.params;
+    const pool = getPool();
+
+    const [bookings] = await pool.query(
+      "SELECT booking_time FROM bookings WHERE provider_id = ? AND booking_date = ? AND status != 'cancelled'",
+      [provider_id, date]
+    );
+
+    // Map to 'HH:MM' format for easy frontend comparison
+    const bookedTimes = bookings.map(b => b.booking_time.substring(0, 5));
+    res.json(bookedTimes);
+  } catch (error) {
+    console.error('Fetch Booked Times Error:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+
 // Create a new booking
 router.post('/bookings', authenticateToken, async (req, res) => {
   try {
-    const { provider_id, service_id, booking_date, booking_time, notes } = req.body;
+    const { provider_id, service_id, booking_date, booking_time, status, notes } = req.body;
     const user_id = req.user.id;
     const pool = getPool();
 
+    const bookingStatus = status || 'pending';
+
     const [result] = await pool.query(
-      'INSERT INTO bookings (user_id, provider_id, service_id, booking_date, booking_time, notes) VALUES (?, ?, ?, ?, ?, ?)',
-      [user_id, provider_id, service_id || null, booking_date, booking_time, notes || '']
+      'INSERT INTO bookings (user_id, provider_id, service_id, booking_date, booking_time, status, notes) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [user_id, provider_id, service_id || null, booking_date, booking_time, bookingStatus, notes || '']
     );
 
     res.status(201).json({ message: 'Booking created successfully', id: result.insertId });

@@ -67,7 +67,7 @@ const Services = () => {
           {services.map((service, idx) => (
             <div
               key={service.name}
-              onClick={() => navigate(`/services/${service.name}`)}
+              onClick={() => navigate(`/services/${encodeURIComponent(service.name)}`)}
               className="group cursor-pointer relative bg-white/5 backdrop-blur-md border border-white/10 rounded-[2.5rem] p-10 hover:border-white/20 transition-all duration-500 hover:-translate-y-2 shadow-2xl overflow-hidden"
             >
               <div className={`absolute inset-0 bg-gradient-to-br ${service.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-500`} />

@@ -1,4 +1,8 @@
 import api from './api';
+export const getBookedTimes = async (providerId, date) => {
+  const res = await api.get(`/bookings/provider/${providerId}/date/${date}`);
+  return res.data;
+};
 
 export const createBooking = async (bookingData) => {
   const res = await api.post('/bookings', bookingData);

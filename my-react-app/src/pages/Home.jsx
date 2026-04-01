@@ -104,7 +104,7 @@ const Home = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 fade-in [animation-delay:200ms]">
           {services.map((s, idx) => (
             <div key={s.name} 
-              onClick={() => navigate(`/services/${s.name}`)}
+              onClick={() => navigate(`/services/${encodeURIComponent(s.name)}`)}
               className="group cursor-pointer relative p-8 rounded-3xl bg-white/5 border border-white/10 hover:border-white/20 transition-all duration-500 hover:-translate-y-2 overflow-hidden shadow-2xl">
               <div className={`absolute inset-0 bg-gradient-to-br ${s.color} opacity-0 group-hover:opacity-10 transition-opacity duration-500`} />
               <div className="text-5xl mb-6 float" style={{ animationDelay: `${idx * 0.5}s` }}>{s.icon}</div>

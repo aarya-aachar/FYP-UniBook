@@ -78,7 +78,7 @@ router.post('/auth/login', async (req, res) => {
 router.get('/auth/me', authenticateToken, async (req, res) => {
   try {
     const pool = getPool();
-    const [users] = await pool.query('SELECT id, name, email, role FROM users WHERE id = ?', [req.user.id]);
+    const [users] = await pool.query('SELECT id, name, email, role, created_at FROM users WHERE id = ?', [req.user.id]);
     
     if (users.length === 0) {
       return res.status(404).json({ message: 'User not found' });
@@ -87,6 +87,44 @@ router.get('/auth/me', authenticateToken, async (req, res) => {
     res.json(users[0]);
   } catch (error) {
     console.error('Profile Error:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+
+router.post('/auth/profile/update', authenticateToken, async (req, res) => {
+  try {
+    const { name, currentPassword, newPassword } = req.body;
+    const pool = getPool();
+    
+    // 1. Get current user with password
+    const [users] = await pool.query('SELECT * FROM users WHERE id = ?', [req.user.id]);
+    if (users.length === 0) return res.status(404).json({ message: 'User not found' });
+    
+    const user = users[0];
+
+    // 2. Verify current password
+    const validPassword = await bcrypt.compare(currentPassword, user.password);
+    if (!validPassword) {
+      return res.status(401).json({ message: 'Invalid current password' });
+    }
+
+    // 3. Prepare updates
+    let updatedName = name || user.name;
+    let updatedPassword = user.password;
+
+    if (newPassword) {
+      updatedPassword = await bcrypt.hash(newPassword, 10);
+    }
+
+    // 4. Update database
+    await pool.query(
+      'UPDATE users SET name = ?, password = ? WHERE id = ?',
+      [updatedName, updatedPassword, req.user.id]
+    );
+
+    res.json({ message: 'Profile updated successfully', user: { id: user.id, name: updatedName, email: user.email, role: user.role } });
+  } catch (error) {
+    console.error('Profile Update Error:', error);
     res.status(500).json({ message: 'Internal Server Error' });
   }
 });

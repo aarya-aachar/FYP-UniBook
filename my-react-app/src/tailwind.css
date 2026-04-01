@@ -3,9 +3,19 @@
 @tailwind utilities;
 
 html {
-  font-size: 110%; /* Makes all rem-based fonts slightly larger (default 16px -> 17.6px) */
+  font-size: 110%; /* Makes all rem-based fonts slightly larger */
 }
 
 body {
-  @apply antialiased text-slate-200;
+  @apply antialiased text-slate-200 transition-colors duration-500;
+  font-family: 'Inter', sans-serif;
 }
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Outfit', sans-serif;
+}
+
+/* Custom Typography Utilities for Admin Terminal */
+.font-outfit { font-family: 'Outfit', sans-serif; }
+.font-inter   { font-family: 'Inter', sans-serif; }
+.font-condensed { font-family: 'Inter', sans-serif; font-feature-settings: "tnum" 1, "lnum" 1; } /* For numbers/tabular data */

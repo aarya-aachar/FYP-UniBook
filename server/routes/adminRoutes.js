@@ -21,7 +21,30 @@ router.get('/admin/metrics', authenticateToken, verifyAdmin, async (req, res) =>
       WHERE b.status = 'confirmed'
     `);
 
-    // 3. Provider breakdown for chart
+    // 3. Revenue Trends (last 14 days)
+    const [revenueTrends] = await pool.query(`
+      SELECT DATE_FORMAT(created_at, '%m-%d') as name, COALESCE(SUM(revenue_total), 0) as value 
+      FROM (
+        SELECT b.created_at, p.base_price as revenue_total 
+        FROM bookings b 
+        LEFT JOIN providers p ON b.provider_id = p.id 
+        WHERE b.status = 'confirmed' AND b.created_at >= DATE_SUB(NOW(), INTERVAL 14 DAY)
+      ) as daily 
+      GROUP BY DATE_FORMAT(created_at, '%m-%d') 
+      ORDER BY name ASC
+    `);
+
+    // 4. Recent Activity (last 5 bookings)
+    const [recentActivity] = await pool.query(`
+      SELECT b.id, u.name as user, p.name as provider, b.status, b.created_at 
+      FROM bookings b 
+      LEFT JOIN users u ON b.user_id = u.id 
+      LEFT JOIN providers p ON b.provider_id = p.id 
+      ORDER BY b.created_at DESC 
+      LIMIT 5
+    `);
+
+    // 5. Provider breakdown for chart
     const [breakdown] = await pool.query('SELECT category as name, COUNT(*) as value FROM providers GROUP BY category');
 
     res.json({
@@ -31,7 +54,9 @@ router.get('/admin/metrics', authenticateToken, verifyAdmin, async (req, res) =>
         bookings: bookingsCount,
         revenue: parseFloat(totalRevenue || 0)
       },
-      chartData: breakdown
+      chartData: breakdown,
+      revenueTrends: revenueTrends,
+      recentActivity: recentActivity
     });
   } catch (error) {
     console.error('Admin Metrics Error:', error);

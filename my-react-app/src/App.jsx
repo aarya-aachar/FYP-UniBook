@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { AdminThemeProvider } from './context/AdminThemeContext';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -19,40 +20,44 @@ import About from './pages/About';
 import Contact from './pages/Contact';
 import Payment from "./pages/Payment";
 import UserReports from "./pages/UserReports";
+import AdminProfile from "./pages/AdminProfile";
 
 
 
 function App() {
   return (
     <Router>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/services" element={<Services />} />
-        <Route path="/services/:serviceName" element={<ServiceProviders />} />
-        <Route path="/service/:providerId" element={<ServiceDetails />} />
-        <Route path="/booking/:providerId" element={<Booking />} />
-        <Route path="/booking-confirmation/:id" element={<BookingConfirmation />} />
-        <Route path="/dashboard/user" element={<UserDashboard />} />
-        <Route path="/dashboard/user/appointments" element={<ViewAppointments />} />
-        <Route path="/dashboard/admin" element={<AdminDashboard />} />
-        <Route path="/dashboard/admin/users" element={<ManageUsers />} />
-        <Route path="/dashboard/admin/providers" element={<ManageProviders />} />
-        <Route path="/dashboard/admin/bookings" element={<ManageBookings />} />
-        <Route path="/dashboard/admin/reports" element={<Reports />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/contact" element={<Contact />} />
-        
-<Route path="/payment/:providerId" element={<Payment />} />
+      <AdminThemeProvider>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/services" element={<Services />} />
+          <Route path="/services/:serviceName" element={<ServiceProviders />} />
+          <Route path="/service/:providerId" element={<ServiceDetails />} />
+          <Route path="/booking/:providerId" element={<Booking />} />
+          <Route path="/booking-confirmation/:id" element={<BookingConfirmation />} />
+          <Route path="/dashboard/user" element={<UserDashboard />} />
+          <Route path="/dashboard/user/appointments" element={<ViewAppointments />} />
+          <Route path="/dashboard/admin" element={<AdminDashboard />} />
+          <Route path="/dashboard/admin/users" element={<ManageUsers />} />
+          <Route path="/dashboard/admin/providers" element={<ManageProviders />} />
+          <Route path="/dashboard/admin/bookings" element={<ManageBookings />} />
+          <Route path="/dashboard/admin/reports" element={<Reports />} />
+          <Route path="/dashboard/admin/profile" element={<AdminProfile />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
+          
+  <Route path="/payment/:providerId" element={<Payment />} />
 
-<Route path="/my-reports" element={<UserReports />} />
+  <Route path="/my-reports" element={<UserReports />} />
 
-  <Route path="/my-appointments" element={<ViewAppointments />} />
+    <Route path="/my-appointments" element={<ViewAppointments />} />
 
 
-      </Routes>
+        </Routes>
+      </AdminThemeProvider>
     </Router>
   );
 }

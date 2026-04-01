@@ -8,11 +8,20 @@ router.get('/admin/metrics', authenticateToken, verifyAdmin, async (req, res) =>
   try {
     const pool = getPool();
     
+    // 1. Total Counts
     const [[{ usersCount }]] = await pool.query('SELECT COUNT(*) as usersCount FROM users');
     const [[{ providersCount }]] = await pool.query('SELECT COUNT(*) as providersCount FROM providers');
     const [[{ bookingsCount }]] = await pool.query('SELECT COUNT(*) as bookingsCount FROM bookings');
     
-    // get providers breakdown for pie chart
+    // 2. LIVE Revenue Calculation
+    const [[{ totalRevenue }]] = await pool.query(`
+      SELECT COALESCE(SUM(p.base_price), 0) as totalRevenue 
+      FROM bookings b 
+      LEFT JOIN providers p ON b.provider_id = p.id 
+      WHERE b.status = 'confirmed'
+    `);
+
+    // 3. Provider breakdown for chart
     const [breakdown] = await pool.query('SELECT category as name, COUNT(*) as value FROM providers GROUP BY category');
 
     res.json({
@@ -20,7 +29,7 @@ router.get('/admin/metrics', authenticateToken, verifyAdmin, async (req, res) =>
         users: usersCount,
         providers: providersCount,
         bookings: bookingsCount,
-        reports: 0 // Mock open reports for now
+        revenue: parseFloat(totalRevenue || 0)
       },
       chartData: breakdown
     });

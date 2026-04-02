@@ -78,7 +78,7 @@ router.post('/auth/login', async (req, res) => {
 router.get('/auth/me', authenticateToken, async (req, res) => {
   try {
     const pool = getPool();
-    const [users] = await pool.query('SELECT id, name, email, role, created_at FROM users WHERE id = ?', [req.user.id]);
+    const [users] = await pool.query('SELECT id, name, email, role, age, gender, created_at FROM users WHERE id = ?', [req.user.id]);
     
     if (users.length === 0) {
       return res.status(404).json({ message: 'User not found' });
@@ -93,7 +93,7 @@ router.get('/auth/me', authenticateToken, async (req, res) => {
 
 router.post('/auth/profile/update', authenticateToken, async (req, res) => {
   try {
-    const { name, currentPassword, newPassword } = req.body;
+    const { name, currentPassword, newPassword, age, gender } = req.body;
     const pool = getPool();
     
     // 1. Get current user with password
@@ -102,7 +102,10 @@ router.post('/auth/profile/update', authenticateToken, async (req, res) => {
     
     const user = users[0];
 
-    // 2. Verify current password
+    // 2. Verify current password (REQUIRED)
+    if (!currentPassword) {
+      return res.status(400).json({ message: 'Current password is required.' });
+    }
     const validPassword = await bcrypt.compare(currentPassword, user.password);
     if (!validPassword) {
       return res.status(401).json({ message: 'Invalid current password' });
@@ -111,21 +114,48 @@ router.post('/auth/profile/update', authenticateToken, async (req, res) => {
     // 3. Prepare updates
     let updatedName = name || user.name;
     let updatedPassword = user.password;
+    
+    // Sanitize age
+    let updatedAge = user.age;
+    if (age !== undefined && age !== "" && age !== null) {
+      const parsedAge = parseInt(age);
+      if (!isNaN(parsedAge)) updatedAge = parsedAge;
+    }
+    
+    let updatedGender = gender !== undefined ? gender : user.gender;
 
-    if (newPassword) {
+    if (newPassword && newPassword.trim() !== "") {
       updatedPassword = await bcrypt.hash(newPassword, 10);
     }
 
     // 4. Update database
+    const sqlParams = [
+      updatedName ?? null, 
+      updatedPassword ?? null, 
+      updatedAge ?? null, 
+      updatedGender ?? null, 
+      req.user.id
+    ];
+    
     await pool.query(
-      'UPDATE users SET name = ?, password = ? WHERE id = ?',
-      [updatedName, updatedPassword, req.user.id]
+      'UPDATE users SET name = ?, password = ?, age = ?, gender = ? WHERE id = ?',
+      sqlParams
     );
 
-    res.json({ message: 'Profile updated successfully', user: { id: user.id, name: updatedName, email: user.email, role: user.role } });
+    res.json({ 
+      message: 'Profile updated successfully', 
+      user: { 
+        id: user.id, 
+        name: updatedName, 
+        email: user.email, 
+        role: user.role, 
+        age: updatedAge,
+        gender: updatedGender
+      } 
+    });
   } catch (error) {
-    console.error('Profile Update Error:', error);
-    res.status(500).json({ message: 'Internal Server Error' });
+    console.error('>>> [SERVER ERROR] Profile Update Failed:', error.stack);
+    res.status(500).json({ message: 'Internal Server Error: ' + error.message });
   }
 });
 

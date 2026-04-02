@@ -15,7 +15,9 @@ const PORT = process.env.PORT || 4001;
 
 // Loosen CORS for development cross-network access
 app.use(cors({ origin: true, credentials: true }));
-app.use(express.json());
+// Increased payload limits for large Base64 profile photos
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Serve uploaded images statically
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));

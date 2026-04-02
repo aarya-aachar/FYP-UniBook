@@ -36,3 +36,28 @@ export const getProfile = () => {
   const raw = localStorage.getItem('user');
   return raw ? JSON.parse(raw) : null;
 };
+
+export const fetchFullProfile = async () => {
+  try {
+    const res = await api.get('/auth/me');
+    // Update local storage with the latest data
+    localStorage.setItem('user', JSON.stringify(res.data));
+    return res.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Failed to fetch profile');
+  }
+};
+
+export const updateProfile = async (profileData) => {
+  try {
+    const res = await api.post('/auth/profile/update', profileData);
+
+    if (res.data.user) {
+      const currentUser = getProfile();
+      localStorage.setItem('user', JSON.stringify({ ...currentUser, ...res.data.user }));
+    }
+    return res.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Update failed');
+  }
+};

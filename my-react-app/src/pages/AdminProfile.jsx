@@ -4,7 +4,7 @@ import axios from "axios";
 import { useAdminTheme } from "../context/AdminThemeContext";
 
 const AdminProfile = () => {
-  const { adminTheme, toggleAdminTheme, setAdminTheme } = useAdminTheme();
+  const { adminTheme, setAdminTheme } = useAdminTheme();
   const isDark = adminTheme === 'dark';
 
   const [user, setUser] = useState(null);
@@ -26,7 +26,7 @@ const AdminProfile = () => {
   };
 
   useEffect(() => {
-    document.title = "Admin | Profile - UniBook";
+    document.title = "Settings | Admin UniBook";
     fetchProfile();
   }, []);
 
@@ -77,14 +77,12 @@ const AdminProfile = () => {
     }
   };
 
-  const initials = user?.name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || "AD";
-
   const cardBase = isDark 
     ? "bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl" 
-    : "bg-white border border-slate-200 shadow-xl shadow-slate-200/50";
+    : "bg-white border border-slate-200 shadow-xl shadow-slate-200/20";
 
   const textPrimary = isDark ? "text-white" : "text-slate-900";
-  const textSecondary = isDark ? "text-white/50" : "text-slate-600";
+  const textSecondary = isDark ? "text-white/50" : "text-slate-500";
   const inputBase = isDark 
     ? "bg-white/5 border-white/10 text-white placeholder-white/20 focus:border-blue-500" 
     : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400 focus:border-blue-600 focus:bg-white";
@@ -111,109 +109,107 @@ const AdminProfile = () => {
            style={{ background: isDark ? 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%)' : 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)' }}>
         <Sidebar />
         
-        <div className="flex-1 px-10 py-12 max-w-7xl mx-auto w-full">
-          {/* Header */}
+        <div className="flex-1 px-10 py-12 max-w-7xl mx-auto w-full overflow-hidden">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 mb-12" style={{ animation: 'fadeIn 0.5s ease-out' }}>
             <div>
-              <h1 className={`text-5xl font-black tracking-tighter mb-4 transition-colors font-outfit ${textPrimary}`}>Profile Settings</h1>
-              <p className={`text-lg font-semibold tracking-tight transition-colors ${textSecondary}`}>Update your password and account details</p>
+              <h1 className={`text-6xl font-black tracking-tighter mb-4 transition-colors font-outfit ${textPrimary}`}>Admin Settings</h1>
+              <p className={`text-lg font-bold tracking-tight transition-colors ${textSecondary}`}>Manage your administrative profile and preferences</p>
             </div>
           </div>
 
           {loading ? (
-            <div className={`h-96 rounded-[3rem] animate-pulse border ${isDark ? 'bg-white/5 border-white/10' : 'bg-slate-100 border-slate-200'}`} />
+            <div className={`h-96 rounded-[3.5rem] animate-pulse border ${isDark ? 'bg-white/5 border-white/10' : 'bg-slate-100 border-slate-200'}`} />
           ) : (
-            <div className="grid gap-8 animate-in fade-in duration-700">
+            <div className="grid gap-10 animate-in fade-in duration-700">
               
-              {/* Identity Card */}
-              <div className={`rounded-[3rem] p-10 flex flex-col md:flex-row items-center gap-10 transition-all duration-500 border relative overflow-hidden ${cardBase}`}
+              <div className={`rounded-[3.5rem] p-12 flex flex-col md:flex-row items-center gap-12 transition-all duration-500 border relative overflow-hidden ${cardBase}`}
                    style={{ animation: 'fadeIn 0.4s ease forwards' }}>
-                 <div className="w-40 h-40 rounded-[3rem] bg-gradient-to-tr from-blue-600 to-indigo-700 flex items-center justify-center text-6xl shadow-2xl shadow-blue-500/20 relative z-10">👤</div>
+                 <div className="w-48 h-48 rounded-[3rem] bg-gradient-to-tr from-blue-600 to-indigo-700 flex items-center justify-center text-7xl shadow-2xl shadow-blue-500/30 relative z-10 transition-transform hover:scale-105 duration-500">👤</div>
                  <div className="flex-1 text-center md:text-left relative z-10">
-                    <h2 className={`text-4xl font-black font-outfit tracking-tight mb-2 ${textPrimary}`}>{user?.name}</h2>
-                    <p className={`text-xl font-bold opacity-60 mb-8 ${textSecondary}`}>{user?.email}</p>
+                    <h2 className={`text-5xl font-black font-outfit tracking-tighter mb-2 ${textPrimary}`}>{user?.name}</h2>
+                    <p className={`text-2xl font-bold opacity-60 mb-10 ${textSecondary}`}>{user?.email}</p>
                     
-                    <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
-                       <div className={`px-6 py-3 rounded-2xl border transition-all flex flex-col ${isDark ? 'bg-white/5 border-white/10' : 'bg-slate-50 border-slate-100 shadow-inner'}`}>
-                          <span className={`text-[10px] font-black uppercase tracking-[0.2em] mb-1 opacity-40 ${textSecondary}`}>Role</span>
-                          <span className={`font-black text-xs uppercase tracking-widest ${isDark ? 'text-blue-400' : 'text-blue-600'}`}>System Administrator</span>
+                    <div className="flex flex-wrap items-center justify-center md:justify-start gap-6">
+                       <div className={`px-8 py-4 rounded-3xl border transition-all flex flex-col ${isDark ? 'bg-white/5 border-white/10' : 'bg-slate-50 border-slate-100 shadow-inner shadow-slate-200/10'}`}>
+                          <span className={`text-xs font-black uppercase tracking-[0.2em] mb-2 opacity-50 ${textSecondary}`}>Access Role</span>
+                          <span className={`font-black text-sm uppercase tracking-widest ${isDark ? 'text-blue-400' : 'text-blue-600'}`}>System Administrator</span>
                        </div>
-                       <div className={`px-6 py-3 rounded-2xl border transition-all flex flex-col ${isDark ? 'bg-white/5 border-white/10' : 'bg-slate-50 border-slate-100 shadow-inner'}`}>
-                          <span className={`text-[10px] font-black uppercase tracking-[0.2em] mb-1 opacity-40 ${textSecondary}`}>Status</span>
-                          <span className={`font-black text-xs uppercase tracking-widest ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>Active / Secure</span>
+                       <div className={`px-8 py-4 rounded-3xl border transition-all flex flex-col ${isDark ? 'bg-white/5 border-white/10' : 'bg-slate-50 border-slate-100 shadow-inner shadow-slate-200/10'}`}>
+                          <span className={`text-xs font-black uppercase tracking-[0.2em] mb-2 opacity-50 ${textSecondary}`}>Account Status</span>
+                          <span className={`font-black text-sm uppercase tracking-widest ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>Verified / Active</span>
                        </div>
                     </div>
                  </div>
+                 <div className="absolute top-[-10%] right-[-5%] w-64 h-64 bg-blue-500/5 blur-[100px] rounded-full pointer-events-none" />
               </div>
 
-              <div className="grid lg:grid-cols-2 gap-8">
-                {/* Security Section */}
-                <div className={`rounded-[3rem] p-10 relative overflow-hidden transition-all duration-500 ${cardBase}`}>
-                  <div className="flex items-center gap-3 mb-10">
-                    <h3 className={`text-2xl font-black tracking-tight transition-colors font-outfit ${textPrimary}`}>Security Settings</h3>
+              <div className="grid lg:grid-cols-2 gap-10">
+                <div className={`rounded-[3.5rem] p-12 relative overflow-hidden transition-all duration-500 border ${cardBase}`}>
+                  <div className="flex items-center gap-4 mb-10">
+                    <h3 className={`text-3xl font-black tracking-tight transition-colors font-outfit ${textPrimary}`}>Security Suite</h3>
                     <div className={`h-px flex-1 transition-colors ${isDark ? 'bg-white/10' : 'bg-slate-100'}`} />
                   </div>
 
-                  <form onSubmit={handleSubmit} className="space-y-6">
+                  <form onSubmit={handleSubmit} className="space-y-8">
                     <div>
-                      <label className={`block text-xs font-black uppercase tracking-[0.2em] mb-3 ml-2 transition-colors ${textSecondary}`}>Enter Full Name</label>
-                      <input type="text" name="name" value={form.name} onChange={handleChange} placeholder="Update administrative name" className={`w-full px-6 py-4 rounded-2xl border font-bold transition-all outline-none ${inputBase}`} />
+                      <label className={`block text-xs font-black uppercase tracking-[0.2em] mb-4 ml-2 transition-colors ${textSecondary}`}>Update Display Name</label>
+                      <input type="text" name="name" value={form.name} onChange={handleChange} placeholder="Full administrative name" className={`w-full px-8 py-5 rounded-3xl border font-black transition-all outline-none text-sm ${inputBase}`} />
                     </div>
                     <div>
-                      <label className={`block text-xs font-black uppercase tracking-[0.2em] mb-3 ml-2 transition-colors ${textSecondary}`}>Enter Current Password</label>
-                      <input type="password" name="currentPassword" value={form.currentPassword} onChange={handleChange} placeholder="Verify current credentials" className={`w-full px-6 py-4 rounded-2xl border font-bold transition-all outline-none ${inputBase}`} />
+                      <label className={`block text-xs font-black uppercase tracking-[0.2em] mb-4 ml-2 transition-colors ${textSecondary}`}>Current Authorization</label>
+                      <input type="password" name="currentPassword" value={form.currentPassword} onChange={handleChange} placeholder="Verify your current password" className={`w-full px-8 py-5 rounded-3xl border font-black transition-all outline-none text-sm ${inputBase}`} />
                     </div>
-                    <div>
-                      <label className={`block text-xs font-black uppercase tracking-[0.2em] mb-3 ml-2 transition-colors ${textSecondary}`}>Enter New Password</label>
-                      <input type="password" name="newPassword" value={form.newPassword} onChange={handleChange} placeholder="Define new secure password" className={`w-full px-6 py-4 rounded-2xl border font-bold transition-all outline-none ${inputBase}`} />
+                    <div className="grid sm:grid-cols-2 gap-6">
+                      <div>
+                        <label className={`block text-xs font-black uppercase tracking-[0.2em] mb-4 ml-2 transition-colors ${textSecondary}`}>New Password</label>
+                        <input type="password" name="newPassword" value={form.newPassword} onChange={handleChange} placeholder="New secret key" className={`w-full px-8 py-5 rounded-3xl border font-black transition-all outline-none text-sm ${inputBase}`} />
+                      </div>
+                      <div>
+                        <label className={`block text-xs font-black uppercase tracking-[0.2em] mb-4 ml-2 transition-colors ${textSecondary}`}>Confirm New</label>
+                        <input type="password" name="confirmPassword" value={form.confirmPassword} onChange={handleChange} placeholder="Verify secret key" className={`w-full px-8 py-5 rounded-3xl border font-black transition-all outline-none text-sm ${inputBase}`} />
+                      </div>
                     </div>
-                    <div>
-                      <label className={`block text-xs font-black uppercase tracking-[0.2em] mb-3 ml-2 transition-colors ${textSecondary}`}>Confirm New Password</label>
-                      <input type="password" name="confirmPassword" value={form.confirmPassword} onChange={handleChange} placeholder="Re-verify new password" className={`w-full px-6 py-4 rounded-2xl border font-bold transition-all outline-none ${inputBase}`} />
-                    </div>
-                    <button type="submit" disabled={updating} className={`w-full py-5 rounded-[1.5rem] font-black text-xs uppercase tracking-[0.3em] text-white transition-all shadow-xl mt-4 ${updating ? 'bg-white/10 text-white/20 cursor-wait' : 'bg-gradient-to-r from-blue-600 to-indigo-700 hover:opacity-90 hover:shadow-blue-500/30 active:scale-[0.98]'}`}>
-                      {updating ? 'Saving...' : 'Save Changes →'}
+                    <button type="submit" disabled={updating} className={`w-full py-6 rounded-[2rem] font-black text-xs uppercase tracking-[0.4em] text-white transition-all shadow-2xl mt-4 ${updating ? 'bg-white/10 text-white/20 cursor-wait shadow-none' : 'bg-gradient-to-r from-blue-600 to-indigo-800 hover:opacity-95 hover:shadow-blue-500/30 active:scale-[0.98]'}`}>
+                      {updating ? 'Processing...' : 'Apply Secure Changes →'}
                     </button>
                   </form>
                 </div>
 
-                <div className="space-y-8">
-                  {/* Theme Preferences */}
-                  <div className={`rounded-[3rem] p-10 transition-all duration-500 ${cardBase}`}>
-                    <div className="flex items-center gap-3 mb-10">
-                      <h3 className={`text-2xl font-black tracking-tight transition-colors font-outfit ${textPrimary}`}>Theme</h3>
+                <div className="space-y-10">
+                  <div className={`rounded-[3.5rem] p-12 transition-all duration-500 border ${cardBase}`}>
+                    <div className="flex items-center gap-4 mb-10">
+                      <h3 className={`text-3xl font-black tracking-tight transition-colors font-outfit ${textPrimary}`}>UI Style Engine</h3>
                       <div className={`h-px flex-1 transition-colors ${isDark ? 'bg-white/10' : 'bg-slate-100'}`} />
                     </div>
                     
-                    <div className="grid grid-cols-2 gap-4">
-                        <button onClick={() => setAdminTheme('light')} className={`flex flex-col items-center gap-4 p-6 rounded-[2.5rem] border-2 transition-all group ${!isDark ? 'bg-white border-blue-600 shadow-xl' : 'bg-white/5 border-transparent hover:bg-white/10'}`}>
-                           <span className={`text-4xl transition-transform duration-500 group-hover:rotate-12 ${!isDark ? 'grayscale-0' : 'grayscale'}`}>☀️</span>
-                           <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${!isDark ? 'text-blue-600' : 'text-white/40'}`}>Light Mode</span>
+                    <div className="grid grid-cols-2 gap-6">
+                        <button onClick={() => setAdminTheme('light')} className={`flex flex-col items-center gap-6 p-8 rounded-[3rem] border-2 transition-all group ${!isDark ? 'bg-white border-blue-600 shadow-2xl shadow-blue-200/20' : 'bg-white/5 border-transparent hover:bg-white/10'}`}>
+                           <span className={`text-5xl transition-transform duration-500 group-hover:rotate-12 ${!isDark ? 'grayscale-0' : 'grayscale'}`}>☀️</span>
+                           <span className={`text-xs font-black uppercase tracking-[0.2em] ${!isDark ? 'text-blue-600' : 'text-white/40'}`}>Professional Light</span>
                         </button>
-                        <button onClick={() => setAdminTheme('dark')} className={`flex flex-col items-center gap-4 p-6 rounded-[2.5rem] border-2 transition-all group ${isDark ? 'bg-blue-500/10 border-blue-500 shadow-xl shadow-blue-500/20' : 'bg-slate-50 border-transparent hover:bg-slate-100'}`}>
-                           <span className={`text-4xl transition-transform duration-500 group-hover:-rotate-12 ${isDark ? 'grayscale-0' : 'grayscale'}`}>🌙</span>
-                           <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${isDark ? 'text-blue-400' : 'text-slate-400'}`}>Dark Mode</span>
+                        <button onClick={() => setAdminTheme('dark')} className={`flex flex-col items-center gap-6 p-8 rounded-[3rem] border-2 transition-all group ${isDark ? 'bg-blue-500/10 border-blue-500 shadow-2xl shadow-blue-500/30' : 'bg-slate-50 border-transparent hover:bg-slate-100'}`}>
+                           <span className={`text-5xl transition-transform duration-500 group-hover:-rotate-12 ${isDark ? 'grayscale-0' : 'grayscale'}`}>🌙</span>
+                           <span className={`text-xs font-black uppercase tracking-[0.2em] ${isDark ? 'text-blue-400' : 'text-slate-400'}`}>Advanced Dark</span>
                         </button>
                     </div>
                   </div>
 
-                  {/* System Context */}
                   <div className="grid gap-6">
-                    <div className={`rounded-[3rem] p-8 transition-all duration-500 ${cardBase}`}>
-                        <div className="flex items-center gap-5">
-                          <span className="text-3xl">🔱</span>
+                    <div className={`rounded-[3rem] p-10 transition-all duration-500 border ${cardBase}`}>
+                        <div className="flex items-center gap-6">
+                          <span className="text-4xl">🔱</span>
                           <div>
-                              <p className={`text-[10px] font-black uppercase tracking-[0.2em] opacity-40 ${textSecondary}`}>Access Level</p>
-                              <p className={`font-black text-xl tracking-tight transition-colors font-outfit ${textPrimary}`}>Full Administrator</p>
+                              <p className={`text-xs font-black uppercase tracking-[0.2em] opacity-50 mb-1 ${textSecondary}`}>Permission Status</p>
+                              <p className={`font-black text-2xl tracking-tighter transition-colors font-outfit ${textPrimary}`}>Full Global Admin</p>
                           </div>
                         </div>
                     </div>
-                    <div className={`rounded-[3rem] p-8 transition-all duration-500 ${cardBase}`}>
-                        <div className="flex items-center gap-5">
-                          <span className="text-3xl">🛡️</span>
+                    <div className={`rounded-[3rem] p-10 transition-all duration-500 border ${cardBase}`}>
+                        <div className="flex items-center gap-6">
+                          <span className="text-4xl">🛡️</span>
                           <div>
-                              <p className={`text-[10px] font-black uppercase tracking-[0.2em] opacity-40 ${textSecondary}`}>Account Security</p>
-                              <p className={`font-black text-xl tracking-tight transition-colors font-outfit ${textPrimary}`}>Verified & Secure</p>
+                              <p className={`text-xs font-black uppercase tracking-[0.2em] opacity-50 mb-1 ${textSecondary}`}>Security Profile</p>
+                              <p className={`font-black text-2xl tracking-tighter transition-colors font-outfit ${textPrimary}`}>Verified Identity</p>
                           </div>
                         </div>
                     </div>
@@ -229,4 +225,3 @@ const AdminProfile = () => {
 };
 
 export default AdminProfile;
-

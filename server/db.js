@@ -36,6 +36,9 @@ async function initDB() {
         email VARCHAR(100) UNIQUE NOT NULL,
         password VARCHAR(255) NOT NULL,
         role ENUM('user', 'admin') DEFAULT 'user',
+        profile_photo LONGTEXT,
+        age INT,
+        gender VARCHAR(20),
         is_active TINYINT(1) DEFAULT 1,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
@@ -84,10 +87,45 @@ async function initDB() {
       )
     `;
 
+    const createReviews = `
+      CREATE TABLE IF NOT EXISTS reviews (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        provider_id INT NOT NULL,
+        booking_id INT DEFAULT NULL,
+        rating INT NOT NULL CHECK (rating >= 1 AND rating <= 5),
+        comment TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+        FOREIGN KEY (provider_id) REFERENCES providers(id) ON DELETE CASCADE,
+        FOREIGN KEY (booking_id) REFERENCES bookings(id) ON DELETE SET NULL
+      )
+    `;
+
     await pool.query(createUsers);
     await pool.query(createProviders);
     await pool.query(createServices);
     await pool.query(createBookings);
+    await pool.query(createReviews);
+
+    // One-time column check for existing systems
+    try {
+      // Adding columns individually to handle cases where some might exist and others don't
+      const cols = await pool.query("SHOW COLUMNS FROM users");
+      const existingCols = cols[0].map(c => c.Field);
+
+      if (!existingCols.includes('profile_photo')) {
+        await pool.query("ALTER TABLE users ADD COLUMN profile_photo LONGTEXT AFTER role");
+      }
+      if (!existingCols.includes('age')) {
+        await pool.query("ALTER TABLE users ADD COLUMN age INT AFTER profile_photo");
+      }
+      if (!existingCols.includes('gender')) {
+        await pool.query("ALTER TABLE users ADD COLUMN gender VARCHAR(20) AFTER age");
+      }
+    } catch (err) {
+      console.log('Migration check skipped or columns already handled:', err.message);
+    }
 
     console.log('Database tables successfully initialized.');
 

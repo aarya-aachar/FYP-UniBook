@@ -33,16 +33,37 @@ router.get('/providers', async (req, res) => {
     const { category } = req.query;
     const pool = getPool();
 
-    let query = 'SELECT * FROM providers ORDER BY created_at DESC';
+    let query = `
+      SELECT p.*, 
+             (SELECT COUNT(*) FROM reviews WHERE provider_id = p.id) as review_count,
+             (SELECT AVG(rating) FROM reviews WHERE provider_id = p.id) as average_rating
+      FROM providers p
+      ORDER BY p.created_at DESC
+    `;
     const params = [];
 
     if (category) {
-      query = 'SELECT * FROM providers WHERE category = ? ORDER BY created_at DESC';
+      query = `
+        SELECT p.*, 
+               (SELECT COUNT(*) FROM reviews WHERE provider_id = p.id) as review_count,
+               (SELECT AVG(rating) FROM reviews WHERE provider_id = p.id) as average_rating
+        FROM providers p
+        WHERE p.category = ?
+        ORDER BY p.created_at DESC
+      `;
       params.push(category);
     }
 
     const [providers] = await pool.query(query, params);
-    res.json(providers);
+    
+    // Format the average_rating for clean JSON response
+    const formattedProviders = providers.map(p => ({
+      ...p,
+      average_rating: parseFloat(p.average_rating || 0).toFixed(1),
+      review_count: parseInt(p.review_count || 0)
+    }));
+
+    res.json(formattedProviders);
   } catch (error) {
     console.error('Fetch Providers Error:', error);
     res.status(500).json({ message: 'Internal Server Error' });
@@ -53,7 +74,13 @@ router.get('/providers', async (req, res) => {
 router.get('/providers/:id', async (req, res) => {
   try {
     const pool = getPool();
-    const [providers] = await pool.query('SELECT * FROM providers WHERE id = ?', [req.params.id]);
+    const [providers] = await pool.query(`
+      SELECT p.*, 
+             (SELECT COUNT(*) FROM reviews WHERE provider_id = p.id) as review_count,
+             (SELECT AVG(rating) FROM reviews WHERE provider_id = p.id) as average_rating
+      FROM providers p
+      WHERE p.id = ?
+    `, [req.params.id]);
 
     if (providers.length === 0) {
       return res.status(404).json({ message: 'Provider not found' });
@@ -62,6 +89,8 @@ router.get('/providers/:id', async (req, res) => {
     const [services] = await pool.query('SELECT * FROM services WHERE provider_id = ?', [req.params.id]);
     const provider = providers[0];
     provider.services = services;
+    provider.average_rating = parseFloat(provider.average_rating || 0).toFixed(1);
+    provider.review_count = parseInt(provider.review_count || 0);
 
     res.json(provider);
   } catch (error) {

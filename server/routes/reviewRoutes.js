@@ -3,66 +3,75 @@ const router = express.Router();
 const { getPool } = require('../db');
 const { authenticateToken } = require('../middleware/authMiddleware');
 
-// @route   POST /api/reviews
-// @desc    Submit or Edit a review for a specific booking
-// @access  Private (User only)
-router.post('/', authenticateToken, async (req, res) => {
-  const { booking_id, provider_id, rating, comment } = req.body;
-  const user_id = req.user.id;
-
+// Get all reviews for a specific provider
+router.get('/provider/:providerId', async (req, res) => {
   try {
+    const { providerId } = req.params;
     const pool = getPool();
-
-    // Verify booking belongs to user & is historical/confirmed
-    const [bookings] = await pool.query('SELECT * FROM bookings WHERE id = ? AND user_id = ?', [booking_id, user_id]);
     
-    if (bookings.length === 0) {
-      return res.status(404).json({ message: 'Booking not found or unauthorized' });
-    }
-
-    const booking = bookings[0];
-
-    // Ensure it's not pending/cancelled
-    if (booking.status !== 'confirmed') {
-      return res.status(400).json({ message: 'Only confirmed and attended bookings can be reviewed' });
-    }
-
-    // Upsert Logic: Insert if entirely new, Update if modifying an existing review
-    const [existing] = await pool.query('SELECT id FROM reviews WHERE booking_id = ?', [booking_id]);
+    // Join with users to get the reviewer's name
+    const [rows] = await pool.query(`
+      SELECT r.*, u.name as user_name 
+      FROM reviews r
+      JOIN users u ON r.user_id = u.id
+      WHERE r.provider_id = ?
+      ORDER BY r.created_at DESC
+    `, [providerId]);
     
-    if (existing.length > 0) {
-      // Edit Review
-      await pool.query(
-        'UPDATE reviews SET rating = ?, comment = ? WHERE booking_id = ? AND user_id = ?',
-        [rating, comment || null, booking_id, user_id]
-      );
-      res.json({ message: 'Review updated successfully' });
-    } else {
-      // New Review
-      await pool.query(
-        'INSERT INTO reviews (booking_id, user_id, provider_id, rating, comment) VALUES (?, ?, ?, ?, ?)',
-        [booking_id, user_id, provider_id, rating, comment || null]
-      );
-      res.status(201).json({ message: 'Review submitted successfully' });
-    }
-
+    res.json(rows);
   } catch (error) {
-    console.error('Error posting review:', error);
-    res.status(500).json({ message: 'Server error' });
+    console.error('Fetch Reviews Error:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 });
 
-// @route   GET /api/reviews
-// @desc    Get all reviews made by the logged-in user
-// @access  Private
-router.get('/', authenticateToken, async (req, res) => {
+// Get average rating and total count for a provider
+router.get('/provider/:providerId/stats', async (req, res) => {
   try {
+    const { providerId } = req.params;
     const pool = getPool();
-    const [reviews] = await pool.query('SELECT * FROM reviews WHERE user_id = ?', [req.user.id]);
-    res.json(reviews);
+    
+    const [rows] = await pool.query(`
+      SELECT 
+        COUNT(*) as total_reviews,
+        AVG(rating) as average_rating
+      FROM reviews
+      WHERE provider_id = ?
+    `, [providerId]);
+    
+    const stats = rows[0];
+    res.json({
+      total_reviews: stats.total_reviews || 0,
+      average_rating: parseFloat(stats.average_rating || 0).toFixed(1)
+    });
   } catch (error) {
-    console.error('Error fetching user reviews:', error);
-    res.status(500).json({ message: 'Server error' });
+    console.error('Fetch Review Stats Error:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+
+// Submit a review (Simplified version)
+router.post('/', authenticateToken, async (req, res) => {
+  try {
+    const { provider_id, rating, comment, booking_id } = req.body;
+    const pool = getPool();
+    
+    if (!rating || rating < 1 || rating > 5) {
+      return res.status(400).json({ message: 'Valid rating (1-5) is required.' });
+    }
+
+    const [result] = await pool.query(`
+      INSERT INTO reviews (user_id, provider_id, booking_id, rating, comment)
+      VALUES (?, ?, ?, ?, ?)
+    `, [req.user.id, provider_id, booking_id || null, rating, comment]);
+    
+    res.status(201).json({ 
+      message: 'Review submitted successfully',
+      reviewId: result.insertId 
+    });
+  } catch (error) {
+    console.error('Submit Review Error:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 });
 

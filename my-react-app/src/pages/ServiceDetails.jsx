@@ -2,6 +2,7 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import UserNavbar from "../components/UserNavbar";
 import { useUserTheme } from "../context/UserThemeContext";
+import { ArrowLeft, MapPin } from "lucide-react";
 
 const ServiceDetails = () => {
   const { userTheme } = useUserTheme();
@@ -46,12 +47,9 @@ const ServiceDetails = () => {
       
       <UserNavbar />
 
-      <main className="flex-1 overflow-y-auto px-6 md:px-10 py-12 relative flex flex-col items-center transition-all duration-500">
-        {/* Background Ambient Decor */}
-        <div className={`absolute top-[10%] right-[10%] w-[500px] h-[500px] blur-[150px] rounded-full pointer-events-none transition-all duration-500
-          ${isDark ? 'bg-blue-600/10' : 'bg-blue-400/5'}`} />
-        <div className={`absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] blur-[150px] rounded-full pointer-events-none transition-all duration-500
-          ${isDark ? 'bg-purple-600/10' : 'bg-purple-400/5'}`} />
+      <main className="flex-1 overflow-y-auto px-6 md:px-10 py-12 relative flex flex-col items-center transition-all duration-300">
+        <div className={`absolute top-0 right-0 w-full h-96 bg-gradient-to-b opacity-50 pointer-events-none transition-all duration-300
+          ${isDark ? 'from-indigo-900/10 to-transparent' : 'from-indigo-50 to-transparent'}`} />
 
         <style>{`
           @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
@@ -62,27 +60,27 @@ const ServiceDetails = () => {
           
           {/* Breadcrumbs */}
           <button onClick={() => navigate(-1)} 
-            className={`flex items-center gap-2 transition-colors font-bold mb-8 group
-              ${isDark ? 'text-white/40 hover:text-white' : 'text-slate-400 hover:text-slate-900'}`}>
-            <span className="group-hover:-translate-x-1 transition-transform">←</span> Back
+            className={`flex items-center gap-2 transition-colors font-medium mb-8 group cursor-pointer
+              ${isDark ? 'text-slate-400 hover:text-white' : 'text-slate-500 hover:text-slate-900'}`}>
+            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" /> Back
           </button>
 
-          <div className={`relative group border rounded-[3rem] p-12 shadow-2xl overflow-hidden transition-all duration-500 backdrop-blur-md
-            ${isDark ? 'bg-white/5 border-white/10 hover:border-white/20' : 'bg-white border-slate-200 hover:border-blue-200'}`}>
+          <div className={`relative group border rounded-2xl p-8 md:p-10 shadow-sm transition-all duration-200
+            ${isDark ? 'bg-slate-800/50 border-slate-700' : 'bg-white border-slate-200'}`}>
             
             {/* Image Banner Section */}
-            <div className={`relative w-full h-[400px] rounded-[2rem] overflow-hidden mb-12 shadow-2xl border transition-all
-              ${isDark ? 'border-white/10' : 'border-slate-100'}`}>
+            <div className={`relative w-full h-[400px] rounded-2xl overflow-hidden mb-10 shadow-sm border transition-all
+              ${isDark ? 'border-slate-700' : 'border-slate-200'}`}>
               <img 
                 src={provider.image} 
                 alt={provider.name} 
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
               />
-              <div className={`absolute inset-0 bg-gradient-to-t opacity-60 transition-colors
-                ${isDark ? 'from-[#0f172a] via-transparent to-transparent' : 'from-slate-900/40 via-transparent to-transparent'}`} />
+              <div className={`absolute inset-0 bg-gradient-to-t opacity-70 transition-colors
+                ${isDark ? 'from-slate-900 via-slate-900/40 to-transparent' : 'from-slate-900/60 via-transparent to-transparent'}`} />
               
-              <div className="absolute bottom-10 left-10">
-                 <span className="px-4 py-2 rounded-full bg-blue-600 text-white text-xs font-black uppercase tracking-widest shadow-xl">
+              <div className="absolute bottom-8 left-8">
+                 <span className="px-3 py-1.5 rounded-md bg-white border border-slate-200 text-slate-800 text-xs font-semibold tracking-wide shadow-sm">
                    {provider.category}
                  </span>
               </div>
@@ -90,36 +88,36 @@ const ServiceDetails = () => {
 
             {/* Typography Section */}
             <div className="space-y-6">
-              <h1 className={`text-4xl font-black tracking-tight leading-none transition-colors
+              <h1 className={`text-4xl font-bold tracking-tight transition-colors
                 ${isDark ? 'text-white' : 'text-slate-900'}`}>
                 {provider.name}
               </h1>
               
-              <div className={`flex items-center gap-4 font-bold text-lg transition-colors
-                ${isDark ? 'text-white/40' : 'text-slate-600'}`}>
-                 <span className="opacity-60">📍</span> {provider.address}
+              <div className={`flex items-center gap-2 font-medium text-base transition-colors
+                ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
+                 <MapPin className="w-5 h-5 opacity-70" /> {provider.address}
               </div>
 
-              <div className={`p-8 rounded-[2rem] border transition-all
-                ${isDark ? 'bg-white/5 border-white/10' : 'bg-slate-50 border-slate-100 shadow-inner'}`}>
-                <p className={`text-lg leading-relaxed font-medium transition-colors
-                  ${isDark ? 'text-white/60' : 'text-slate-600'}`}>
+              <div className={`p-6 md:p-8 rounded-xl border transition-all
+                ${isDark ? 'bg-slate-900/50 border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
+                <p className={`text-base leading-relaxed transition-colors
+                  ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
                   {provider.description}
                 </p>
               </div>
 
-              <div className="pt-8 flex flex-col sm:flex-row items-center gap-6">
+              <div className="pt-6 flex flex-col sm:flex-row items-center gap-4">
                 <Link
                   to={`/booking/${providerId}`}
-                  className={`w-full sm:w-auto px-12 py-5 rounded-2xl font-black uppercase tracking-[0.2em] text-xs transition-all text-center
-                    ${isDark ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-2xl shadow-blue-500/20 hover:scale-105' : 'bg-blue-600 text-white shadow-xl hover:bg-blue-700'}`}
+                  className={`w-full sm:w-auto px-8 py-3 rounded-xl font-semibold text-sm transition-all focus:ring-2 focus:ring-blue-500 text-center cursor-pointer shadow-sm
+                    ${isDark ? 'bg-blue-600 text-white hover:bg-blue-500' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
                 >
-                  Book Secure Appointment
+                  Book Appointment
                 </Link>
                 <Link
                    to="/services"
-                   className={`w-full sm:w-auto px-10 py-5 rounded-2xl border font-black uppercase tracking-[0.2em] text-xs transition-all text-center
-                     ${isDark ? 'bg-white/5 border-white/10 text-white/60 hover:bg-white hover:text-slate-950' : 'bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-900 hover:text-white'}`}
+                   className={`w-full sm:w-auto px-8 py-3 rounded-xl border font-semibold text-sm transition-all text-center cursor-pointer shadow-sm
+                     ${isDark ? 'bg-slate-800 border-slate-700 text-slate-300 hover:text-white hover:bg-slate-700' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-slate-900'}`}
                 >
                    Explore More
                 </Link>

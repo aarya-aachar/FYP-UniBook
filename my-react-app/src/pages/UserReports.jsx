@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import UserNavbar from "../components/UserNavbar";
-import { getPastUserBookings, submitReview } from "../services/bookingService";
+import { getPastUserBookings, submitReview, updateReview } from "../services/bookingService";
 import { useUserTheme } from "../context/UserThemeContext";
+import { FileText, CheckCircle, XCircle, Calendar, Clock, Utensils, Activity, Hospital, Sparkles, Star, Edit, Plus, MessageSquare } from 'lucide-react';
 
 const UserReports = () => {
   const { userTheme } = useUserTheme();
@@ -67,7 +68,11 @@ const UserReports = () => {
 
     try {
       setIsSubmitting(true);
-      await submitReview(activeBooking.id, activeBooking.provider_id, rating, comment);
+      if (activeBooking.review_id) {
+        await updateReview(activeBooking.review_id, rating, comment);
+      } else {
+        await submitReview(activeBooking.id, activeBooking.provider_id, rating, comment);
+      }
       toast(activeBooking.review_id ? "Review updated successfully!" : "Review posted successfully!");
       closeReviewModal();
       fetchReports();
@@ -78,6 +83,15 @@ const UserReports = () => {
       setIsSubmitting(false);
     }
   };
+
+  const getCategoryIcon = (category) => {
+    switch(category) {
+      case 'Restaurants': return <Utensils className="w-6 h-6" />;
+      case 'Futsal': return <Activity className="w-6 h-6" />;
+      case 'Hospitals': return <Hospital className="w-6 h-6" />;
+      default: return <Sparkles className="w-6 h-6" />;
+    }
+  }
 
   return (
     <div className="flex flex-col min-h-screen transition-all duration-500 font-inter"
@@ -100,25 +114,25 @@ const UserReports = () => {
         {/* Toast Notification */}
         <div className="fixed top-6 right-6 z-[200] flex flex-col gap-3 pointer-events-none">
           {toasts.map(t => (
-            <div key={t.id} className={`flex items-center gap-3 pl-4 pr-5 py-4 rounded-2xl shadow-2xl text-white text-base font-bold pointer-events-auto
-              ${t.type === 'success' ? 'bg-gradient-to-r from-emerald-500 to-teal-500' : 'bg-red-500'}`}
-              style={{ animation: 'toastIn 0.4s cubic-bezier(0.34,1.56,0.64,1)' }}>
-              <span className="text-xl">{t.type === 'success' ? '✅' : '❌'}</span>
+            <div key={t.id} className={`flex items-center gap-3 px-5 py-4 rounded-xl shadow-lg text-white text-sm font-medium pointer-events-auto
+              ${t.type === 'success' ? 'bg-emerald-600' : 'bg-red-600'}`}
+              style={{ animation: 'toastIn 0.3s cubic-bezier(0.16, 1, 0.3, 1)' }}>
+              {t.type === 'success' ? <CheckCircle className="w-5 h-5" /> : <XCircle className="w-5 h-5" />}
               {t.message}
             </div>
           ))}
         </div>
 
-        <div className="max-w-7xl mx-auto w-full slide-up pt-4">
+        <div className="max-w-7xl mx-auto w-full slide-up pt-4 relative z-10">
           
-          <div className={`flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 border-b pb-8 transition-colors ${isDark ? 'border-white/5' : 'border-slate-200'}`}>
+          <div className={`flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10 border-b pb-6 transition-colors ${isDark ? 'border-slate-800' : 'border-slate-200'}`}>
             <div>
-              <h1 className={`text-4xl font-black mb-2 tracking-tight transition-colors ${isDark ? 'text-white' : 'text-slate-900'}`}>My Reviews</h1>
-              <p className={`text-lg transition-colors font-medium ${isDark ? 'text-white/40' : 'text-slate-500'} max-w-2xl leading-relaxed`}>See the feedback you've shared for your past bookings.</p>
+              <h1 className={`text-3xl font-bold mb-2 tracking-tight transition-colors ${isDark ? 'text-white' : 'text-slate-900'}`}>My Reviews</h1>
+              <p className={`text-base transition-colors ${isDark ? 'text-slate-400' : 'text-slate-600'} max-w-2xl`}>See the feedback you've shared for your past bookings.</p>
             </div>
             <button onClick={() => navigate('/services')} 
-              className="px-8 py-5 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-black text-sm uppercase tracking-[0.2em] shadow-xl shadow-blue-500/20 hover:scale-105 transition-all w-max whitespace-nowrap">
-              + New Booking
+              className={`flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg text-white font-medium text-sm transition-all w-max shadow-sm cursor-pointer ${isDark ? 'bg-blue-600 hover:bg-blue-500' : 'bg-blue-600 hover:bg-blue-700'}`}>
+              <Plus className="w-4 h-4" /> New Booking
             </button>
           </div>
 
@@ -126,57 +140,59 @@ const UserReports = () => {
             {loading ? (
                <div className="flex flex-col gap-4">
                  {[1,2,3].map(i => (
-                   <div key={i} className={`h-40 rounded-[2.5rem] animate-pulse border transition-all ${isDark ? 'bg-white/5 border-white/10' : 'bg-slate-100 border-slate-200'}`} />
+                   <div key={i} className={`h-40 rounded-2xl animate-pulse border transition-all ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-slate-100 border-slate-200'}`} />
                  ))}
                </div>
             ) : reports.length === 0 ? (
-               <div className={`text-center py-24 rounded-[2.5rem] border border-dashed backdrop-blur-sm transition-all ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-slate-200 shadow-slate-200/20'}`}>
-                 <div className={`w-20 h-20 rounded-3xl flex items-center justify-center text-4xl mx-auto mb-6 transition-all ${isDark ? 'bg-white/5 border-white/10' : 'bg-slate-50 border-slate-200 shadow-inner'}`}>📝</div>
-                 <h3 className={`text-2xl font-black transition-colors ${isDark ? 'text-white/50' : 'text-slate-400'}`}>No reviews yet</h3>
-                 <p className={`mt-2 text-sm font-bold transition-colors ${isDark ? 'text-white/20' : 'text-slate-300'}`}>Once you attend an appointment, it will appear here for you to share your experience.</p>
+               <div className={`text-center py-20 rounded-2xl border border-dashed transition-all ${isDark ? 'bg-slate-800/50 border-slate-600' : 'bg-slate-50 border-slate-300'}`}>
+                 <div className={`w-16 h-16 rounded-xl flex items-center justify-center mx-auto mb-4 transition-all ${isDark ? 'bg-slate-700 text-slate-500' : 'bg-slate-200 text-slate-400'}`}>
+                    <FileText className="w-8 h-8" />
+                 </div>
+                 <h3 className={`text-xl font-semibold transition-colors ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>No reviews yet</h3>
+                 <p className={`mt-1 text-sm transition-colors ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>Once you attend an appointment, it will appear here for you to share your experience.</p>
                </div>
             ) : reports.map((b, i) => {
               const hasReviewed = !!b.review_id;
               return (
               <div key={b.id} 
-                className={`group relative border rounded-[2.5rem] p-8 flex flex-col md:flex-row justify-between gap-8 transition-all duration-500 shadow-xl
-                  ${isDark ? 'bg-white/5 backdrop-blur-xl border-white/10 hover:bg-white/10 hover:border-white/20' : 'bg-white border-slate-200 hover:border-blue-200 shadow-slate-200/20'}`}
-                style={{ animation: `slideUp 0.5s ease-out ${i * 0.08}s forwards`, opacity: 0 }}>
+                className={`group relative border rounded-2xl p-6 md:p-8 flex flex-col md:flex-row justify-between gap-6 transition-all duration-300 shadow-sm
+                  ${isDark ? 'bg-slate-800/80 border-slate-700 hover:border-slate-600' : 'bg-white border-slate-200 hover:border-blue-200'}`}
+                style={{ animation: `slideUp 0.4s ease-out ${i * 0.05}s forwards`, opacity: 0 }}>
                 
                 <div className="flex items-start gap-6 w-full md:w-auto">
-                  <div className={`w-16 h-16 rounded-2xl border flex items-center justify-center text-3xl flex-shrink-0 group-hover:scale-110 transition-all
-                    ${isDark ? 'bg-white/5 border-white/10' : 'bg-slate-50 border-slate-100 shadow-inner group-hover:bg-white'}`}>
-                    {b.category === 'Restaurants' ? '🍽️' : b.category === 'Futsal' ? '⚽' : b.category === 'Hospitals' ? '🏥' : '💆'}
+                  <div className={`w-14 h-14 rounded-xl border flex items-center justify-center flex-shrink-0 transition-all
+                    ${isDark ? 'bg-slate-700 border-slate-600 text-slate-300' : 'bg-slate-50 border-slate-200 text-slate-600'}`}>
+                    {getCategoryIcon(b.category)}
                   </div>
                   <div className="min-w-0">
-                    <h3 className={`text-2xl font-black truncate transition-colors group-hover:text-blue-500 ${isDark ? 'text-white' : 'text-slate-900'}`}>{b.provider_name}</h3>
-                    <div className={`flex flex-wrap items-center gap-x-6 gap-y-2 mt-2 mb-4 text-sm font-bold uppercase transition-colors ${isDark ? 'text-white/40' : 'text-slate-500'}`}>
-                      <div className="flex items-center gap-3 tracking-widest"><span className="opacity-40">📅</span> {new Date(b.booking_date).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}</div>
-                      <div className="flex items-center gap-3 tracking-widest"><span className="opacity-40">⏱️</span> {b.booking_time.substring(0,5)}</div>
+                    <h3 className={`text-xl font-bold truncate transition-colors group-hover:text-blue-600 ${isDark ? 'text-white' : 'text-slate-900'}`}>{b.provider_name}</h3>
+                    <div className={`flex flex-wrap items-center gap-x-6 gap-y-2 mt-2 mb-4 text-sm transition-colors ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                      <div className="flex items-center gap-2"><Calendar className="w-4 h-4 opacity-60" /> {new Date(b.booking_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</div>
+                      <div className="flex items-center gap-2"><Clock className="w-4 h-4 opacity-60" /> {b.booking_time.substring(0,5)}</div>
                     </div>
 
                     {hasReviewed && (
-                      <div className={`border rounded-2xl p-6 mt-2 max-w-xl transition-all ${isDark ? 'bg-white/5 border-white/10' : 'bg-slate-50 border-slate-100 shadow-inner'}`}>
-                        <div className="flex text-amber-500 text-xl mb-3">
+                      <div className={`border rounded-xl p-5 mt-2 max-w-xl transition-all ${isDark ? 'bg-slate-900/50 border-slate-700' : 'bg-slate-50 border-slate-200 shadow-inner'}`}>
+                        <div className="flex text-amber-500 mb-3">
                           {[1,2,3,4,5].map(star => (
-                            <span key={star} className={star <= b.rating ? 'opacity-100' : 'opacity-20 grayscale'}>★</span>
+                            <Star key={star} className={`w-4 h-4 ${star <= b.rating ? 'fill-current' : 'opacity-30'}`} />
                           ))}
                         </div>
-                        {b.comment && <p className={`italic text-sm font-bold transition-colors leading-relaxed ${isDark ? 'text-white/70' : 'text-slate-600'}`}>"{b.comment}"</p>}
+                        {b.comment && <p className={`text-sm italic transition-colors leading-relaxed ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>"{b.comment}"</p>}
                       </div>
                     )}
                   </div>
                 </div>
 
-                <div className="flex flex-col items-end justify-center w-full md:w-auto mt-4 md:mt-0 border-t border-white/10 md:border-none pt-6 md:pt-0">
+                <div className="flex flex-col items-end justify-center w-full md:w-auto mt-2 md:mt-0 pt-4 md:pt-0 border-t md:border-none transition-colors border-slate-200 dark:border-slate-700">
                   <button 
                     onClick={() => openReviewModal(b)}
-                    className={`px-8 py-5 rounded-2xl border transition-all font-black text-xs uppercase tracking-[0.2em] whitespace-nowrap shadow-xl flex items-center gap-3
+                    className={`px-5 py-2.5 flex items-center justify-center gap-2 w-full md:w-auto rounded-lg border font-medium text-sm transition-all shadow-sm cursor-pointer
                       ${hasReviewed 
-                        ? (isDark ? 'bg-white/5 text-white/50 border-white/10 hover:text-white hover:bg-white/10' : 'bg-white text-slate-400 border-slate-200 hover:text-slate-900 hover:bg-slate-50 shadow-slate-200/20')
-                        : 'bg-blue-600 text-white border-blue-600 hover:bg-blue-500 hover:-translate-y-1'}`}
+                        ? (isDark ? 'bg-slate-800 text-slate-300 border-slate-600 hover:text-white hover:bg-slate-700' : 'bg-white text-slate-600 border-slate-200 hover:text-slate-900 hover:bg-slate-50')
+                        : (isDark ? 'bg-blue-600 text-white border-blue-600 hover:bg-blue-500 hover:shadow' : 'bg-blue-600 text-white border-blue-600 hover:bg-blue-700 shadow-sm')}`}
                   >
-                    {hasReviewed ? '✏️ Edit Review' : '⭐ Leave Review'}
+                    {hasReviewed ? <><Edit className="w-4 h-4" /> Edit Review</> : <><MessageSquare className="w-4 h-4" /> Leave Review</>}
                   </button>
                 </div>
               </div>
@@ -190,41 +206,41 @@ const UserReports = () => {
         <div className="fixed inset-0 z-[100] flex items-center justify-center fade-in p-4">
           <div className="absolute inset-0 bg-[#0f172a]/70 backdrop-blur-md" onClick={closeReviewModal} />
           
-          <div className={`relative w-full max-w-lg border rounded-[2.5rem] p-10 shadow-2xl slide-up transition-all duration-500
-            ${isDark ? 'bg-[#1e293b] border-white/10' : 'bg-white border-slate-200'}`}>
-            <h2 className={`text-3xl font-black mb-2 transition-colors ${isDark ? 'text-white' : 'text-slate-900'}`}>
+          <div className={`relative w-full max-w-lg border rounded-2xl p-8 shadow-2xl slide-up transition-all duration-300
+            ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}>
+            <h2 className={`text-2xl font-bold mb-2 transition-colors ${isDark ? 'text-white' : 'text-slate-900'}`}>
               {activeBooking?.review_id ? 'Edit Review' : 'Rate Your Experience'}
             </h2>
-            <p className={`text-lg font-medium mb-8 transition-colors ${isDark ? 'text-white/40' : 'text-slate-500'}`}>How would you rate <span className={`transition-colors ${isDark ? 'text-white' : 'text-slate-900 font-black'}`}>{activeBooking?.provider_name}</span>?</p>
+            <p className={`text-sm mb-6 transition-colors ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>How would you rate <span className={`transition-colors ${isDark ? 'text-white font-semibold' : 'text-slate-900 font-semibold'}`}>{activeBooking?.provider_name}</span>?</p>
             
-            <div className="mb-8">
-              <label className={`block text-xs font-black uppercase tracking-widest mb-4 transition-colors ${isDark ? 'text-white/40' : 'text-slate-500'}`}>Select Rating</label>
+            <div className="mb-6">
+              <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 transition-colors ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Select Rating</label>
               <div className="relative">
                 <select
                   value={rating}
                   onChange={(e) => setRating(Number(e.target.value))}
-                  className={`w-full border rounded-2xl p-5 outline-none transition-all font-black appearance-none cursor-pointer text-sm
-                    ${isDark ? 'bg-white/5 border-white/10 text-white focus:border-blue-500/50 focus:bg-white/10' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-blue-600 focus:bg-white shadow-sm'}`}
+                  className={`w-full border rounded-xl py-3 pl-4 pr-10 outline-none transition-all font-medium appearance-none cursor-pointer text-sm
+                    ${isDark ? 'bg-slate-900 border-slate-700 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-blue-600 focus:ring-1 focus:ring-blue-600 shadow-sm'}`}
                 >
-                  <option value={0} disabled className={isDark ? "bg-[#1e293b] text-white/50" : "bg-white text-slate-400"}>-- Pick a status --</option>
-                  <option value={5} className={isDark ? "bg-[#1e293b]" : "bg-white"}>⭐⭐⭐⭐⭐ Excellent</option>
-                  <option value={4} className={isDark ? "bg-[#1e293b]" : "bg-white"}>⭐⭐⭐⭐ Very Good</option>
-                  <option value={3} className={isDark ? "bg-[#1e293b]" : "bg-white"}>⭐⭐⭐ Average</option>
-                  <option value={2} className={isDark ? "bg-[#1e293b]" : "bg-white"}>⭐⭐ Poor</option>
-                  <option value={1} className={isDark ? "bg-[#1e293b]" : "bg-white"}>⭐ Terrible</option>
+                  <option value={0} disabled className={isDark ? "bg-slate-900 text-slate-500" : "bg-white text-slate-400"}>-- Pick a rating --</option>
+                  <option value={5} className={isDark ? "bg-slate-900" : "bg-white"}>⭐⭐⭐⭐⭐ Excellent</option>
+                  <option value={4} className={isDark ? "bg-slate-900" : "bg-white"}>⭐⭐⭐⭐ Very Good</option>
+                  <option value={3} className={isDark ? "bg-slate-900" : "bg-white"}>⭐⭐⭐ Average</option>
+                  <option value={2} className={isDark ? "bg-slate-900" : "bg-white"}>⭐⭐ Poor</option>
+                  <option value={1} className={isDark ? "bg-slate-900" : "bg-white"}>⭐ Terrible</option>
                 </select>
-                <div className={`absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none transition-colors ${isDark ? 'text-white/40' : 'text-slate-400'}`}>▼</div>
+                <div className={`absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none transition-colors ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>▼</div>
               </div>
             </div>
 
-            <div className="mb-10">
-              <label className={`block text-xs font-black uppercase tracking-widest mb-4 transition-colors ${isDark ? 'text-white/40' : 'text-slate-500'}`}>Review (Optional)</label>
+            <div className="mb-8">
+              <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 transition-colors ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Review (Optional)</label>
               <textarea 
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
                 placeholder="Tell us what you liked or how they can improve..."
-                className={`w-full border rounded-2xl p-6 placeholder-white/20 outline-none transition-all font-bold resize-none h-40 text-sm
-                  ${isDark ? 'bg-white/5 border-white/10 text-white focus:border-blue-500/50 focus:bg-white/10' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-blue-600 focus:bg-white shadow-sm placeholder-slate-400'}`}
+                className={`w-full border rounded-xl p-4 outline-none transition-all font-medium resize-none h-32 text-sm
+                  ${isDark ? 'bg-slate-900 border-slate-700 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 placeholder-slate-600' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-blue-600 focus:ring-1 focus:ring-blue-600 shadow-sm placeholder-slate-400'}`}
               />
             </div>
 
@@ -232,20 +248,20 @@ const UserReports = () => {
               <button 
                 onClick={closeReviewModal}
                 disabled={isSubmitting}
-                className={`flex-1 px-6 py-5 rounded-2xl font-black uppercase tracking-widest text-xs transition-colors
-                  ${isDark ? 'bg-white/5 text-white/40 hover:bg-white/10 hover:text-white' : 'bg-slate-100 text-slate-400 hover:bg-slate-200 hover:text-slate-900'}`}
+                className={`flex-1 px-4 py-2.5 rounded-lg border font-medium text-sm transition-colors cursor-pointer
+                  ${isDark ? 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
               >
-                Close
+                Cancel
               </button>
               <button 
                 onClick={handleReviewSubmit}
-                disabled={isSubmitting}
-                className={`flex-1 px-6 py-5 rounded-2xl font-black uppercase tracking-widest text-xs transition-all shadow-xl
+                disabled={isSubmitting || rating === 0}
+                className={`flex-1 px-4 py-2.5 rounded-lg font-medium text-sm transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer
                   ${isSubmitting || rating === 0 
-                    ? 'bg-blue-600/30 text-white/30 cursor-not-allowed' 
-                    : 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:scale-[1.02]'}`}
+                    ? (isDark ? 'bg-slate-700 text-slate-500 cursor-not-allowed border border-slate-600' : 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200') 
+                    : 'bg-blue-600 text-white hover:bg-blue-700 hover:shadow'}`}
               >
-                {isSubmitting ? 'Posting...' : 'Post Review'}
+                {isSubmitting ? 'Posting...' : 'Submit Review'}
               </button>
             </div>
           </div>

@@ -33,3 +33,8 @@ export const submitReview = async (booking_id, provider_id, rating, comment) => 
   const res = await api.post('/reviews', { booking_id, provider_id, rating, comment });
   return res.data;
 };
+
+export const updateReview = async (review_id, rating, comment) => {
+  const res = await api.put(`/reviews/${review_id}`, { rating, comment });
+  return res.data;
+};

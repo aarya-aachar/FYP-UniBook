@@ -2,15 +2,28 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import Sidebar from '../components/Sidebar';
 import { useAdminTheme } from '../context/AdminThemeContext';
 import { getProviders, createProvider, updateProvider, deleteProvider } from '../services/providerService';
+import { 
+  Building2, Search, Filter, CheckCircle, AlertCircle, Edit, Trash2, MapPin, SearchX, Coffee, Activity, Stethoscope, Sparkles 
+} from 'lucide-react';
 
 const CATEGORIES = ['Restaurants', 'Futsal', 'Hospitals', 'Salon / Spa'];
 const BACKEND_URL = 'http://localhost:4001';
 
+const getCategoryIcon = (cat) => {
+  switch (cat) {
+    case 'Restaurants': return Coffee;
+    case 'Futsal': return Activity;
+    case 'Hospitals': return Stethoscope;
+    case 'Salon / Spa': return Sparkles;
+    default: return Building2;
+  }
+};
+
 const CAT = {
-  'Restaurants': { gradient: 'from-orange-400 to-red-500',   bg: 'bg-orange-500',   badge: 'bg-orange-100 text-orange-700 border border-orange-200', icon: '🍽️' },
-  'Futsal':      { gradient: 'from-blue-400 to-indigo-600',  bg: 'bg-blue-500',     badge: 'bg-blue-100 text-blue-700 border border-blue-200',     icon: '⚽' },
-  'Hospitals':   { gradient: 'from-emerald-400 to-teal-600', bg: 'bg-emerald-500',  badge: 'bg-emerald-100 text-emerald-700 border border-emerald-200', icon: '🏥' },
-  'Salon / Spa': { gradient: 'from-purple-400 to-pink-600',  bg: 'bg-purple-500',   badge: 'bg-purple-100 text-purple-700 border border-purple-200',   icon: '💆' },
+  'Restaurants': { gradient: 'from-orange-400 to-red-500',   bg: 'bg-orange-500',   badge: 'bg-orange-500/10 text-orange-400 border border-orange-500/20', badgeLight: 'bg-orange-50 text-orange-600 border border-orange-100' },
+  'Futsal':      { gradient: 'from-blue-400 to-indigo-600',  bg: 'bg-blue-500',     badge: 'bg-blue-500/10 text-blue-400 border border-blue-500/20',     badgeLight: 'bg-blue-50 text-blue-600 border border-blue-100' },
+  'Hospitals':   { gradient: 'from-emerald-400 to-teal-600', bg: 'bg-emerald-500',  badge: 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20', badgeLight: 'bg-emerald-50 text-emerald-600 border border-emerald-100' },
+  'Salon / Spa': { gradient: 'from-purple-400 to-pink-600',  bg: 'bg-purple-500',   badge: 'bg-purple-500/10 text-purple-400 border border-purple-500/20',   badgeLight: 'bg-purple-50 text-purple-600 border border-purple-100' },
 };
 
 const EMPTY_FORM = { name: '', address: '', description: '', category: 'Restaurants', base_price: 0, opening_time: '09:00', closing_time: '18:00' };
@@ -93,143 +106,215 @@ const ManageProviders = () => {
   };
 
   const textPrimary = isDark ? "text-white" : "text-slate-900";
-  const textSecondary = isDark ? "text-white/50" : "text-slate-500";
-  const cardBase = isDark ? "bg-white/5 backdrop-blur-sm border border-white/10" : "bg-white border border-slate-200 shadow-xl shadow-slate-200/20";
+  const textSecondary = isDark ? "text-slate-400" : "text-slate-500";
+  const textMuted = isDark ? "text-slate-500" : "text-slate-400";
+  const cardBase = isDark ? "bg-slate-900 border border-slate-800 shadow-sm" : "bg-white border border-slate-200 shadow-sm";
+  const borderCol = isDark ? "border-slate-800" : "border-slate-200";
+  const bgRowHover = isDark ? "hover:bg-slate-800/50" : "hover:bg-slate-50";
 
   return (
-    <div className="flex min-h-screen transition-colors duration-500 font-inter" 
-         style={{ background: isDark ? 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%)' : 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)' }}>
+    <div className="flex min-h-screen transition-colors duration-300 font-inter" 
+         style={{ backgroundColor: isDark ? '#020617' : '#f1f5f9' }}>
       <Sidebar />
 
       <style>{`
         @keyframes toastIn { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        @keyframes fadeIn  { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn  { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
       `}</style>
 
       <div className="fixed top-6 right-6 z-[200] flex flex-col gap-3 pointer-events-none">
         {toasts.map(t => (
-          <div key={t.id} className={`flex items-center gap-3 pl-4 pr-5 py-4 rounded-2xl shadow-2xl text-white text-sm font-black pointer-events-auto
-            ${t.type === 'success' ? 'bg-gradient-to-r from-emerald-500 to-teal-500' : 'bg-red-500'}`}
-            style={{ animation: 'toastIn 0.4s cubic-bezier(0.34,1.56,0.64,1)' }}>
-            <span className="text-xl">{t.type === 'success' ? '✅' : '❌'}</span>
+          <div key={t.id} className={`flex items-center gap-3 pl-4 pr-5 py-3 rounded-lg shadow-lg text-white text-sm font-bold pointer-events-auto
+            ${t.type === 'success' ? 'bg-emerald-600' : 'bg-red-600'}`}
+            style={{ animation: 'toastIn 0.3s cubic-bezier(0.16, 1, 0.3, 1)' }}>
+            {t.type === 'success' ? <CheckCircle className="w-5 h-5"/> : <AlertCircle className="w-5 h-5"/>}
             {t.message}
           </div>
         ))}
       </div>
 
-      <div className="flex-1 px-10 py-12 max-w-7xl mx-auto w-full overflow-hidden">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 mb-12" style={{ animation: 'fadeIn 0.5s ease-out' }}>
+      <div className="flex-1 px-8 py-10 max-w-7xl mx-auto w-full overflow-hidden">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 mb-8 border-b border-slate-200 dark:border-slate-800 pb-6" style={{ animation: 'fadeIn 0.4s ease-out' }}>
           <div>
-            <h1 className={`text-4xl font-black tracking-tight mb-2 transition-colors ${textPrimary}`}>Service Providers</h1>
-            <p className={`text-lg font-medium transition-colors ${textSecondary}`}>{providers.length} total providers registered</p>
+            <h1 className={`text-2xl font-bold tracking-tight mb-1 transition-colors ${textPrimary}`}>Service Providers</h1>
+            <p className={`text-sm font-medium transition-colors ${textSecondary}`}>Manage pricing, locations, and details for {providers.length} enrolled services.</p>
           </div>
-          <button onClick={openAdd} className={`px-10 py-5 rounded-[2.5rem] font-black text-xs uppercase tracking-widest text-white bg-gradient-to-r from-blue-600 to-indigo-700 shadow-2xl shadow-blue-500/20 hover:scale-105 transition-all`}>
-            ➕ Create New Service
+          <button onClick={openAdd} className="flex items-center gap-2 px-5 py-2.5 rounded-lg font-bold text-sm text-white bg-blue-600 hover:bg-blue-700 shadow-sm transition-all cursor-pointer">
+            <Building2 className="w-4 h-4" />
+            Add Provider
           </button>
         </div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-          {CATEGORIES.map(cat => {
-            const cfg = CAT[cat];
-            const active = filter === cat;
-            return (
-              <button key={cat} onClick={() => setFilter(active ? 'All' : cat)} className={`p-8 rounded-[3rem] text-left transition-all duration-300 border
-                  ${active ? `bg-gradient-to-br ${cfg.gradient} border-transparent shadow-2xl -translate-y-2 text-white` : `${cardBase} hover:shadow-2xl`}`}>
-                <div className="text-4xl mb-4">{cfg.icon}</div>
-                <div className={`text-2xl font-black tracking-tighter`}>{providers.filter(p => p.category === cat).length}</div>
-                <div className={`text-xs font-black uppercase tracking-widest mt-2 opacity-50`}>{cat}</div>
-              </button>
-            )
-          })}
+        {/* Data Table Controls */}
+        <div className={`p-4 rounded-xl border-b-0 border ${cardBase} flex flex-col md:flex-row gap-4 mb-0`} style={{ animation: 'fadeIn 0.6s ease-out' }}>
+          <div className="relative flex-1">
+            <span className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors ${textMuted}`}>
+              <Search className="w-5 h-5" />
+            </span>
+            <input 
+              type="text" 
+              placeholder="Search providers by name or address..." 
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className={`w-full pl-12 pr-6 py-3 border rounded-xl transition-all font-medium text-sm outline-none
+                ${isDark ? 'bg-slate-800/50 border-slate-700 text-white placeholder-slate-500 focus:border-blue-500' : 'bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400 focus:border-blue-600 focus:bg-white'}`} 
+            />
+          </div>
+          <div className="relative md:w-64">
+            <span className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors ${textMuted} pointer-events-none`}>
+              <Filter className="w-4 h-4" />
+            </span>
+            <select 
+              value={filter} 
+              onChange={e => setFilter(e.target.value)}
+              className={`appearance-none w-full pl-11 pr-10 py-3 border rounded-xl transition-all cursor-pointer font-bold text-xs uppercase tracking-widest outline-none
+                ${isDark ? 'bg-slate-800/50 border-slate-700 text-slate-300 focus:border-blue-500' : 'bg-slate-50 border-slate-200 text-slate-700 focus:border-blue-600'}`}
+            >
+              <option value="All">All Categories</option>
+              {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
+          </div>
         </div>
 
-        <div className="flex flex-col md:flex-row gap-4 mb-10">
-          <input type="text" placeholder="Search by name or location..." value={search} onChange={e => setSearch(e.target.value)}
-            className={`flex-1 px-8 py-5 border rounded-3xl font-black text-lg outline-none transition-all
-              ${isDark ? 'bg-white/5 border-white/10 text-white placeholder-white/10 focus:border-blue-400 focus:bg-white/10' : 'bg-white border-slate-200 text-slate-900 placeholder-slate-300 focus:border-blue-600 shadow-sm'}`} />
-          <select value={filter} onChange={e => setFilter(e.target.value)}
-            className={`px-10 py-5 border rounded-3xl font-black text-xs uppercase tracking-widest outline-none transition-all cursor-pointer
-              ${isDark ? 'bg-white/5 border-white/10 text-white/50 focus:border-blue-400' : 'bg-white border-slate-200 text-slate-700 focus:border-blue-600 shadow-sm'}`}>
-            <option value="All">All Categories</option>
-            {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-          </select>
+        {/* Data Table */}
+        <div className={`overflow-x-auto rounded-xl border border-t-0 shadow-lg ${cardBase}`} style={{ animation: 'fadeIn 0.7s ease-out' }}>
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className={`border-b ${borderCol} ${isDark ? 'bg-slate-800/50' : 'bg-slate-50'}`}>
+                <th className={`px-6 py-4 text-xs font-black uppercase tracking-wider ${textSecondary}`}>Provider Details</th>
+                <th className={`px-6 py-4 text-xs font-black uppercase tracking-wider ${textSecondary}`}>Category</th>
+                <th className={`px-6 py-4 text-xs font-black uppercase tracking-wider ${textSecondary}`}>Pricing</th>
+                <th className={`px-6 py-4 text-xs font-black uppercase tracking-wider ${textSecondary}`}>Operating Hours</th>
+                <th className={`px-6 py-4 text-xs font-black uppercase tracking-wider text-right ${textSecondary}`}>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                // Loading Skeletons
+                Array.from({ length: 5 }).map((_, i) => (
+                  <tr key={i} className={`border-b ${borderCol}`}>
+                    <td className="px-6 py-4"><div className={`h-12 w-64 rounded-xl animate-pulse ${isDark ? 'bg-white/5' : 'bg-slate-200'}`} /></td>
+                    <td className="px-6 py-4"><div className={`h-6 w-24 rounded-full animate-pulse ${isDark ? 'bg-white/5' : 'bg-slate-200'}`} /></td>
+                    <td className="px-6 py-4"><div className={`h-6 w-16 rounded-full animate-pulse ${isDark ? 'bg-white/5' : 'bg-slate-200'}`} /></td>
+                    <td className="px-6 py-4"><div className={`h-4 w-28 rounded-full animate-pulse ${isDark ? 'bg-white/5' : 'bg-slate-200'}`} /></td>
+                    <td className="px-6 py-4 text-right"><div className={`h-8 w-24 rounded-lg animate-pulse ml-auto ${isDark ? 'bg-white/5' : 'bg-slate-200'}`} /></td>
+                  </tr>
+                ))
+              ) : displayed.length > 0 ? (
+                displayed.map(p => {
+                  const cfg = CAT[p.category] || CAT['Restaurants'];
+                  const CatIcon = getCategoryIcon(p.category);
+                  const imageUrl = p.image ? (p.image.startsWith('/uploads') ? `${BACKEND_URL}${p.image}` : p.image) : null;
+                  
+                  return (
+                    <tr key={p.id} className={`border-b border-t-0 last:border-b-0 transition-colors ${borderCol} ${bgRowHover}`}>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-4">
+                          {imageUrl ? (
+                             <img src={imageUrl} alt={p.name} className="w-12 h-12 rounded-xl object-cover border border-white/10 shadow-sm" />
+                          ) : (
+                             <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${cfg.gradient} flex items-center justify-center shadow-sm`}>
+                                <CatIcon className="w-6 h-6 text-white" />
+                             </div>
+                          )}
+                          <div className="min-w-0">
+                            <p className={`text-sm font-bold truncate ${textPrimary}`}>{p.name}</p>
+                            <p className={`text-xs truncate flex items-center gap-1 ${textSecondary}`}>
+                               <MapPin className="w-3 h-3" />
+                               {p.address}
+                            </p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border transition-all ${isDark ? cfg.badge : cfg.badgeLight}`}>
+                           <CatIcon className="w-3 h-3" />
+                           {p.category}
+                        </div>
+                      </td>
+                      <td className={`px-6 py-4 whitespace-nowrap text-sm font-black ${textPrimary}`}>
+                        Rs. {p.base_price}
+                      </td>
+                      <td className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${textSecondary}`}>
+                        {p.opening_time.substring(0,5)} - {p.closing_time.substring(0,5)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right">
+                        <div className="flex items-center justify-end gap-2">
+                           <button 
+                             onClick={() => openEdit(p)}
+                             className={`p-2 rounded-lg transition-colors cursor-pointer outline-none ${isDark ? 'text-blue-400 hover:bg-blue-500/20' : 'text-blue-600 hover:bg-blue-50'}`}
+                             title="Edit Provider"
+                           >
+                              <Edit className="w-4 h-4" />
+                           </button>
+                           <button 
+                             onClick={() => {setToDelete(p); setConfirmOpen(true);}}
+                             className={`p-2 rounded-lg transition-colors cursor-pointer outline-none ${isDark ? 'text-red-400 hover:bg-red-500/20' : 'text-red-600 hover:bg-red-50'}`}
+                             title="Delete Provider"
+                           >
+                              <Trash2 className="w-4 h-4" />
+                           </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              ) : (
+                <tr>
+                  <td colSpan="5" className="px-6 py-20 text-center">
+                    <div className="flex flex-col items-center justify-center">
+                      <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-4 ${isDark ? 'bg-slate-800 text-slate-600' : 'bg-slate-100 text-slate-400'}`}>
+                        <SearchX className="w-8 h-8" />
+                      </div>
+                      <p className={`text-lg font-bold ${textPrimary}`}>No providers found</p>
+                      <p className={`text-sm mt-1 ${textSecondary}`}>Adjust your category filter or search term.</p>
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
-
-        {loading ? (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            {[1,2,3,4,5,6,7,8].map(i => <div key={i} className={`h-80 rounded-[2.5rem] animate-pulse border ${isDark ? 'bg-white/5 border-white/10' : 'bg-slate-100 border-slate-200'}`} />)}
-          </div>
-        ) : displayed.length > 0 ? (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            {displayed.map(p => {
-              const cfg = CAT[p.category] || CAT['Restaurants'];
-              return (
-                <div key={p.id} className={`group relative rounded-[3rem] overflow-hidden transition-all duration-500 hover:-translate-y-2 border ${cardBase}`} style={{ animation: 'fadeIn 0.4s ease forwards' }}>
-                  <div className={`h-40 relative bg-gradient-to-br ${cfg.gradient}`}>
-                    {p.image && <img src={p.image.startsWith('/uploads') ? `${BACKEND_URL}${p.image}` : p.image} alt={p.name} className="w-full h-full object-cover opacity-80" />}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
-                    <span className="absolute bottom-4 left-6 text-4xl">{cfg.icon}</span>
-                    <span className={`absolute top-4 right-6 px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest ${cfg.badge}`}>{p.category}</span>
-                  </div>
-                  <div className="p-8">
-                    <h3 className={`font-black text-2xl truncate tracking-tight transition-colors font-outfit ${textPrimary}`}>{p.name}</h3>
-                    <p className={`text-sm mt-2 flex items-center gap-2 font-bold tracking-tight ${textSecondary}`}><span>📍</span> {p.address}</p>
-                    <div className={`mt-8 flex items-center justify-between p-5 rounded-2xl border ${isDark ? 'bg-white/5 border-white/10' : 'bg-slate-50 border-slate-100 shadow-inner'}`}>
-                      <div className="flex flex-col">
-                        <span className="text-xs font-black uppercase tracking-widest opacity-40">Base Rate</span>
-                        <span className={`font-black text-lg ${textPrimary}`}>Rs. {p.base_price}</span>
-                      </div>
-                      <div className="flex flex-col items-end">
-                        <span className="text-xs font-black uppercase tracking-widest opacity-40">Hours</span>
-                        <span className={`font-bold text-sm ${textSecondary}`}>{p.opening_time.substring(0,5)} - {p.closing_time.substring(0,5)}</span>
-                      </div>
-                    </div>
-                    <div className="flex gap-3 mt-8">
-                      <button onClick={() => openEdit(p)} className={`flex-1 py-4 rounded-2xl font-black text-xs uppercase tracking-widest border transition-all ${isDark ? 'bg-white/10 border-white/10 text-white hover:bg-white hover:text-slate-900' : 'bg-blue-50 text-blue-600 border-blue-100 hover:bg-blue-600 hover:text-white shadow-sm shadow-blue-200/20'}`}>Edit</button>
-                      <button onClick={() => {setToDelete(p); setConfirmOpen(true);}} className={`flex-1 py-4 rounded-2xl font-black text-xs uppercase tracking-widest border transition-all ${isDark ? 'bg-red-500/10 border-red-500/20 text-red-500 hover:bg-red-500 hover:text-white' : 'bg-red-50 text-red-600 border-red-100 hover:bg-red-600 hover:text-white shadow-sm shadow-red-200/20'}`}>Delete</button>
-                    </div>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        ) : (
-          <div className={`text-center py-40 rounded-[3rem] border transition-all ${isDark ? 'bg-white/5 border-white/10' : 'bg-white'}`}>
-             <div className="text-8xl mb-6 opacity-10 font-outfit">🏢</div>
-             <h3 className={`text-3xl font-black ${textPrimary}`}>No providers found</h3>
-          </div>
-        )}
       </div>
 
       {modalOpen && (
-        <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md" onClick={() => setModalOpen(false)}>
-          <div className={`w-full max-w-lg rounded-[3rem] p-10 border transition-all duration-500 ${isDark ? 'bg-slate-900 border-white/10' : 'bg-white border-slate-100'}`} onClick={e => e.stopPropagation()}>
-            <h2 className={`text-2xl font-black mb-2 ${textPrimary}`}>{modalMode === 'edit' ? 'Update Service' : 'New Service'}</h2>
-            <p className={`text-sm font-bold mb-6 ${textSecondary}`}>Enter the details for this provider</p>
-            <div className="space-y-6">
-              <div>
-                <label className="block text-xs font-black uppercase tracking-widest mb-3 opacity-40">Service Name</label>
-                <input type="text" value={form.name} onChange={e => setForm({...form, name: e.target.value})} className={`w-full px-6 py-4 rounded-2xl border font-bold text-sm outline-none transition-all ${isDark ? 'bg-white/5 border-white/10 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'}`} />
+        <div className="fixed inset-0 z-[250] flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm animate-in fade-in" onClick={() => setModalOpen(false)}>
+          <div className={`w-full max-w-lg rounded-xl p-8 border shadow-2xl animate-in zoom-in-95 duration-200 ${isDark ? 'bg-slate-900 border-slate-700' : 'bg-white border-slate-200'}`} onClick={e => e.stopPropagation()}>
+            <h2 className={`text-2xl font-black tracking-tight mb-2 ${textPrimary}`}>{modalMode === 'edit' ? 'Update Service Details' : 'Register New Service'}</h2>
+            <p className={`text-sm font-medium mb-6 ${textSecondary}`}>Enter the system details for this provider record.</p>
+            <div className="space-y-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className={`block text-xs font-bold uppercase tracking-widest mb-2 ${textSecondary}`}>Service Name</label>
+                  <input type="text" value={form.name} onChange={e => setForm({...form, name: e.target.value})} className={`w-full px-4 py-3 rounded-xl border font-semibold text-sm outline-none transition-all ${isDark ? 'bg-slate-800 border-slate-700 text-white focus:border-blue-500' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-blue-600'}`} />
+                </div>
+                <div>
+                  <label className={`block text-xs font-bold uppercase tracking-widest mb-2 ${textSecondary}`}>Provider Image</label>
+                  <label className={`flex items-center justify-center w-full px-4 py-3 rounded-xl border font-semibold text-sm transition-all cursor-pointer ${isDark ? 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 focus-within:border-blue-500' : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100 focus-within:border-blue-600'}`}>
+                    <span className="truncate">{imageFile ? imageFile.name : 'Choose File...'}</span>
+                    <input type="file" ref={fileInputRef} onChange={e => setImageFile(e.target.files[0])} accept="image/*" className="hidden" />
+                  </label>
+                </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-black uppercase tracking-widest mb-3 opacity-40">Category</label>
-                  <select value={form.category} onChange={e => setForm({...form, category: e.target.value})} className={`w-full px-6 py-4 rounded-2xl border font-bold text-sm outline-none transition-all ${isDark ? 'bg-white/5 border-white/10 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'}`}>
+                  <label className={`block text-xs font-bold uppercase tracking-widest mb-2 ${textSecondary}`}>Category</label>
+                  <select value={form.category} onChange={e => setForm({...form, category: e.target.value})} className={`w-full px-4 py-3 rounded-xl border font-semibold text-sm outline-none transition-all ${isDark ? 'bg-slate-800 border-slate-700 text-white focus:border-blue-500' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-blue-600'}`}>
                     {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-black uppercase tracking-widest mb-3 opacity-40">Base Rate (Rs.)</label>
-                  <input type="number" value={form.base_price} onChange={e => setForm({...form, base_price: e.target.value})} className={`w-full px-6 py-4 rounded-2xl border font-bold text-sm outline-none transition-all ${isDark ? 'bg-white/5 border-white/10 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'}`} />
+                  <label className={`block text-xs font-bold uppercase tracking-widest mb-2 ${textSecondary}`}>Base Rate (Rs.)</label>
+                  <input type="number" value={form.base_price} onChange={e => setForm({...form, base_price: e.target.value})} className={`w-full px-4 py-3 rounded-xl border font-semibold text-sm outline-none transition-all ${isDark ? 'bg-slate-800 border-slate-700 text-white focus:border-blue-500' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-blue-600'}`} />
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-black uppercase tracking-widest mb-3 opacity-40">Full Address</label>
-                <input type="text" value={form.address} onChange={e => setForm({...form, address: e.target.value})} className={`w-full px-6 py-4 rounded-2xl border font-bold text-sm outline-none transition-all ${isDark ? 'bg-white/5 border-white/10 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'}`} />
+                <label className={`block text-xs font-bold uppercase tracking-widest mb-2 ${textSecondary}`}>Full Address</label>
+                <input type="text" value={form.address} onChange={e => setForm({...form, address: e.target.value})} className={`w-full px-4 py-3 rounded-xl border font-semibold text-sm outline-none transition-all ${isDark ? 'bg-slate-800 border-slate-700 text-white focus:border-blue-500' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-blue-600'}`} />
               </div>
-              <div className="flex gap-4">
-                <button onClick={() => setModalOpen(false)} className={`flex-1 py-5 rounded-3xl font-black text-xs uppercase tracking-widest ${isDark ? 'bg-white/5 text-white/40' : 'bg-slate-100 text-slate-400'}`}>Cancel</button>
-                <button onClick={handleSubmit} disabled={submitting} className="flex-1 py-5 rounded-3xl font-black text-xs uppercase tracking-widest bg-blue-600 text-white shadow-xl shadow-blue-500/20">{submitting ? 'Saving...' : 'Confirm'}</button>
+              <div className="flex gap-3 pt-4">
+                <button onClick={() => setModalOpen(false)} className={`flex-1 py-3 rounded-xl font-bold text-sm transition-colors cursor-pointer ${isDark ? 'bg-slate-800 text-white/70 hover:bg-slate-700' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>Cancel</button>
+                <button onClick={handleSubmit} disabled={submitting} className={`flex-1 py-3 rounded-xl font-bold text-sm bg-blue-600 text-white hover:bg-blue-700 transition-colors shadow-sm cursor-pointer`}>{submitting ? 'Saving...' : 'Save Details'}</button>
               </div>
             </div>
           </div>
@@ -237,16 +322,18 @@ const ManageProviders = () => {
       )}
 
       {confirmOpen && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/90 backdrop-blur-xl">
-          <div className={`w-full max-w-sm rounded-[3rem] p-10 text-center border ${isDark ? 'bg-slate-900 border-white/10' : 'bg-white'}`}>
-             <span className="text-6xl mb-6 block">🗑️</span>
-             <h2 className={`text-3xl font-black font-outfit mb-2 ${textPrimary}`}>Delete Entry?</h2>
-             <p className={`text-lg font-bold mb-10 ${textSecondary}`}>Are you sure you want to remove <span className={`font-black ${isDark ? 'text-white' : 'text-slate-900'}`}>"{toDelete?.name}"</span>?</p>
-             <div className="flex gap-4">
-                <button onClick={() => setConfirmOpen(false)} className={`flex-1 py-5 rounded-3xl font-black text-xs uppercase tracking-widest ${isDark ? 'bg-white/5 text-white/40' : 'bg-slate-100 text-slate-400'}`}>No, Keep</button>
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm animate-in fade-in">
+          <div className={`w-full max-w-sm rounded-xl p-8 border shadow-2xl animate-in zoom-in-95 duration-200 ${isDark ? 'bg-slate-900 border-slate-700' : 'bg-white border-slate-200'}`}>
+             <div className={`w-12 h-12 rounded-full mb-4 flex items-center justify-center ${isDark ? 'bg-red-500/20 text-red-500' : 'bg-red-100 text-red-600'}`}>
+                <Trash2 className="w-6 h-6" />
+             </div>
+             <h2 className={`text-xl font-black mb-2 tracking-tight ${textPrimary}`}>Delete Service?</h2>
+             <p className={`text-sm mb-6 font-medium ${textSecondary}`}>Are you sure you want to permanently delete <span className="font-black">"{toDelete?.name}"</span>? This action cannot be undone.</p>
+             <div className="flex gap-3">
+                <button onClick={() => setConfirmOpen(false)} className={`flex-1 py-3 text-sm font-bold rounded-xl transition-colors cursor-pointer ${isDark ? 'bg-slate-800 text-white/70 hover:bg-slate-700' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>Cancel</button>
                 <button onClick={async () => {
-                   setDeleting(true); try { await deleteProvider(toDelete.id); toast('Deleted'); setConfirmOpen(false); fetchProviders(); } finally { setDeleting(false); }
-                }} className="flex-1 py-5 rounded-3xl font-black text-xs uppercase tracking-widest bg-red-600 text-white shadow-xl shadow-red-500/20">Yes, Delete</button>
+                   setDeleting(true); try { await deleteProvider(toDelete.id); toast('Provider deleted permanently'); setConfirmOpen(false); fetchProviders(); } finally { setDeleting(false); }
+                }} className="flex-1 py-3 text-sm font-bold rounded-xl bg-red-600 text-white hover:bg-red-700 transition-colors cursor-pointer">Yes, Delete</button>
              </div>
           </div>
         </div>

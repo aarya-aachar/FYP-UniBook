@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import UserNavbar from '../components/UserNavbar';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -60,16 +61,9 @@ const Home = () => {
       </div>
 
       {/* Navigation */}
-      <nav className="relative z-10 px-6 py-8 max-w-7xl mx-auto flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-xl shadow-lg shadow-blue-500/20">🛸</div>
-          <span className="text-2xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-white to-white/60">UniBook</span>
-        </div>
-        <div className="flex items-center gap-6">
-          <Link to="/login" className="text-white/60 hover:text-white font-semibold transition-colors">Login</Link>
-          <Link to="/register" className="px-6 py-2.5 rounded-xl bg-white text-slate-950 font-bold hover:bg-white/90 transition-all shadow-xl shadow-white/10">Get Started</Link>
-        </div>
-      </nav>
+      <div className="relative z-50">
+        <UserNavbar />
+      </div>
 
       {/* Hero Section */}
       <section className="relative z-10 pt-20 pb-32 px-6 text-center max-w-5xl mx-auto">

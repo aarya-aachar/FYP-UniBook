@@ -3,33 +3,34 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import UserNavbar from "../components/UserNavbar";
 import { getProviders } from "../services/providerService";
 import { useUserTheme } from "../context/UserThemeContext";
+import { Utensils, Activity, Hospital, Sparkles, MapPin, Star, Building, ArrowLeft } from "lucide-react";
 
 const BACKEND_URL = 'http://localhost:4001';
 
 const CAT_CONFIG = {
   'Restaurants': { 
-    icon: '🍽️', 
-    gradient: 'from-orange-500/20 to-red-500/10', 
-    color: 'text-orange-400',
-    colorLight: 'text-orange-600 font-black'
+    icon: Utensils, 
+    color: 'text-orange-500',
+    bgLight: 'bg-orange-50',
+    bgDark: 'bg-orange-500/10'
   },
   'Futsal': { 
-    icon: '⚽', 
-    gradient: 'from-blue-500/20 to-indigo-500/10', 
-    color: 'text-blue-400',
-    colorLight: 'text-blue-600 font-black'
+    icon: Activity, 
+    color: 'text-blue-500',
+    bgLight: 'bg-blue-50',
+    bgDark: 'bg-blue-500/10'
   },
   'Hospitals': { 
-    icon: '🏥', 
-    gradient: 'from-emerald-500/20 to-teal-500/10', 
-    color: 'text-emerald-400',
-    colorLight: 'text-emerald-600 font-black'
+    icon: Hospital, 
+    color: 'text-emerald-500',
+    bgLight: 'bg-emerald-50',
+    bgDark: 'bg-emerald-500/10'
   },
   'Salon / Spa': { 
-    icon: '💆', 
-    gradient: 'from-purple-500/20 to-pink-500/10', 
-    color: 'text-purple-400',
-    colorLight: 'text-purple-600 font-black'
+    icon: Sparkles, 
+    color: 'text-purple-500',
+    bgLight: 'bg-purple-50',
+    bgDark: 'bg-purple-500/10'
   },
 };
 
@@ -67,39 +68,34 @@ const ServiceProviders = () => {
       
       <UserNavbar />
 
-      <main className="flex-1 overflow-y-auto px-6 md:px-10 py-12 relative transition-all duration-500">
-        <div className={`absolute top-[10%] left-[20%] w-96 h-96 blur-[120px] rounded-full pointer-events-none transition-all duration-500
-          ${isDark ? 'bg-indigo-600/10' : 'bg-indigo-400/5'}`} />
+      <main className="flex-1 overflow-y-auto px-6 md:px-10 py-12 relative transition-all duration-300">
+        <div className={`absolute top-0 left-0 w-full h-96 bg-gradient-to-b opacity-50 pointer-events-none transition-all duration-300
+          ${isDark ? 'from-indigo-900/10 to-transparent' : 'from-indigo-50 to-transparent'}`} />
 
-        <style>{`
-          @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-          .fade-in { animation: fadeIn 0.5s ease-out forwards; }
-        `}</style>
-
-        <div className="max-w-7xl mx-auto w-full fade-in pt-4">
-          <div className="mb-12">
-            <button onClick={() => navigate('/services')} className={`flex items-center gap-2 transition-colors font-bold mb-6 group ${isDark ? 'text-white/40 hover:text-white' : 'text-slate-400 hover:text-slate-900'}`}>
-              <span className="group-hover:-translate-x-1 transition-transform">←</span> Back to Services
+        <div className="max-w-7xl mx-auto w-full pt-4 relative z-10">
+          <div className="mb-10">
+            <button onClick={() => navigate('/services')} className={`flex items-center gap-2 transition-colors font-medium mb-6 group cursor-pointer ${isDark ? 'text-slate-400 hover:text-white' : 'text-slate-500 hover:text-slate-900'}`}>
+              <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" /> Back to Services
             </button>
             
             <div className="flex items-center gap-6">
-              <div className={`w-20 h-20 rounded-[2rem] border flex items-center justify-center text-4xl shadow-2xl transition-all
-                ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-slate-200 shadow-slate-200/20'}`}>
-                {cfg.icon}
+              <div className={`w-16 h-16 rounded-2xl border flex items-center justify-center shadow-sm transition-all
+                ${isDark ? `bg-slate-800 border-slate-700 ${cfg.color}` : `bg-white border-slate-200 ${cfg.color}`}`}>
+                <cfg.icon className="w-8 h-8" />
               </div>
               <div>
-                <h1 className={`text-4xl font-black tracking-tight transition-colors ${isDark ? 'text-white' : 'text-slate-900'}`}>Recommended {serviceName}</h1>
-                <p className={`text-lg font-medium mt-2 transition-colors ${isDark ? 'text-white/40' : 'text-slate-600'}`}>
+                <h1 className={`text-3xl font-bold tracking-tight transition-colors ${isDark ? 'text-white' : 'text-slate-900'}`}>Recommended {serviceName}</h1>
+                <p className={`text-base mt-1 transition-colors ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
                   We found {providers.length} top-rated options for you
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-8">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
             {loading ? (
                [1,2,3,4].map(i => (
-                 <div key={i} className={`h-64 rounded-[2.5rem] border animate-pulse ${isDark ? 'bg-white/5 border-white/10' : 'bg-slate-100 border-slate-200'}`} />
+                 <div key={i} className={`h-64 rounded-2xl border animate-pulse ${isDark ? 'bg-slate-800/50 border-slate-700' : 'bg-slate-100 border-slate-200'}`} />
                ))
             ) : providers.length > 0 ? (
               providers.map((p) => {
@@ -108,62 +104,60 @@ const ServiceProviders = () => {
                 return (
                   <div
                     key={p.id}
-                    className={`group relative rounded-[2.5rem] p-8 flex flex-col transition-all duration-500 hover:-translate-y-2 shadow-2xl overflow-hidden border
-                      ${isDark ? 'bg-white/5 backdrop-blur-md border-white/10 hover:border-white/20' : 'bg-white border-slate-200 hover:border-blue-200 shadow-slate-200/50 shadow-slate-200/20 transition-all'}`}
+                    className={`group relative rounded-2xl p-6 flex flex-col transition-all duration-200 shadow-sm hover:-translate-y-[2px] hover:shadow-md border overflow-hidden
+                      ${isDark ? 'bg-slate-800/50 border-slate-700 hover:border-slate-600' : 'bg-white border-slate-200 hover:border-slate-300'}`}
                   >
                     {imgSrc && (
-                      <div className="absolute inset-0 opacity-20 group-hover:opacity-40 transition-opacity duration-700 pointer-events-none">
-                        <img src={imgSrc} alt={p.name} className="w-full h-full object-cover mix-blend-overlay" />
+                      <div className="absolute inset-0 opacity-[0.03] group-hover:opacity-[0.06] transition-opacity duration-300 pointer-events-none">
+                        <img src={imgSrc} alt={p.name} className="w-full h-full object-cover" />
                       </div>
                     )}
                     
-                    <div className={`absolute inset-0 bg-gradient-to-br ${cfg.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none`} />
-                    
                     <div className="relative z-10 flex flex-col h-full">
-                      <div className="flex items-start justify-between mb-6">
+                      <div className="flex items-start justify-between mb-5">
                         {imgSrc ? (
-                          <div className={`w-14 h-14 rounded-2xl border overflow-hidden shadow-lg group-hover:scale-110 transition-transform duration-500 
-                            ${isDark ? 'border-white/10' : 'border-slate-100'}`}>
+                          <div className={`w-14 h-14 rounded-xl border overflow-hidden shadow-sm transition-transform duration-300 
+                            ${isDark ? 'border-slate-700' : 'border-slate-200'}`}>
                              <img src={imgSrc} alt={p.name} className="w-full h-full object-cover" />
                           </div>
                         ) : (
-                          <div className={`w-14 h-14 rounded-2xl border flex items-center justify-center font-black text-xl transition-all duration-500
-                            ${isDark ? 'bg-white/5 border-white/10 text-white/80 group-hover:bg-white group-hover:text-slate-950' : 'bg-slate-50 border-slate-100 text-slate-400 group-hover:bg-slate-900 group-hover:text-white'}`}>
+                          <div className={`w-14 h-14 rounded-xl border flex items-center justify-center font-bold text-xl transition-all duration-300
+                            ${isDark ? `bg-slate-700 border-slate-600 text-slate-300 ${cfg.bgDark}` : `bg-slate-50 border-slate-200 text-slate-500 ${cfg.bgLight}`}`}>
                             {p.name.charAt(0)}
                           </div>
                         )}
                         
                         <div className="flex flex-col items-end gap-2">
-                           <span className={`px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest border transition-colors 
-                             ${isDark ? `border-white/10 bg-white/5 ${cfg.color}` : `border-slate-100 bg-slate-50 shadow-sm ${cfg.colorLight}`}`}>
+                           <span className={`px-2.5 py-1 rounded text-xs font-semibold uppercase tracking-wider border transition-colors 
+                             ${isDark ? `border-slate-700 bg-slate-800 ${cfg.color}` : `border-slate-200 bg-slate-50 text-slate-700`}`}>
                              Featured
                            </span>
                            {p.review_count > 0 && (
-                             <div className={`flex items-center gap-1.5 px-3 py-1 rounded-xl border transition-colors
-                               ${isDark ? 'bg-amber-500/10 border-amber-500/20 text-amber-400' : 'bg-amber-50 border-amber-200 text-amber-600 font-bold shadow-sm'}`}>
-                               <span className="text-sm">⭐</span>
-                               <span className="text-xs font-black whitespace-nowrap">{p.average_rating} ({p.review_count} reviews)</span>
+                             <div className={`flex items-center gap-1 px-2 py-0.5 rounded border transition-colors
+                               ${isDark ? 'bg-amber-500/10 border-amber-500/20 text-amber-400' : 'bg-amber-50 border-amber-200 text-amber-600 shadow-sm'}`}>
+                               <Star className="w-3 h-3 fill-current" />
+                               <span className="text-xs font-semibold">{p.average_rating} ({p.review_count})</span>
                              </div>
                            )}
                         </div>
                       </div>
 
-                    <h2 className={`text-2xl font-black mb-2 transition-colors group-hover:text-blue-500 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                    <h2 className={`text-xl font-bold mb-2 transition-colors group-hover:text-blue-500 ${isDark ? 'text-white' : 'text-slate-900'}`}>
                       {p.name}
                     </h2>
 
-                    <p className={`mb-4 flex items-center gap-2 text-sm font-bold transition-colors ${isDark ? 'text-white/60' : 'text-slate-600'}`}>
-                      <span className="opacity-40 text-lg">📍</span> {p.address}
+                    <p className={`mb-3 flex items-center gap-1.5 text-sm transition-colors ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                      <MapPin className="w-4 h-4 opacity-70" /> {p.address}
                     </p>
                     
-                    <p className={`mb-8 text-sm leading-relaxed line-clamp-3 font-bold transition-colors ${isDark ? 'text-white/60' : 'text-slate-600'}`}>
+                    <p className={`mb-6 text-sm leading-relaxed line-clamp-3 transition-colors ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
                       {p.description || "Take a look at what we offer and book your spot today for the best experience."}
                     </p>
 
                     <Link
                       to={`/booking/${p.id}`}
-                      className={`mt-auto py-4 rounded-2xl border font-black uppercase tracking-widest text-sm text-center transition-all duration-300 shadow-xl
-                        ${isDark ? 'bg-white/5 border-white/10 text-white hover:bg-white hover:text-slate-950' : 'bg-slate-900 border-slate-900 text-white hover:bg-blue-600 hover:border-blue-600'}`}
+                      className={`mt-auto py-2.5 rounded-lg border font-semibold text-sm text-center transition-all duration-200 shadow-sm cursor-pointer
+                        ${isDark ? 'bg-slate-700 border-slate-600 text-white hover:bg-slate-600' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-slate-900'}`}
                     >
                       Check Availability
                     </Link>
@@ -172,11 +166,13 @@ const ServiceProviders = () => {
                 );
               })
             ) : (
-              <div className="col-span-full py-32 text-center rounded-[3rem] border shadow-2xl
-                ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-slate-200 shadow-slate-200/20'}">
-                <div className="text-6xl mb-6 opacity-20">🏢</div>
-                <h3 className={`text-2xl font-black uppercase tracking-widest ${isDark ? 'text-white/40' : 'text-slate-400'}`}>No providers found</h3>
-                <Link to="/services" className="inline-block mt-6 text-blue-500 font-black uppercase tracking-widest text-sm hover:underline">Try another category →</Link>
+              <div className={`col-span-full py-20 text-center rounded-2xl border shadow-sm
+                ${isDark ? 'bg-slate-800/50 border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
+                <Building className="w-16 h-16 mx-auto mb-4 text-slate-400 opacity-50" />
+                <h3 className={`text-lg font-semibold ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>No providers found</h3>
+                <Link to="/services" className="inline-flex items-center gap-2 mt-4 text-blue-500 font-medium text-sm hover:underline cursor-pointer">
+                  Try another category <ArrowLeft className="w-4 h-4 rotate-180" />
+                </Link>
               </div>
             )}
           </div>

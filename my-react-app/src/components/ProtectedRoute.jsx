@@ -10,20 +10,24 @@ const ProtectedRoute = ({ children, requiredRole }) => {
   const user = getProfile();
 
   // 1. Not logged in -> Redirect seamlessly to login
-  if (!user) {
+  const token = localStorage.getItem('token');
+  if (!user || !token) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   // 2. Role Check
-  const currentRole = String(user.role || '').toLowerCase().trim();
-  const targetRole = String(requiredRole || '').toLowerCase().trim();
+  // 2. Role Check (only if a specific role is required)
+  if (requiredRole) {
+    const currentRole = String(user.role || '').toLowerCase().trim();
+    const targetRole = String(requiredRole).toLowerCase().trim();
 
-  if (currentRole !== targetRole) {
-    // Security violation: user attempting to access wrong role page
-    // Purge session completely and explicitly kick out to login
-    console.warn(`[RBAC] Security hit: User role '${currentRole}' attempted access to route requiring '${targetRole}'. Session purged.`);
-    logout();
-    return <Navigate to="/login" replace />;
+    if (currentRole !== targetRole) {
+      // Security violation: user attempting to access wrong role page
+      // Purge session completely and explicitly kick out to login
+      console.warn(`[RBAC] Security hit: User role '${currentRole}' attempted access to route requiring '${targetRole}'. Session purged.`);
+      logout();
+      return <Navigate to="/login" replace />;
+    }
   }
 
   // 3. Authorized

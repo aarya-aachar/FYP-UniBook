@@ -2,31 +2,40 @@ import { useNavigate, Link } from "react-router-dom";
 import UserNavbar from "../components/UserNavbar";
 import { useEffect } from "react";
 import { useUserTheme } from "../context/UserThemeContext";
+import { Utensils, Activity, Hospital, Sparkles, ArrowRight } from "lucide-react";
 
 const services = [
   {
     name: "Restaurants",
     description: "Explore top-tier dining and reserve your table instantly at the city's finest spots.",
-    icon: "🍽️",
-    gradient: "from-orange-400 to-red-500",
+    icon: Utensils,
+    color: "text-orange-500",
+    bgHover: "hover:bg-orange-50",
+    darkBgHover: "hover:bg-orange-500/10"
   },
   {
     name: "Futsal",
     description: "Book professional courts and enjoy the competitive edge with your team.",
-    icon: "⚽",
-    gradient: "from-blue-400 to-indigo-600",
+    icon: Activity,
+    color: "text-blue-500",
+    bgHover: "hover:bg-blue-50",
+    darkBgHover: "hover:bg-blue-500/10"
   },
   {
     name: "Hospitals",
     description: "Seamlessly schedule appointments with trusted healthcare providers.",
-    icon: "🏥",
-    gradient: "from-emerald-400 to-teal-600",
+    icon: Hospital,
+    color: "text-emerald-500",
+    bgHover: "hover:bg-emerald-50",
+    darkBgHover: "hover:bg-emerald-500/10"
   },
   {
     name: "Salon / Spa",
     description: "Relax and pamper yourself with premium wellness and beauty services.",
-    icon: "💆",
-    gradient: "from-purple-400 to-pink-600",
+    icon: Sparkles,
+    color: "text-purple-500",
+    bgHover: "hover:bg-purple-50",
+    darkBgHover: "hover:bg-purple-500/10"
   },
 ];
 
@@ -45,64 +54,63 @@ const Services = () => {
       
       <UserNavbar />
 
-      <main className="flex-1 overflow-y-auto px-6 md:px-10 py-12 relative transition-all duration-500">
-        <div className={`absolute top-[10%] right-[10%] w-96 h-96 blur-[120px] rounded-full pointer-events-none transition-all duration-500
-          ${isDark ? 'bg-blue-600/10' : 'bg-blue-400/5'}`} />
+      <main className="flex-1 overflow-y-auto px-6 md:px-10 py-12 relative transition-all duration-300">
+        <div className={`absolute top-0 right-0 w-full h-96 bg-gradient-to-b opacity-50 pointer-events-none transition-all duration-300
+          ${isDark ? 'from-blue-900/10 to-transparent' : 'from-blue-50 to-transparent'}`} />
 
-        <style>{`
-          @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-          .fade-in { animation: fadeIn 0.5s ease-out forwards; }
-        `}</style>
-
-        <div className="max-w-7xl mx-auto w-full fade-in pt-4">
-          <div className="mb-16">
-            <h1 className={`text-4xl font-black mb-2 tracking-tight transition-colors ${isDark ? 'text-white' : 'text-slate-900'}`}>
+        <div className="max-w-7xl mx-auto w-full pt-4 relative z-10">
+          <div className="mb-12 border-b pb-6 transition-colors border-slate-200 dark:border-slate-800">
+            <h1 className={`text-3xl font-bold mb-2 tracking-tight transition-colors ${isDark ? 'text-white' : 'text-slate-900'}`}>
               Choose a Category
             </h1>
-            <p className={`text-lg transition-colors font-medium ${isDark ? 'text-white/40' : 'text-slate-600'} max-w-2xl leading-relaxed`}>
+            <p className={`text-base transition-colors ${isDark ? 'text-slate-400' : 'text-slate-600'} max-w-2xl`}>
               Pick a service to find the best providers near you. Explore top-rated places and book instantly.
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-8">
-            {services.map((service) => (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-6">
+            {services.map((service, i) => {
+              const Icon = service.icon;
+              return (
               <div
                 key={service.name}
                 onClick={() => navigate(`/services/${encodeURIComponent(service.name)}`)}
-                className={`group cursor-pointer relative rounded-[2.5rem] p-10 transition-all duration-500 hover:-translate-y-2 shadow-2xl overflow-hidden border
-                  ${isDark ? 'bg-white/5 backdrop-blur-md border-white/10 hover:border-white/20' : 'bg-white border-slate-200 hover:border-blue-200 shadow-slate-200/20'}`}
+                className={`group cursor-pointer relative rounded-2xl p-6 transition-all duration-200 shadow-sm hover:-translate-y-[2px] hover:shadow-md border
+                  ${isDark ? `bg-slate-800/50 border-slate-700 hover:border-slate-600 ${service.darkBgHover}` : `bg-white border-slate-200 hover:border-slate-300 ${service.bgHover}`}`}
               >
-                <div className={`absolute inset-0 bg-gradient-to-br ${service.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-500`} />
                 
                 <div className="relative z-10">
-                  <div className={`w-16 h-16 rounded-2xl border flex items-center justify-center text-4xl mb-8 group-hover:scale-110 transition-transform duration-500
-                    ${isDark ? 'bg-white/5 border-white/10' : 'bg-slate-50 border-slate-100'}`}>
-                    {service.icon}
+                  <div className={`w-12 h-12 rounded-xl border flex items-center justify-center mb-6 transition-transform duration-200
+                    ${isDark ? 'bg-slate-700/50 border-slate-600' : 'bg-slate-50 border-slate-200'} ${service.color}`}>
+                    <Icon className="w-6 h-6" />
                   </div>
-                  <h2 className={`text-2xl font-black mb-4 group-hover:text-blue-500 transition-colors ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                  <h2 className={`text-xl font-bold mb-3 transition-colors ${isDark ? 'text-white' : 'text-slate-900'}`}>
                     {service.name}
                   </h2>
-                  <p className={`text-sm leading-relaxed font-bold mb-8 transition-colors ${isDark ? 'text-white/40' : 'text-slate-600'}`}>
+                  <p className={`text-sm leading-relaxed mb-6 transition-colors ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
                     {service.description}
                   </p>
 
-                  <div className="flex items-center gap-2 text-xs font-black text-blue-500 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all duration-500 translate-x-[-10px] group-hover:translate-x-0">
-                    View Options <span>→</span>
+                  <div className={`flex items-center gap-2 text-sm font-medium transition-all duration-200
+                    ${isDark ? 'text-blue-400 group-hover:text-blue-300' : 'text-blue-600 group-hover:text-blue-700'}`}>
+                    View Options <ArrowRight className="w-4 h-4 translate-x-0 group-hover:translate-x-1 transition-transform" />
                   </div>
                 </div>
               </div>
-            ))}
+            )})}
           </div>
 
-          <div className={`mt-20 p-12 rounded-[3.5rem] border text-center transition-all duration-500
-            ${isDark ? 'bg-gradient-to-r from-blue-600/10 to-indigo-600/5 border-white/10' : 'bg-blue-50 border-blue-100/50'}`}>
-            <h2 className={`text-2xl font-black mb-4 transition-colors ${isDark ? 'text-white' : 'text-slate-900'}`}>Need to check your bookings?</h2>
-            <p className={`text-sm mb-10 max-w-xl mx-auto font-bold transition-colors ${isDark ? 'text-white/40' : 'text-slate-600'}`}>
-              Visit your dashboard to see all your active and past appointments. You can also edit your profile and settings there.
-            </p>
+          <div className={`mt-16 p-8 rounded-2xl border flex flex-col sm:flex-row items-center justify-between gap-6 transition-all duration-300
+            ${isDark ? 'bg-slate-800/50 border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
+            <div>
+              <h2 className={`text-xl font-bold mb-2 transition-colors ${isDark ? 'text-white' : 'text-slate-900'}`}>Need to check your bookings?</h2>
+              <p className={`text-sm transition-colors ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                Visit your dashboard to see all your active and past appointments.
+              </p>
+            </div>
             <Link
-              to="/dashboard/user"
-              className="inline-block px-12 py-5 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-black uppercase tracking-[0.2em] text-xs shadow-2xl shadow-blue-500/20 hover:scale-105 transition-all"
+              to="/dashboard"
+              className="px-6 py-2.5 rounded-lg bg-blue-600 text-white font-medium text-sm shadow-sm hover:bg-blue-700 hover:shadow shadow-blue-500/20 transition-all cursor-pointer whitespace-nowrap"
             >
               Back to Dashboard
             </Link>

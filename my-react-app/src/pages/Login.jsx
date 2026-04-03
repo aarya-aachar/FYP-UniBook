@@ -38,7 +38,7 @@ const Login = () => {
         window.location.assign('/dashboard/admin');
       } else {
         console.log('DEBUG: REDIRECTING TO USER HUB...');
-        navigate('/dashboard/user');
+        navigate('/dashboard');
       }
     } catch (err) {
       alert(err.message || 'Login failed');

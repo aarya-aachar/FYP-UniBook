@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import Sidebar from "../components/Sidebar";
 import { useAdminTheme } from "../context/AdminThemeContext";
 import { getFullReports, getExportData } from "../services/adminService";
+import { Users, CalendarDays, Building2, DownloadCloud, Printer, FileText } from "lucide-react";
 
 const Reports = () => {
   const { adminTheme } = useAdminTheme();
@@ -99,43 +100,44 @@ const Reports = () => {
   };
 
   const textPrimary = isDark ? "text-white" : "text-slate-900";
-  const textSecondary = isDark ? "text-white/50" : "text-slate-600";
-  const cardBase = isDark ? 'bg-white/5 border border-white/10 shadow-2xl' : 'bg-white border border-slate-100 shadow-2xl shadow-slate-200/20';
+  const textSecondary = isDark ? "text-slate-400" : "text-slate-500";
+  const cardBase = isDark ? 'bg-slate-900 border border-slate-800 shadow-sm' : 'bg-white border border-slate-200 shadow-sm';
 
   return (
-    <div className="flex min-h-screen transition-colors duration-500 font-inter" 
-         style={{ background: isDark ? 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%)' : 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)' }}>
+    <div className="flex min-h-screen transition-colors duration-300 font-inter" 
+         style={{ backgroundColor: isDark ? '#020617' : '#f1f5f9' }}>
       <Sidebar />
 
       <style>{`
         @keyframes toastIn { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        @keyframes fadeIn  { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn  { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
       `}</style>
 
-      <div className="flex-1 px-10 py-12 max-w-7xl mx-auto w-full overflow-hidden">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 mb-12" style={{ animation: 'fadeIn 0.5s ease-out' }}>
+      <div className="flex-1 px-8 py-10 max-w-7xl mx-auto w-full overflow-hidden">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 mb-8 border-b border-slate-200 dark:border-slate-800 pb-6" style={{ animation: 'fadeIn 0.4s ease-out' }}>
           <div>
-            <h1 className={`text-4xl font-black tracking-tight mb-2 transition-colors ${textPrimary}`}>Data Exports</h1>
-            <p className={`text-lg font-medium transition-colors ${textSecondary}`}>Manage system archives and digital records</p>
+            <h1 className={`text-2xl font-bold tracking-tight mb-1 transition-colors ${textPrimary}`}>Data Exports</h1>
+            <p className={`text-sm font-medium transition-colors ${textSecondary}`}>Manage system archives and digital records.</p>
           </div>
-          <div className={`px-10 py-5 rounded-[2.5rem] border transition-all shadow-2xl font-black text-xs uppercase tracking-widest
-            ${isDark ? 'bg-white/5 border-white/10 text-white/40' : 'bg-white border-slate-100 text-slate-400 shadow-slate-200/10'}`}>
-            Protocol: 0.10.x PDF Engine
+          <div className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-all shadow-sm font-bold text-xs uppercase tracking-wider
+            ${isDark ? 'bg-slate-800/50 border-slate-700 text-slate-400' : 'bg-white border-slate-200 text-slate-500'}`}>
+            <FileText className="w-4 h-4" />
+            PDF Engine Ready
           </div>
         </div>
 
         {loading ? (
-             <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-                {[1,2,3].map(i => <div key={i} className={`h-80 rounded-[4rem] animate-pulse border ${isDark ? 'bg-white/5 border-white/10' : 'bg-slate-100 border-slate-200'}`} />)}
+             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {[1,2,3].map(i => <div key={i} className={`h-80 rounded-xl animate-pulse border ${isDark ? 'bg-slate-800/50 border-slate-800' : 'bg-slate-100 border-slate-200'}`} />)}
              </div>
         ) : (
           <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                <ReportCard 
                   isDark={isDark}
                   title="Member Register" 
                   desc="Full directory of system accounts, assigned roles, and current access status." 
-                  icon="👥"
+                  Icon={Users}
                   onCSV={() => exportCSV('users')}
                   onPDF={() => exportPDF('users')}
                 />
@@ -143,7 +145,7 @@ const Reports = () => {
                   isDark={isDark}
                   title="Booking History" 
                   desc="Detailed log of all reservations, transactional indices, and slot confirmations." 
-                  icon="📅"
+                  Icon={CalendarDays}
                   onCSV={() => exportCSV('bookings')}
                   onPDF={() => exportPDF('bookings')}
                 />
@@ -151,17 +153,20 @@ const Reports = () => {
                   isDark={isDark}
                   title="Partner Registry" 
                   desc="A complete list of service provides, location mapping, and service rates." 
-                  icon="🏢"
+                  Icon={Building2}
                   onCSV={() => exportCSV('providers')}
                   onPDF={() => exportPDF('providers')}
                 />
             </div>
 
-            <div className={`backdrop-blur-xl border rounded-[4rem] p-12 text-center transition-all duration-500
-              ${isDark ? 'bg-white/5 border-white/10 shadow-2xl' : 'bg-white border-slate-100 shadow-2xl shadow-slate-200/10'}`}>
+            <div className={`backdrop-blur-xl border rounded-[3rem] p-10 text-center transition-all duration-500
+              ${cardBase}`}>
+               <div className={`w-16 h-16 mx-auto rounded-2xl flex items-center justify-center mb-6 ${isDark ? 'bg-blue-500/10 text-blue-400' : 'bg-blue-50 text-blue-600'}`}>
+                 <DownloadCloud className="w-8 h-8"/>
+               </div>
                <p className={`text-xl font-bold tracking-tight mb-2 ${textPrimary}`}>Archival Services Active</p>
-               <p className={`text-lg font-bold italic tracking-tight ${isDark ? 'text-white/20' : 'text-slate-400'}`}>
-                 Export system records for auditing and digital archival purposes.
+               <p className={`text-sm font-medium ${textSecondary}`}>
+                 Export system records smoothly as CSV or PDF documents for auditing purposes. You can open CSV with Excel.
                </p>
             </div>
           </div>
@@ -209,26 +214,30 @@ const Reports = () => {
   );
 };
 
-const ReportCard = ({ title, desc, icon, onCSV, onPDF, isDark }) => {
+const ReportCard = ({ title, desc, Icon, onCSV, onPDF, isDark }) => {
   const textPrimary = isDark ? "text-white" : "text-slate-900";
   const textSecondary = isDark ? "text-white/50" : "text-slate-500";
-  const cardBase = isDark ? 'bg-white/5 border border-white/10' : 'bg-white border border-slate-100 shadow-2xl shadow-slate-200/20';
+  const cardBase = isDark ? 'bg-slate-800/50 border border-slate-700' : 'bg-white border border-slate-200 shadow-xl shadow-slate-200/20';
 
   return (
-    <div className={`group relative rounded-[4rem] p-12 transition-all duration-500 overflow-hidden border-b-[12px] ${cardBase}
+    <div className={`group relative rounded-3xl p-8 transition-all duration-300 overflow-hidden border-b-[6px] ${cardBase}
       ${isDark ? 'hover:border-b-blue-500' : 'hover:border-b-blue-600'}`}>
-      <div className="absolute -top-10 -right-10 text-[16rem] opacity-5 group-hover:opacity-10 transition-all duration-700 pointer-events-none transform rotate-12">{icon}</div>
-      <div className={`w-20 h-20 rounded-[2rem] flex items-center justify-center text-4xl mb-8 shadow-2xl transition-all duration-500
-        ${isDark ? 'bg-white/5 shadow-black/40 ring-1 ring-white/10 group-hover:bg-blue-600/20' : 'bg-slate-50 shadow-slate-200/20 ring-1 ring-slate-100 group-hover:bg-blue-50'}`}>{icon}</div>
-      <h3 className={`text-2xl font-black mb-3 leading-tight tracking-tight ${textPrimary}`}>{title}</h3>
-      <p className={`text-sm font-bold mb-10 leading-relaxed transition-colors ${textSecondary}`}>{desc}</p>
-      <div className="flex gap-4">
-         <button onClick={onCSV} className={`flex-1 py-6 rounded-[2rem] font-black text-xs uppercase tracking-widest transition-all active:scale-95 border
-           ${isDark ? 'bg-white/5 border-white/10 text-white hover:bg-white/10' : 'bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200'}`}>
-           💾 Export CSV
+      
+      <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-6 shadow-sm transition-all duration-300
+        ${isDark ? 'bg-slate-800 text-blue-400 group-hover:bg-blue-500/20' : 'bg-gradient-to-br from-blue-50 to-indigo-50 text-blue-600 group-hover:bg-blue-100'}`}>
+        <Icon className="w-6 h-6" />
+      </div>
+      <h3 className={`text-xl font-black mb-2 leading-tight tracking-tight ${textPrimary}`}>{title}</h3>
+      <p className={`text-sm font-medium mb-8 flex-1 transition-colors ${textSecondary}`}>{desc}</p>
+      <div className="flex gap-3">
+         <button onClick={onCSV} className={`flex flex-1 items-center justify-center gap-2 py-3 rounded-xl font-bold text-xs uppercase tracking-widest transition-all active:scale-95 border cursor-pointer
+           ${isDark ? 'bg-slate-800 border-slate-700 text-white/80 hover:bg-slate-700' : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'}`}>
+           <DownloadCloud className="w-4 h-4"/>
+           CSV
          </button>
-         <button onClick={onPDF} className="flex-1 py-6 rounded-[2rem] bg-gradient-to-tr from-blue-600 to-indigo-800 text-white font-black text-xs uppercase tracking-[0.3em] shadow-2xl shadow-blue-500/40 hover:scale-[1.02] active:scale-95 transition-all">
-           📄 Print PDF
+         <button onClick={onPDF} className="flex flex-1 items-center justify-center gap-2 py-3 rounded-xl bg-blue-600 text-white font-bold text-xs uppercase tracking-[0.2em] shadow-lg shadow-blue-500/20 hover:bg-blue-700 active:scale-95 transition-all cursor-pointer">
+           <Printer className="w-4 h-4"/>
+           PDF
          </button>
       </div>
     </div>

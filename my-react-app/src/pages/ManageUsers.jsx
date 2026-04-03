@@ -97,14 +97,14 @@ const ManageUsers = () => {
       <div className="flex-1 px-10 py-12 max-w-7xl mx-auto w-full overflow-hidden">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 mb-12" style={{ animation: 'fadeIn 0.5s ease-out' }}>
           <div>
-            <h1 className={`text-6xl font-black tracking-tighter mb-4 transition-colors font-outfit ${textPrimary}`}>Client List</h1>
-            <p className={`text-lg font-bold tracking-tight transition-colors ${textSecondary}`}>
+            <h1 className={`text-4xl font-black tracking-tight mb-2 transition-colors ${textPrimary}`}>Client List</h1>
+            <p className={`text-lg font-medium transition-colors ${textSecondary}`}>
               Total {users.length} registered accounts
             </p>
           </div>
           <div className={`flex items-center gap-4 px-8 py-5 rounded-[2.5rem] border transition-all shadow-2xl ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-slate-100 shadow-slate-200/20'}`}>
              <span className={`text-xs font-black uppercase tracking-widest ${textSecondary}`}>Active Members:</span>
-             <span className={`font-black text-3xl font-outfit ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>{users.filter(u => u.is_active).length}</span>
+             <span className={`font-black text-2xl ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>{users.filter(u => u.is_active).length}</span>
           </div>
         </div>
 

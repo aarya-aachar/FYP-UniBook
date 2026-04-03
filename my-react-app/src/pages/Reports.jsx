@@ -115,8 +115,8 @@ const Reports = () => {
       <div className="flex-1 px-10 py-12 max-w-7xl mx-auto w-full overflow-hidden">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 mb-12" style={{ animation: 'fadeIn 0.5s ease-out' }}>
           <div>
-            <h1 className={`text-6xl font-black tracking-tighter mb-4 transition-colors font-outfit ${textPrimary}`}>Data Exports</h1>
-            <p className={`text-lg font-bold tracking-tight transition-colors ${textSecondary}`}>Manage system archives and digital records</p>
+            <h1 className={`text-4xl font-black tracking-tight mb-2 transition-colors ${textPrimary}`}>Data Exports</h1>
+            <p className={`text-lg font-medium transition-colors ${textSecondary}`}>Manage system archives and digital records</p>
           </div>
           <div className={`px-10 py-5 rounded-[2.5rem] border transition-all shadow-2xl font-black text-xs uppercase tracking-widest
             ${isDark ? 'bg-white/5 border-white/10 text-white/40' : 'bg-white border-slate-100 text-slate-400 shadow-slate-200/10'}`}>
@@ -218,10 +218,10 @@ const ReportCard = ({ title, desc, icon, onCSV, onPDF, isDark }) => {
     <div className={`group relative rounded-[4rem] p-12 transition-all duration-500 overflow-hidden border-b-[12px] ${cardBase}
       ${isDark ? 'hover:border-b-blue-500' : 'hover:border-b-blue-600'}`}>
       <div className="absolute -top-10 -right-10 text-[16rem] opacity-5 group-hover:opacity-10 transition-all duration-700 pointer-events-none transform rotate-12">{icon}</div>
-      <div className={`w-28 h-28 rounded-[2.5rem] flex items-center justify-center text-6xl mb-12 shadow-2xl transition-all duration-500
+      <div className={`w-20 h-20 rounded-[2rem] flex items-center justify-center text-4xl mb-8 shadow-2xl transition-all duration-500
         ${isDark ? 'bg-white/5 shadow-black/40 ring-1 ring-white/10 group-hover:bg-blue-600/20' : 'bg-slate-50 shadow-slate-200/20 ring-1 ring-slate-100 group-hover:bg-blue-50'}`}>{icon}</div>
-      <h3 className={`text-4xl font-black mb-4 leading-none tracking-tighter font-outfit ${textPrimary}`}>{title}</h3>
-      <p className={`text-lg font-bold mb-14 leading-relaxed transition-colors ${textSecondary}`}>{desc}</p>
+      <h3 className={`text-2xl font-black mb-3 leading-tight tracking-tight ${textPrimary}`}>{title}</h3>
+      <p className={`text-sm font-bold mb-10 leading-relaxed transition-colors ${textSecondary}`}>{desc}</p>
       <div className="flex gap-4">
          <button onClick={onCSV} className={`flex-1 py-6 rounded-[2rem] font-black text-xs uppercase tracking-widest transition-all active:scale-95 border
            ${isDark ? 'bg-white/5 border-white/10 text-white hover:bg-white/10' : 'bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200'}`}>

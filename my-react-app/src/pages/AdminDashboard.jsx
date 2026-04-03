@@ -102,10 +102,10 @@ const AdminDashboard = () => {
 
         <div className="flex-1 px-10 py-12 max-w-7xl mx-auto w-full overflow-hidden">
           <div className="mb-12" style={{ animation: 'fadeIn 0.5s ease-out' }}>
-            <h1 className={`text-6xl font-black tracking-tighter mb-4 transition-colors font-outfit ${textPrimary}`}>Admin Dashboard</h1>
-            <p className={`text-xl font-bold tracking-tight flex items-center gap-3 transition-colors ${textSecondary}`}>
+            <h1 className={`text-4xl font-black tracking-tight mb-2 transition-colors ${textPrimary}`}>Admin Dashboard</h1>
+            <p className={`text-lg font-medium flex items-center gap-3 transition-colors ${textSecondary}`}>
               <span className={isDark ? "text-blue-400" : "text-blue-600"}>📅</span> {formattedDate}
-              <span className={`mx-2 text-2xl font-thin opacity-10 ${textPrimary}`}>|</span>
+              <span className={`mx-2 text-xl font-thin opacity-20 ${textPrimary}`}>|</span>
               <span className={`font-black tracking-widest opacity-90 ${textPrimary}`}>{formattedTime}</span>
             </p>
           </div>
@@ -119,7 +119,7 @@ const AdminDashboard = () => {
                   {card.icon}
                 </div>
                 <h3 className={`text-xs font-black uppercase tracking-[0.2em] mb-2 ${textSecondary}`}>{card.label}</h3>
-                <p className={`text-4xl font-black tabular-nums tracking-tighter font-outfit ${textPrimary}`}>
+                <p className={`text-3xl font-black tabular-nums tracking-tighter ${textPrimary}`}>
                   {loading ? '---' : card.value}
                 </p>
               </div>
@@ -131,10 +131,10 @@ const AdminDashboard = () => {
               style={{ animation: 'fadeIn 0.6s ease-out 0.4s forwards', opacity: 0 }}>
               <div className="flex justify-between items-center mb-10">
                 <div>
-                  <h1 className={`text-4xl font-black tracking-tighter mb-2 transition-colors font-outfit ${textPrimary}`}>
+                  <h2 className={`text-2xl font-black tracking-tight mb-1 transition-colors ${textPrimary}`}>
                     Revenue Statistics
-                  </h1>
-                  <p className={`text-lg font-bold tracking-tight transition-colors ${textSecondary}`}>
+                  </h2>
+                  <p className={`text-sm font-bold transition-colors ${textSecondary}`}>
                     Platform revenue growth over time
                   </p>
                 </div>
@@ -182,7 +182,7 @@ const AdminDashboard = () => {
 
             <div className={`rounded-[3rem] p-10 flex flex-col items-center transition-all duration-500 ${cardBase}`}
               style={{ animation: 'fadeIn 0.6s ease-out 0.5s forwards', opacity: 0 }}>
-              <h3 className={`text-2xl font-black mb-10 self-start tracking-tight font-outfit ${textPrimary}`}>Service Types</h3>
+              <h3 className={`text-xl font-black mb-10 self-start tracking-tight ${textPrimary}`}>Service Types</h3>
               <div className="w-full h-72">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
@@ -221,8 +221,8 @@ const AdminDashboard = () => {
             style={{ animation: 'fadeIn 0.6s ease-out 0.7s forwards', opacity: 0 }}>
             <div className="flex justify-between items-end mb-10">
               <div>
-                <h3 className={`text-3xl font-black tracking-tight font-outfit ${textPrimary}`}>Recent System Activity</h3>
-                <p className={`text-lg mt-2 font-bold tracking-tight transition-colors ${textSecondary}`}>Live updates on user and provider actions</p>
+                <h3 className={`text-2xl font-black tracking-tight ${textPrimary}`}>Recent System Activity</h3>
+                <p className={`text-sm mt-2 font-bold transition-colors ${textSecondary}`}>Live updates on user and provider actions</p>
               </div>
               <Link to="/dashboard/admin/bookings" className="text-blue-500 text-sm font-black tracking-widest uppercase hover:underline">View All →</Link>
             </div>
@@ -239,9 +239,9 @@ const AdminDashboard = () => {
                     </div>
                     <div className="flex-1">
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className={`font-black text-xl leading-none transition-colors ${textPrimary}`}>{activity.user}</span>
-                        <span className={`text-base font-bold tracking-tight lowercase ${textSecondary}`}>booked</span>
-                        <span className={`font-black text-xl leading-none transition-colors ${isDark ? 'text-blue-400' : 'text-blue-600'}`}>{activity.provider}</span>
+                        <span className={`font-black text-base leading-none transition-colors ${textPrimary}`}>{activity.user}</span>
+                        <span className={`text-sm font-bold tracking-tight lowercase ${textSecondary}`}>booked</span>
+                        <span className={`font-black text-base leading-none transition-colors ${isDark ? 'text-blue-400' : 'text-blue-600'}`}>{activity.provider}</span>
                       </div>
                       <p className={`text-xs font-black tracking-[0.2em] mt-3 uppercase transition-colors ${textMuted}`}>
                         {new Date(activity.created_at).toLocaleString('en-US', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}

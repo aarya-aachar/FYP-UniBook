@@ -112,8 +112,8 @@ const AdminProfile = () => {
         <div className="flex-1 px-10 py-12 max-w-7xl mx-auto w-full overflow-hidden">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 mb-12" style={{ animation: 'fadeIn 0.5s ease-out' }}>
             <div>
-              <h1 className={`text-6xl font-black tracking-tighter mb-4 transition-colors font-outfit ${textPrimary}`}>Admin Settings</h1>
-              <p className={`text-lg font-bold tracking-tight transition-colors ${textSecondary}`}>Manage your administrative profile and preferences</p>
+              <h1 className={`text-4xl font-black tracking-tight mb-2 transition-colors ${textPrimary}`}>Admin Settings</h1>
+              <p className={`text-lg font-medium transition-colors ${textSecondary}`}>Manage your administrative profile and preferences</p>
             </div>
           </div>
 
@@ -124,10 +124,10 @@ const AdminProfile = () => {
               
               <div className={`rounded-[3.5rem] p-12 flex flex-col md:flex-row items-center gap-12 transition-all duration-500 border relative overflow-hidden ${cardBase}`}
                    style={{ animation: 'fadeIn 0.4s ease forwards' }}>
-                 <div className="w-48 h-48 rounded-[3rem] bg-gradient-to-tr from-blue-600 to-indigo-700 flex items-center justify-center text-7xl shadow-2xl shadow-blue-500/30 relative z-10 transition-transform hover:scale-105 duration-500">👤</div>
+                 <div className="w-36 h-36 rounded-[2.5rem] bg-gradient-to-tr from-blue-600 to-indigo-700 flex items-center justify-center text-5xl shadow-2xl shadow-blue-500/30 relative z-10 transition-transform hover:scale-105 duration-500">👤</div>
                  <div className="flex-1 text-center md:text-left relative z-10">
-                    <h2 className={`text-5xl font-black font-outfit tracking-tighter mb-2 ${textPrimary}`}>{user?.name}</h2>
-                    <p className={`text-2xl font-bold opacity-60 mb-10 ${textSecondary}`}>{user?.email}</p>
+                    <h2 className={`text-3xl font-black tracking-tight mb-1 ${textPrimary}`}>{user?.name}</h2>
+                    <p className={`text-base font-bold opacity-60 mb-8 ${textSecondary}`}>{user?.email}</p>
                     
                     <div className="flex flex-wrap items-center justify-center md:justify-start gap-6">
                        <div className={`px-8 py-4 rounded-3xl border transition-all flex flex-col ${isDark ? 'bg-white/5 border-white/10' : 'bg-slate-50 border-slate-100 shadow-inner shadow-slate-200/10'}`}>

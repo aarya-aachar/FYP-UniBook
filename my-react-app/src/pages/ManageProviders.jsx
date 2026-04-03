@@ -120,8 +120,8 @@ const ManageProviders = () => {
       <div className="flex-1 px-10 py-12 max-w-7xl mx-auto w-full overflow-hidden">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 mb-12" style={{ animation: 'fadeIn 0.5s ease-out' }}>
           <div>
-            <h1 className={`text-6xl font-black tracking-tighter mb-4 transition-colors font-outfit ${textPrimary}`}>Service Providers</h1>
-            <p className={`text-lg font-bold tracking-tight transition-colors ${textSecondary}`}>{providers.length} total providers registered</p>
+            <h1 className={`text-4xl font-black tracking-tight mb-2 transition-colors ${textPrimary}`}>Service Providers</h1>
+            <p className={`text-lg font-medium transition-colors ${textSecondary}`}>{providers.length} total providers registered</p>
           </div>
           <button onClick={openAdd} className={`px-10 py-5 rounded-[2.5rem] font-black text-xs uppercase tracking-widest text-white bg-gradient-to-r from-blue-600 to-indigo-700 shadow-2xl shadow-blue-500/20 hover:scale-105 transition-all`}>
             ➕ Create New Service
@@ -135,8 +135,8 @@ const ManageProviders = () => {
             return (
               <button key={cat} onClick={() => setFilter(active ? 'All' : cat)} className={`p-8 rounded-[3rem] text-left transition-all duration-300 border
                   ${active ? `bg-gradient-to-br ${cfg.gradient} border-transparent shadow-2xl -translate-y-2 text-white` : `${cardBase} hover:shadow-2xl`}`}>
-                <div className="text-5xl mb-4">{cfg.icon}</div>
-                <div className={`text-4xl font-black font-outfit tracking-tighter`}>{providers.filter(p => p.category === cat).length}</div>
+                <div className="text-4xl mb-4">{cfg.icon}</div>
+                <div className={`text-2xl font-black tracking-tighter`}>{providers.filter(p => p.category === cat).length}</div>
                 <div className={`text-xs font-black uppercase tracking-widest mt-2 opacity-50`}>{cat}</div>
               </button>
             )
@@ -204,8 +204,8 @@ const ManageProviders = () => {
       {modalOpen && (
         <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md" onClick={() => setModalOpen(false)}>
           <div className={`w-full max-w-lg rounded-[3rem] p-10 border transition-all duration-500 ${isDark ? 'bg-slate-900 border-white/10' : 'bg-white border-slate-100'}`} onClick={e => e.stopPropagation()}>
-            <h2 className={`text-4xl font-black font-outfit mb-2 ${textPrimary}`}>{modalMode === 'edit' ? 'Update Service' : 'New Service'}</h2>
-            <p className={`text-lg font-bold mb-8 ${textSecondary}`}>Enter the details for this provider</p>
+            <h2 className={`text-2xl font-black mb-2 ${textPrimary}`}>{modalMode === 'edit' ? 'Update Service' : 'New Service'}</h2>
+            <p className={`text-sm font-bold mb-6 ${textSecondary}`}>Enter the details for this provider</p>
             <div className="space-y-6">
               <div>
                 <label className="block text-xs font-black uppercase tracking-widest mb-3 opacity-40">Service Name</label>

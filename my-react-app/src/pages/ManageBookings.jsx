@@ -82,12 +82,12 @@ const ManageBookings = () => {
       <div className="flex-1 px-10 py-12 max-w-7xl mx-auto w-full overflow-hidden">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 mb-12" style={{ animation: 'fadeIn 0.5s ease-out' }}>
           <div>
-            <h1 className={`text-6xl font-black tracking-tighter mb-4 transition-colors font-outfit ${textPrimary}`}>Booking Overview</h1>
-            <p className={`text-lg font-bold tracking-tight transition-colors ${textSecondary}`}>{bookings.length} total system reservations</p>
+            <h1 className={`text-4xl font-black tracking-tight mb-2 transition-colors ${textPrimary}`}>Booking Overview</h1>
+            <p className={`text-lg font-medium transition-colors ${textSecondary}`}>{bookings.length} total system reservations</p>
           </div>
           <div className={`flex items-center gap-4 px-8 py-5 rounded-[2.5rem] border transition-all shadow-2xl ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-slate-100 shadow-slate-200/20'}`}>
              <span className={`text-xs font-black uppercase tracking-widest ${textSecondary}`}>Active Slots:</span>
-             <span className={`font-black text-3xl font-outfit ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>{bookings.filter(b => b.status === 'confirmed').length}</span>
+             <span className={`font-black text-2xl ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>{bookings.filter(b => b.status === 'confirmed').length}</span>
           </div>
         </div>
 
@@ -98,7 +98,7 @@ const ManageBookings = () => {
         ) : bookings.length === 0 ? (
           <div className={`text-center py-40 rounded-[4rem] border transition-all ${isDark ? 'bg-white/5 border-white/10' : 'bg-white'}`}>
              <div className="text-8xl mb-6 opacity-10">🗓️</div>
-             <h3 className={`text-3xl font-black ${textPrimary}`}>No system logs found</h3>
+             <h3 className={`text-2xl font-black ${textPrimary}`}>No system logs found</h3>
           </div>
         ) : (
           <div className="grid gap-8">

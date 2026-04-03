@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useUserTheme } from "../context/UserThemeContext";
-import UserSidebar from "../components/UserSidebar";
+import UserNavbar from "../components/UserNavbar";
 
 const Contact = () => {
   const { userTheme } = useUserTheme();
@@ -30,15 +30,16 @@ const Contact = () => {
   }, []);
 
   return (
-    <div className="flex min-h-screen transition-all duration-500 font-inter"
+    <div className="flex flex-col min-h-screen transition-all duration-500 font-inter"
          style={{ background: isDark ? 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%)' : 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)' }}>
-      <UserSidebar />
+      
+      <UserNavbar />
 
-      <div className="flex-1 flex flex-col items-center justify-center p-6 relative overflow-hidden transition-all duration-500">
+      <main className="flex-1 flex flex-col items-center justify-center p-6 relative overflow-hidden transition-all duration-500">
         <div className={`absolute top-0 right-[-10%] w-[600px] h-[600px] blur-[150px] rounded-full pointer-events-none transition-all duration-500
           ${isDark ? 'bg-blue-600/10' : 'bg-blue-400/5'}`} />
 
-        <div className="max-w-[550px] w-full relative z-10 animate-[fadeIn_0.5s_ease-out]">
+        <div className="max-w-7xl mx-auto w-full relative z-10 animate-[fadeIn_0.5s_ease-out] flex flex-col items-center justify-center">
           <div className="text-center mb-10">
             <h1 className={`text-4xl font-black mb-2 tracking-tighter ${textPrimary}`}>Reach Out</h1>
             <p className={`text-lg font-bold ${textSecondary}`}>Have questions? We're here to help.</p>
@@ -110,7 +111,7 @@ const Contact = () => {
              </div>
           </div>
         </div>
-      </div>
+      </main>
 
       <style>{`
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import UserSidebar from '../components/UserSidebar';
+import UserNavbar from '../components/UserNavbar';
 import { getUserBookings, updateBookingStatus } from '../services/bookingService';
 import { useUserTheme } from '../context/UserThemeContext';
 
@@ -77,11 +77,12 @@ const ViewAppointments = () => {
   }
 
   return (
-    <div className="flex min-h-screen transition-all duration-500 font-inter"
+    <div className="flex flex-col min-h-screen transition-all duration-500 font-inter"
          style={{ background: isDark ? 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%)' : 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)' }}>
-      <UserSidebar />
+      
+      <UserNavbar />
 
-      <div className="flex-1 overflow-y-auto px-10 py-12 relative transition-all duration-500">
+      <main className="flex-1 overflow-y-auto px-6 md:px-10 py-12 relative transition-all duration-500">
         <div className={`absolute top-[10%] right-[10%] w-96 h-96 blur-[120px] rounded-full pointer-events-none transition-all duration-500
           ${isDark ? 'bg-blue-600/10' : 'bg-blue-400/5'}`} />
 
@@ -102,7 +103,7 @@ const ViewAppointments = () => {
           ))}
         </div>
 
-        <div className="max-w-6xl mx-auto w-full slide-up pt-4">
+        <div className="max-w-7xl mx-auto w-full slide-up pt-4">
           
           <div className={`flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 border-b pb-8 transition-colors ${isDark ? 'border-white/5' : 'border-slate-200'}`}>
             <div>
@@ -168,7 +169,7 @@ const ViewAppointments = () => {
             )})}
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 };

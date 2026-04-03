@@ -1,6 +1,6 @@
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
-import UserSidebar from "../components/UserSidebar";
+import UserNavbar from "../components/UserNavbar";
 import { createBooking } from "../services/bookingService";
 import { useUserTheme } from "../context/UserThemeContext";
 
@@ -57,11 +57,12 @@ const Payment = () => {
   };
 
   return (
-    <div className="flex min-h-screen transition-all duration-500 font-inter"
+    <div className="flex flex-col min-h-screen transition-all duration-500 font-inter"
          style={{ background: isDark ? 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%)' : 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)' }}>
-      <UserSidebar />
+      
+      <UserNavbar />
 
-      <div className="flex-1 flex flex-col items-center justify-center p-6 relative overflow-hidden transition-all duration-500">
+      <main className="flex-1 flex flex-col items-center justify-center p-6 relative overflow-hidden transition-all duration-500">
         <div className={`absolute top-0 right-[-10%] w-[600px] h-[600px] blur-[150px] rounded-full pointer-events-none transition-all duration-500
           ${isDark ? 'bg-emerald-600/10' : 'bg-emerald-400/5'}`} />
         <div className={`absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] blur-[150px] rounded-full pointer-events-none transition-all duration-500
@@ -175,7 +176,7 @@ const Payment = () => {
            </div>
 
         </div>
-      </div>
+      </main>
     </div>
   );
 };

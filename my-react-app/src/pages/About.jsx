@@ -1,5 +1,5 @@
 import { useUserTheme } from "../context/UserThemeContext";
-import UserSidebar from "../components/UserSidebar";
+import UserNavbar from "../components/UserNavbar";
 
 const About = () => {
   const { userTheme } = useUserTheme();
@@ -10,14 +10,15 @@ const About = () => {
   const cardBase = isDark ? "bg-white/5 border-white/10" : "bg-white border-slate-200 shadow-2xl shadow-slate-200/20";
 
   return (
-    <div className="flex min-h-screen transition-all duration-500 font-inter"
+    <div className="flex flex-col min-h-screen transition-all duration-500 font-inter"
          style={{ background: isDark ? 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%)' : 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)' }}>
-      <UserSidebar />
+      
+      <UserNavbar />
 
-      <div className="flex-1 overflow-y-auto px-10 py-12 relative flex flex-col items-center transition-all duration-500">
+      <main className="flex-1 overflow-y-auto px-6 md:px-10 py-12 relative flex flex-col items-center transition-all duration-500">
         <div className={`absolute top-[10%] right-[10%] w-96 h-96 blur-[120px] rounded-full pointer-events-none ${isDark ? 'bg-blue-600/10' : 'bg-blue-400/5'}`} />
 
-        <div className="max-w-4xl w-full pt-4 relative z-10">
+        <div className="max-w-7xl mx-auto w-full pt-4 relative z-10">
           <div className="mb-16 text-center">
             <h1 className={`text-6xl font-black mb-4 tracking-tighter font-outfit ${textPrimary}`}>The UniBook Vision</h1>
             <p className={`text-xl font-bold tracking-tight ${textSecondary}`}>Redefining how you connect with local services.</p>
@@ -49,7 +50,7 @@ const About = () => {
              <button className="px-10 py-5 rounded-2xl bg-blue-600 text-white font-black uppercase tracking-widest text-xs shadow-2xl shadow-blue-500/20 hover:scale-105 transition-all">Explore Services →</button>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 };

@@ -1,5 +1,16 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAdminTheme } from '../context/AdminThemeContext';
+import { 
+  LayoutDashboard, 
+  Building2, 
+  Users, 
+  Calendar, 
+  ClipboardList, 
+  UserCog, 
+  User, 
+  LogOut, 
+  Globe 
+} from 'lucide-react';
 
 const Sidebar = () => {
   const navigate = useNavigate();
@@ -14,12 +25,12 @@ const Sidebar = () => {
   };
 
   const navItems = [
-    { path: '/dashboard/admin', label: 'Overview', icon: '📊' },
-    { path: '/dashboard/admin/providers', label: 'Providers', icon: '🏢' },
-    { path: '/dashboard/admin/users', label: 'Client List', icon: '👥' },
-    { path: '/dashboard/admin/bookings', label: 'All Bookings', icon: '📅' },
-    { path: '/dashboard/admin/reports', label: 'Review Logs', icon: '📈' },
-    { path: '/dashboard/admin/profile', label: 'Settings', icon: '👤' },
+    { path: '/dashboard/admin', label: 'Overview', icon: LayoutDashboard },
+    { path: '/dashboard/admin/providers', label: 'Providers', icon: Building2 },
+    { path: '/dashboard/admin/users', label: 'Client List', icon: Users },
+    { path: '/dashboard/admin/bookings', label: 'All Bookings', icon: Calendar },
+    { path: '/dashboard/admin/reports', label: 'Review Logs', icon: ClipboardList },
+    { path: '/dashboard/admin/profile', label: 'Settings', icon: UserCog },
   ];
 
   return (
@@ -33,8 +44,8 @@ const Sidebar = () => {
       <div>
         {/* Branding */}
         <div className="flex items-center gap-4 mb-14 px-2 group cursor-pointer" onClick={() => navigate('/dashboard/admin')}>
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-700 flex items-center justify-center text-2xl shadow-xl shadow-blue-500/30 group-hover:scale-110 transition-transform">
-            🌌
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-700 flex items-center justify-center shadow-xl shadow-blue-500/30 group-hover:scale-110 transition-transform">
+            <Globe className="text-white w-6 h-6" />
           </div>
           <div>
             <h2 className={`text-2xl font-black tracking-tighter leading-none transition-colors ${isDark ? 'text-white' : 'text-slate-900'}`}>UniBook</h2>
@@ -46,6 +57,7 @@ const Sidebar = () => {
         <nav className="space-y-2">
           {navItems.map((item) => {
             const isActive = location.pathname === item.path;
+            const Icon = item.icon;
             return (
               <Link 
                 key={item.path} 
@@ -59,9 +71,7 @@ const Sidebar = () => {
                   <div className="absolute left-0 top-1/4 bottom-1/4 w-1.5 bg-blue-500 rounded-r-full shadow-[0_0_15px_#3b82f6]" />
                 )}
                 
-                <span className={`text-2xl transition-all duration-500 group-hover:scale-110 ${isActive ? 'opacity-100 scale-110' : 'opacity-40 group-hover:opacity-70'}`}>
-                  {item.icon}
-                </span>
+                <Icon className={`w-5 h-5 transition-all duration-500 group-hover:scale-110 ${isActive ? 'opacity-100 scale-110' : 'opacity-40 group-hover:opacity-70'}`} />
                 <span className={`text-sm tracking-widest uppercase ${isActive ? 'translate-x-1' : ''} transition-transform`}>
                   {item.label}
                 </span>
@@ -74,8 +84,10 @@ const Sidebar = () => {
       {/* Admin Information */}
       <div className="space-y-6 pt-6 border-t border-white/5">
         <div className="px-2 py-2 flex items-center gap-4">
-           <div className={`w-14 h-14 rounded-2xl border flex items-center justify-center text-2xl shadow-inner transition-all flex-shrink-0
-              ${isDark ? 'bg-white/5 border-white/10' : 'bg-slate-50 border-slate-200 shadow-slate-200/10'}`}>👤</div>
+           <div className={`w-14 h-14 rounded-2xl border flex items-center justify-center shadow-inner transition-all flex-shrink-0
+              ${isDark ? 'bg-white/5 border-white/10' : 'bg-slate-50 border-slate-200 shadow-slate-200/10'}`}>
+             <User className={`w-6 h-6 ${isDark ? 'text-white/40' : 'text-slate-400'}`} />
+           </div>
            <div className="flex-1 overflow-hidden">
               <h4 className={`text-sm font-black truncate leading-tight transition-colors ${isDark ? 'text-white' : 'text-slate-900'}`}>System Admin</h4>
               <p className={`text-xs font-black tracking-widest uppercase mt-1 transition-colors ${isDark ? 'text-blue-400' : 'text-blue-600'}`}>Verified Access</p>
@@ -90,7 +102,7 @@ const Sidebar = () => {
               : 'bg-red-50 text-red-600 border-red-100 hover:bg-red-600 hover:text-white shadow-red-100'}`}
         >
           <span>Logout System</span>
-          <span className="text-xl transition-transform group-hover:translate-x-1">→</span>
+          <LogOut className="w-5 h-5 transition-transform group-hover:translate-x-1" />
         </button>
       </div>
     </div>

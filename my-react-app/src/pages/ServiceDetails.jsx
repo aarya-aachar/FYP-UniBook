@@ -1,6 +1,6 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import UserSidebar from "../components/UserSidebar";
+import UserNavbar from "../components/UserNavbar";
 import { useUserTheme } from "../context/UserThemeContext";
 
 const ServiceDetails = () => {
@@ -41,11 +41,12 @@ const ServiceDetails = () => {
   );
 
   return (
-    <div className="flex min-h-screen transition-all duration-500 font-inter"
+    <div className="flex flex-col min-h-screen transition-all duration-500 font-inter"
          style={{ background: isDark ? 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%)' : 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)' }}>
-      <UserSidebar />
       
-      <div className="flex-1 overflow-y-auto px-10 py-12 relative flex flex-col items-center transition-all duration-500">
+      <UserNavbar />
+
+      <main className="flex-1 overflow-y-auto px-6 md:px-10 py-12 relative flex flex-col items-center transition-all duration-500">
         {/* Background Ambient Decor */}
         <div className={`absolute top-[10%] right-[10%] w-[500px] h-[500px] blur-[150px] rounded-full pointer-events-none transition-all duration-500
           ${isDark ? 'bg-blue-600/10' : 'bg-blue-400/5'}`} />
@@ -57,7 +58,7 @@ const ServiceDetails = () => {
           .fade-in { animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         `}</style>
 
-        <div className="max-w-4xl w-full fade-in pt-4">
+        <div className="max-w-7xl mx-auto w-full fade-in pt-4">
           
           {/* Breadcrumbs */}
           <button onClick={() => navigate(-1)} 
@@ -126,7 +127,7 @@ const ServiceDetails = () => {
             </div>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 };

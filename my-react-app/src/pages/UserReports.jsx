@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import UserSidebar from "../components/UserSidebar";
+import UserNavbar from "../components/UserNavbar";
 import { getPastUserBookings, submitReview } from "../services/bookingService";
 import { useUserTheme } from "../context/UserThemeContext";
 
@@ -80,35 +80,36 @@ const UserReports = () => {
   };
 
   return (
-    <div className="flex min-h-screen transition-all duration-500 font-inter"
+    <div className="flex flex-col min-h-screen transition-all duration-500 font-inter"
          style={{ background: isDark ? 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%)' : 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)' }}>
-      <UserSidebar />
+      
+      <UserNavbar />
 
-      <style>{`
-        @keyframes toastIn { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .slide-up { animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        .fade-in { animation: fadeIn 0.3s ease-out forwards; }
-      `}</style>
-
-      {/* Toast Notification */}
-      <div className="fixed top-6 right-6 z-[200] flex flex-col gap-3 pointer-events-none">
-        {toasts.map(t => (
-          <div key={t.id} className={`flex items-center gap-3 pl-4 pr-5 py-4 rounded-2xl shadow-2xl text-white text-base font-bold pointer-events-auto
-            ${t.type === 'success' ? 'bg-gradient-to-r from-emerald-500 to-teal-500' : 'bg-red-500'}`}
-            style={{ animation: 'toastIn 0.4s cubic-bezier(0.34,1.56,0.64,1)' }}>
-            <span className="text-xl">{t.type === 'success' ? '✅' : '❌'}</span>
-            {t.message}
-          </div>
-        ))}
-      </div>
-
-      <div className="flex-1 overflow-y-auto px-10 py-12 relative transition-all duration-500">
+      <main className="flex-1 overflow-y-auto px-6 md:px-10 py-12 relative transition-all duration-500">
         <div className={`absolute top-[10%] right-[10%] w-96 h-96 blur-[120px] rounded-full pointer-events-none transition-all duration-500
           ${isDark ? 'bg-blue-600/10' : 'bg-blue-400/5'}`} />
-        
-        <div className="max-w-6xl mx-auto w-full slide-up pt-4">
+
+        <style>{`
+          @keyframes toastIn { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+          @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+          @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+          .slide-up { animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+          .fade-in { animation: fadeIn 0.3s ease-out forwards; }
+        `}</style>
+
+        {/* Toast Notification */}
+        <div className="fixed top-6 right-6 z-[200] flex flex-col gap-3 pointer-events-none">
+          {toasts.map(t => (
+            <div key={t.id} className={`flex items-center gap-3 pl-4 pr-5 py-4 rounded-2xl shadow-2xl text-white text-base font-bold pointer-events-auto
+              ${t.type === 'success' ? 'bg-gradient-to-r from-emerald-500 to-teal-500' : 'bg-red-500'}`}
+              style={{ animation: 'toastIn 0.4s cubic-bezier(0.34,1.56,0.64,1)' }}>
+              <span className="text-xl">{t.type === 'success' ? '✅' : '❌'}</span>
+              {t.message}
+            </div>
+          ))}
+        </div>
+
+        <div className="max-w-7xl mx-auto w-full slide-up pt-4">
           
           <div className={`flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 border-b pb-8 transition-colors ${isDark ? 'border-white/5' : 'border-slate-200'}`}>
             <div>
@@ -150,8 +151,8 @@ const UserReports = () => {
                   <div className="min-w-0">
                     <h3 className={`text-2xl font-black truncate transition-colors group-hover:text-blue-500 ${isDark ? 'text-white' : 'text-slate-900'}`}>{b.provider_name}</h3>
                     <div className={`flex flex-wrap items-center gap-x-6 gap-y-2 mt-2 mb-4 text-sm font-bold uppercase transition-colors ${isDark ? 'text-white/40' : 'text-slate-500'}`}>
-                      <div className="flex items-center gap-2 tracking-widest"><span className="opacity-40">📅</span> {new Date(b.booking_date).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}</div>
-                      <div className="flex items-center gap-2 tracking-widest"><span className="opacity-40">⏱️</span> {b.booking_time.substring(0,5)}</div>
+                      <div className="flex items-center gap-3 tracking-widest"><span className="opacity-40">📅</span> {new Date(b.booking_date).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}</div>
+                      <div className="flex items-center gap-3 tracking-widest"><span className="opacity-40">⏱️</span> {b.booking_time.substring(0,5)}</div>
                     </div>
 
                     {hasReviewed && (
@@ -182,7 +183,7 @@ const UserReports = () => {
             )})}
           </div>
         </div>
-      </div>
+      </main>
 
       {/* Review Modal */}
       {isModalOpen && (

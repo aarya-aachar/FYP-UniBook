@@ -1,14 +1,15 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Bell, Check, CheckCheck, Trash2, CalendarCheck, Building2, ShieldCheck, Camera, X, Clock } from 'lucide-react';
+import { Bell, Check, CheckCheck, Trash2, CalendarCheck, Building2, ShieldCheck, Camera, X, Clock, CheckCircle2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { getNotifications, getUnreadCount, markAsRead, markAllAsRead, deleteNotification } from '../services/notificationService';
 
 const ICON_MAP = {
-  booking_confirmed: { icon: CalendarCheck, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
-  booking_cancelled: { icon: X, color: 'text-red-500', bg: 'bg-red-500/10' },
+  booking_confirmed: { icon: CheckCircle2, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
+  booking_cancelled: { icon: X, color: 'text-rose-500', bg: 'bg-rose-500/10' },
   booking_reminder: { icon: Clock, color: 'text-amber-500', bg: 'bg-amber-500/10' },
-  provider_added: { icon: Building2, color: 'text-blue-500', bg: 'bg-blue-500/10' },
-  profile_updated: { icon: ShieldCheck, color: 'text-purple-500', bg: 'bg-purple-500/10' },
-  photo_updated: { icon: Camera, color: 'text-indigo-500', bg: 'bg-indigo-500/10' },
+  provider_added: { icon: Building2, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
+  profile_updated: { icon: ShieldCheck, color: 'text-teal-500', bg: 'bg-teal-500/10' },
+  photo_updated: { icon: Camera, color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
 };
 
 const timeAgo = (dateStr) => {
@@ -24,6 +25,7 @@ const NotificationBell = ({ isDark = false }) => {
   const [notifications, setNotifications] = useState([]);
   const [unread, setUnread] = useState(0);
   const panelRef = useRef(null);
+  const navigate = useNavigate();
 
   const refresh = useCallback(async () => {
     try {
@@ -95,7 +97,7 @@ const NotificationBell = ({ isDark = false }) => {
               <button 
                 onClick={handleMarkAllRead}
                 className={`flex items-center gap-1.5 text-xs font-semibold cursor-pointer transition-colors
-                  ${isDark ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'}`}
+                  ${isDark ? 'text-emerald-400 hover:text-emerald-300' : 'text-emerald-600 hover:text-emerald-700'}`}
               >
                 <CheckCheck className="w-3.5 h-3.5" />
                 Mark all read
@@ -114,45 +116,56 @@ const NotificationBell = ({ isDark = false }) => {
                 <p className={`text-xs mt-1 ${isDark ? 'text-slate-600' : 'text-slate-400'}`}>You're all caught up!</p>
               </div>
             ) : (
-              notifications.map(n => {
-                const cfg = ICON_MAP[n.type] || ICON_MAP.profile_updated;
-                const Icon = cfg.icon;
-                return (
-                  <div 
-                    key={n.id}
-                    className={`flex items-start gap-3 px-5 py-4 transition-colors border-b cursor-default group
-                      ${!n.is_read 
-                        ? (isDark ? 'bg-blue-500/5 border-slate-800/50' : 'bg-blue-50/50 border-slate-100')
-                        : (isDark ? 'border-slate-800/30 hover:bg-slate-800/30' : 'border-slate-50 hover:bg-slate-50')}`}
-                  >
-                    <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5 ${cfg.bg}`}>
-                      <Icon className={`w-4 h-4 ${cfg.color}`} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-2">
-                        <p className={`text-[13px] font-semibold leading-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>{n.title}</p>
-                        {!n.is_read && (
-                          <div className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0 mt-1.5" />
-                        )}
+              <>
+                {notifications.slice(0, 5).map(n => {
+                  const cfg = ICON_MAP[n.type] || ICON_MAP.profile_updated;
+                  const Icon = cfg.icon;
+                  return (
+                    <div 
+                      key={n.id}
+                      className={`flex items-start gap-3 px-5 py-4 transition-colors border-b cursor-default group
+                        ${!n.is_read 
+                          ? (isDark ? 'bg-emerald-500/5 border-slate-800/50' : 'bg-emerald-50/50 border-slate-100')
+                          : (isDark ? 'border-slate-800/30 hover:bg-slate-800/30' : 'border-slate-50 hover:bg-slate-50')}`}
+                    >
+                      <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5 ${cfg.bg}`}>
+                        <Icon className={`w-4 h-4 ${cfg.color}`} />
                       </div>
-                      <p className={`text-xs mt-1 leading-relaxed ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>{n.message}</p>
-                      <div className="flex items-center gap-3 mt-2">
-                        <span className={`text-[10px] font-medium ${isDark ? 'text-slate-600' : 'text-slate-400'}`}>{timeAgo(n.created_at)}</span>
-                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-2">
+                          <p className={`text-[13px] font-semibold leading-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>{n.title}</p>
                           {!n.is_read && (
-                            <button onClick={() => handleMarkRead(n.id)} className={`p-1 rounded transition-colors cursor-pointer ${isDark ? 'hover:bg-slate-700 text-slate-500' : 'hover:bg-slate-200 text-slate-400'}`} title="Mark as read">
-                              <Check className="w-3 h-3" />
-                            </button>
+                            <div className="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0 mt-1.5" />
                           )}
-                          <button onClick={() => handleDelete(n.id)} className={`p-1 rounded transition-colors cursor-pointer ${isDark ? 'hover:bg-red-500/20 text-slate-500 hover:text-red-400' : 'hover:bg-red-50 text-slate-400 hover:text-red-500'}`} title="Delete">
-                            <Trash2 className="w-3 h-3" />
-                          </button>
+                        </div>
+                        <p className={`text-xs mt-1 leading-relaxed ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>{n.message}</p>
+                        <div className="flex items-center gap-3 mt-2">
+                          <span className={`text-[10px] font-medium ${isDark ? 'text-slate-600' : 'text-slate-400'}`}>{timeAgo(n.created_at)}</span>
+                          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            {!n.is_read && (
+                              <button onClick={() => handleMarkRead(n.id)} className={`p-1 rounded transition-colors cursor-pointer ${isDark ? 'hover:bg-slate-700 text-slate-500' : 'hover:bg-slate-200 text-slate-400'}`} title="Mark as read">
+                                <Check className="w-3 h-3" />
+                              </button>
+                            )}
+                            <button onClick={() => handleDelete(n.id)} className={`p-1 rounded transition-colors cursor-pointer ${isDark ? 'hover:bg-red-500/20 text-slate-500 hover:text-red-400' : 'hover:bg-red-50 text-slate-400 hover:text-red-500'}`} title="Delete">
+                              <Trash2 className="w-3 h-3" />
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                );
-              })
+                  );
+                })}
+                
+                {/* View All Footer */}
+                <button 
+                  onClick={() => { navigate('/dashboard/admin/notifications'); setOpen(false); }}
+                  className={`w-full py-3.5 text-xs font-bold transition-all border-t flex items-center justify-center gap-2
+                    ${isDark ? 'bg-slate-900 border-slate-800 text-emerald-400 hover:bg-slate-800' : 'bg-slate-50 border-slate-100 text-emerald-600 hover:bg-emerald-50'}`}
+                >
+                  View All Notifications
+                </button>
+              </>
             )}
           </div>
         </div>

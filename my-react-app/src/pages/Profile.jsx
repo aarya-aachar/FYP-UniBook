@@ -108,12 +108,12 @@ const Profile = () => {
   const textPrimary = isDark ? "text-white" : "text-slate-900";
   const textSecondary = isDark ? "text-white/50" : "text-slate-600";
   const inputBase = isDark 
-    ? "bg-white/5 border-white/10 text-white placeholder-white/20 focus:border-blue-500" 
-    : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400 focus:border-blue-600 focus:bg-white";
+    ? "bg-white/5 border-white/10 text-white placeholder-white/20 focus:border-emerald-500" 
+    : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400 focus:border-emerald-600 focus:bg-white";
 
   return (
     <div className="flex flex-col min-h-screen transition-all duration-500 font-inter"
-         style={{ background: isDark ? 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%)' : 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)' }}>
+         style={{ background: isDark ? 'linear-gradient(135deg, #020617 0%, #064e3b 50%, #020617 100%)' : 'linear-gradient(135deg, #f8fafc 0%, #ecfdf5 100%)' }}>
       
       <UserNavbar />
 
@@ -137,7 +137,7 @@ const Profile = () => {
       <main className="flex-1 overflow-y-auto px-6 md:px-10 py-12 relative transition-all duration-500">
         {/* Ambient background glow */}
         <div className={`absolute top-[10%] right-[10%] w-96 h-96 blur-[120px] rounded-full pointer-events-none transition-all duration-500
-          ${isDark ? 'bg-blue-600/10' : 'bg-blue-400/5'}`} />
+          ${isDark ? 'bg-emerald-600/10' : 'bg-emerald-400/5'}`} />
 
         <div className="max-w-4xl mx-auto w-full fade-in pt-4">
           
@@ -159,7 +159,7 @@ const Profile = () => {
             <div className={`rounded-2xl p-6 flex flex-col md:flex-row items-center md:items-start gap-6 relative overflow-hidden transition-all duration-300 shadow-sm ${cardBase}`}>
                
                <div className="relative group cursor-pointer" onClick={() => photoInputRef.current?.click()}>
-                 <div className={`w-28 h-28 rounded-xl p-1 bg-gradient-to-br from-blue-500 to-indigo-600 shadow-lg`}>
+                 <div className={`w-28 h-28 rounded-xl p-1 bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg`}>
                    <div className={`w-full h-full rounded-lg overflow-hidden border-2 transition-colors ${isDark ? 'border-slate-800' : 'border-slate-50'}`}>
                      {profilePhoto ? (
                        <img
@@ -186,8 +186,8 @@ const Profile = () => {
                   <div className="flex flex-col md:flex-row md:items-center justify-center md:justify-start gap-3">
                      <h2 className={`text-2xl font-bold tracking-tight transition-colors ${textPrimary}`}>{form.name}</h2>
                      <span className={`px-3 py-1 rounded inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider w-max mx-auto md:mx-0 border w-max
-                       ${isDark ? 'bg-blue-500/10 border-blue-500/20 text-blue-400' : 'bg-blue-50 border-blue-100 text-blue-600'}`}>
-                         <Fingerprint className="w-3.5 h-3.5" /> Verified User
+                       ${isDark ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-emerald-50 border-emerald-100 text-emerald-600'}`}>
+                          <Fingerprint className="w-3.5 h-3.5" /> Verified User
                      </span>
                   </div>
                   
@@ -197,8 +197,8 @@ const Profile = () => {
                         <span className={`font-semibold text-xs transition-colors ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>Active Session</span>
                      </div>
                      <div className={`px-4 py-2 rounded-lg border transition-all flex items-center gap-2 ${isDark ? 'bg-slate-900/50 border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
-                        <ShieldCheck className={`w-4 h-4 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} />
-                        <span className={`font-semibold text-xs transition-colors ${isDark ? 'text-blue-400' : 'text-blue-600'}`}>Secure Account</span>
+                        <ShieldCheck className={`w-4 h-4 ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`} />
+                        <span className={`font-semibold text-xs transition-colors ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>Secure Account</span>
                      </div>
                   </div>
                </div>
@@ -209,9 +209,9 @@ const Profile = () => {
                
                {/* 1. Account Core Card */}
                <div className={`rounded-2xl p-6 space-y-6 transition-all duration-300 shadow-sm ${cardBase}`}>
-                  <div className="flex items-center justify-between border-b pb-4 transition-colors ${isDark ? 'border-slate-800' : 'border-slate-100'}">
+                  <div className={`flex items-center justify-between border-b pb-4 transition-colors ${isDark ? 'border-slate-800' : 'border-slate-100'}`}>
                      <div className="flex items-center gap-3">
-                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${isDark ? 'bg-slate-800 text-blue-400' : 'bg-blue-50 text-blue-600'}`}><User className="w-4 h-4" /></div>
+                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${isDark ? 'bg-slate-800 text-emerald-400' : 'bg-emerald-50 text-emerald-600'}`}><User className="w-4 h-4" /></div>
                         <h3 className={`text-base font-semibold transition-colors ${textPrimary}`}>Personal Details</h3>
                      </div>
                   </div>
@@ -242,9 +242,9 @@ const Profile = () => {
                          onChange={handleChange}
                          className={`w-full px-4 py-3 rounded-lg border font-medium transition-all outline-none cursor-pointer text-sm ${inputBase}`}
                        >
-                         <option className={isDark ? "bg-[#0f172a]" : "bg-white"}>Male</option>
-                         <option className={isDark ? "bg-[#0f172a]" : "bg-white"}>Female</option>
-                         <option className={isDark ? "bg-[#0f172a]" : "bg-white"}>Other</option>
+                         <option className={isDark ? "bg-[#020617]" : "bg-white"}>Male</option>
+                         <option className={isDark ? "bg-[#020617]" : "bg-white"}>Female</option>
+                         <option className={isDark ? "bg-[#020617]" : "bg-white"}>Other</option>
                        </select>
                      </div>
                   </div>
@@ -252,9 +252,9 @@ const Profile = () => {
 
                {/* 2. Security Suite Card */}
                <div className={`rounded-2xl p-6 space-y-6 transition-all duration-300 shadow-sm ${cardBase}`}>
-                  <div className="flex items-center justify-between border-b pb-4 transition-colors ${isDark ? 'border-slate-800' : 'border-slate-100'}">
+                  <div className={`flex items-center justify-between border-b pb-4 transition-colors ${isDark ? 'border-slate-800' : 'border-slate-100'}`}>
                      <div className="flex items-center gap-3">
-                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${isDark ? 'bg-slate-800 text-indigo-400' : 'bg-indigo-50 text-indigo-600'}`}><ShieldCheck className="w-4 h-4" /></div>
+                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${isDark ? 'bg-slate-800 text-teal-400' : 'bg-teal-50 text-teal-600'}`}><ShieldCheck className="w-4 h-4" /></div>
                         <h3 className={`text-base font-semibold transition-colors ${textPrimary}`}>Security Settings</h3>
                      </div>
                   </div>
@@ -286,24 +286,24 @@ const Profile = () => {
 
                {/* 3. Theme Preferences: Professional Full Width Integration */}
                <div className={`rounded-2xl p-6 transition-all duration-300 col-span-1 lg:col-span-2 shadow-sm ${cardBase}`}>
-                  <div className="flex items-center gap-3 border-b pb-4 mb-6 transition-colors ${isDark ? 'border-slate-800' : 'border-slate-100'}">
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${isDark ? 'bg-slate-800 text-purple-400' : 'bg-purple-50 text-purple-600'}`}><Sparkles className="w-4 h-4" /></div>
+                  <div className={`flex items-center gap-3 border-b pb-4 mb-6 transition-colors ${isDark ? 'border-slate-800' : 'border-slate-100'}`}>
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${isDark ? 'bg-slate-800 text-teal-400' : 'bg-teal-50 text-teal-600'}`}><Sparkles className="w-4 h-4" /></div>
                     <h3 className={`text-base font-semibold transition-colors ${textPrimary}`}>App Theme</h3>
                   </div>
                   
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <button type="button" onClick={() => setUserTheme('light')} className={`flex items-center gap-4 p-4 rounded-xl border transition-all cursor-pointer ${!isDark ? 'bg-blue-50 border-blue-200' : 'bg-transparent border-slate-700 hover:bg-slate-800'}`}>
-                         <Sun className={`w-8 h-8 ${!isDark ? 'text-blue-500' : 'text-slate-500'}`} />
+                      <button type="button" onClick={() => setUserTheme('light')} className={`flex items-center gap-4 p-4 rounded-xl border transition-all cursor-pointer ${!isDark ? 'bg-emerald-50 border-emerald-200' : 'bg-transparent border-slate-700 hover:bg-slate-800'}`}>
+                         <Sun className={`w-8 h-8 ${!isDark ? 'text-emerald-500' : 'text-slate-500'}`} />
                          <div className="text-left">
-                            <span className={`block text-sm font-semibold ${!isDark ? 'text-blue-700' : 'text-white'}`}>Light Variant</span>
-                            <p className={`text-xs font-medium transition-colors ${!isDark ? 'text-blue-600/70' : 'text-slate-400'}`}>Optimal for clarity</p>
+                            <span className={`block text-sm font-semibold ${!isDark ? 'text-emerald-700' : 'text-white'}`}>Light Variant</span>
+                            <p className={`text-xs font-medium transition-colors ${!isDark ? 'text-emerald-600/70' : 'text-slate-400'}`}>Optimal for clarity</p>
                          </div>
                       </button>
-                      <button type="button" onClick={() => setUserTheme('dark')} className={`flex items-center gap-4 p-4 rounded-xl border transition-all cursor-pointer ${isDark ? 'bg-slate-800/80 border-blue-500/50' : 'bg-transparent border-slate-200 hover:bg-slate-50'}`}>
-                         <Moon className={`w-8 h-8 ${isDark ? 'text-blue-400' : 'text-slate-400'}`} />
+                      <button type="button" onClick={() => setUserTheme('dark')} className={`flex items-center gap-4 p-4 rounded-xl border transition-all cursor-pointer ${isDark ? 'bg-slate-800/80 border-emerald-500/50' : 'bg-transparent border-slate-200 hover:bg-slate-50'}`}>
+                         <Moon className={`w-8 h-8 ${isDark ? 'text-emerald-400' : 'text-slate-400'}`} />
                          <div className="text-left">
-                            <span className={`block text-sm font-semibold ${isDark ? 'text-blue-400' : 'text-slate-700'}`}>Dark Variant</span>
-                            <p className={`text-xs font-medium transition-colors ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Optimal for low-light</p>
+                            <span className={`block text-sm font-semibold ${isDark ? 'text-emerald-400' : 'text-slate-700'}`}>Dark Variant</span>
+                            <p className={`text-xs font-medium transition-colors ${isDark ? 'text-emerald-400' : 'text-slate-500'}`}>Optimal for low-light</p>
                          </div>
                       </button>
                   </div>
@@ -320,7 +320,7 @@ const Profile = () => {
                  type="submit"
                  disabled={updating}
                  className={`px-8 py-3 rounded-lg font-bold text-sm transition-all shadow-sm w-full sm:w-auto cursor-pointer
-                   ${updating ? (isDark ? 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700' : 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200') : 'bg-blue-600 text-white hover:bg-blue-700'}`}
+                   ${updating ? (isDark ? 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700' : 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200') : 'bg-emerald-600 text-white hover:bg-emerald-700'}`}
                >
                  {updating ? 'Saving Info...' : 'Save Configuration'}
                </button>

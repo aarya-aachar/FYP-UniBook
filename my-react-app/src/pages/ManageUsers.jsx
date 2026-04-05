@@ -3,19 +3,20 @@ import Sidebar from '../components/Sidebar';
 import { useAdminTheme } from '../context/AdminThemeContext';
 import { getUsers, updateUserStatus, updateUserRole } from '../services/adminService';
 import { Search, ShieldAlert, ShieldCheck, Ban, CheckCircle, UserX, UserCheck, Filter, AlertCircle } from 'lucide-react';
+import AdminTopHeader from '../components/AdminTopHeader';
 
 const ROLE_CONFIG = {
   admin: { 
-    color: 'from-purple-500 to-indigo-600', 
-    badge: 'bg-purple-500/20 text-purple-300 border-purple-500/30',
-    badgeLight: 'bg-purple-50 text-purple-600 border-purple-100 font-bold',
+    color: 'bg-emerald-600', 
+    badge: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
+    badgeLight: 'bg-emerald-50 text-emerald-700 border-emerald-100 font-bold',
     label: 'System Admin',
     icon: ShieldCheck
   },
   user:  { 
-    color: 'from-blue-500 to-cyan-500',   
-    badge: 'bg-blue-500/15 text-blue-300 border-blue-500/20',
-    badgeLight: 'bg-blue-50 text-blue-600 border-blue-100 font-bold',
+    color: 'bg-teal-600',   
+    badge: 'bg-teal-500/15 text-teal-400 border-teal-500/20',
+    badgeLight: 'bg-teal-50 text-teal-700 border-teal-100 font-bold',
     label: 'Client',
     icon: ShieldAlert
   }
@@ -101,16 +102,16 @@ const ManageUsers = () => {
       </div>
 
       <div className="flex-1 px-8 py-10 max-w-7xl mx-auto w-full overflow-hidden">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 mb-8 border-b border-slate-200 dark:border-slate-800 pb-6" style={{ animation: 'fadeIn 0.4s ease-out' }}>
-          <div>
-            <h1 className={`text-2xl font-bold tracking-tight mb-1 transition-colors ${textPrimary}`}>User Accounts</h1>
-            <p className={`text-sm font-medium transition-colors ${textSecondary}`}>Manage system access and privileges for {users.length} registered accounts.</p>
-          </div>
-          <div className={`flex items-center gap-3 px-4 py-2 rounded-lg border transition-all ${isDark ? 'bg-slate-800/50 border-slate-700' : 'bg-white border-slate-200'}`}>
-             <div className={`w-2 h-2 rounded-full ${isDark ? 'bg-emerald-400' : 'bg-emerald-500'} animate-pulse`} />
-             <span className={`text-xs font-bold uppercase tracking-wider ${textSecondary}`}>Active Members:</span>
-             <span className={`font-bold text-sm ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>{users.filter(u => u.is_active).length}</span>
-          </div>
+        <AdminTopHeader 
+          title="User Accounts" 
+          subtitle={`Manage system access and privileges for ${users.length} registered accounts.`} 
+        />
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 mb-8 -mt-10">
+           <div className={`flex items-center gap-3 px-4 py-2 rounded-lg border transition-all ${isDark ? 'bg-slate-800/50 border-slate-700' : 'bg-white border-slate-200'}`}>
+              <div className={`w-2 h-2 rounded-full ${isDark ? 'bg-emerald-400' : 'bg-emerald-500'} animate-pulse`} />
+              <span className={`text-xs font-bold uppercase tracking-wider ${textSecondary}`}>Active Members:</span>
+              <span className={`font-bold text-sm ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>{users.filter(u => u.is_active).length}</span>
+           </div>
         </div>
 
         {/* Data Table Controls */}
@@ -125,7 +126,7 @@ const ManageUsers = () => {
               value={search}
               onChange={e => setSearch(e.target.value)}
               className={`w-full pl-12 pr-6 py-3 border rounded-xl transition-all font-medium text-sm outline-none
-                ${isDark ? 'bg-slate-800/50 border-slate-700 text-white placeholder-slate-500 focus:border-blue-500' : 'bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400 focus:border-blue-600 focus:bg-white'}`} 
+                ${isDark ? 'bg-slate-800/50 border-slate-700 text-white placeholder-slate-500 focus:border-emerald-500' : 'bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400 focus:border-emerald-600 focus:bg-white'}`} 
             />
           </div>
           <div className="relative">
@@ -136,7 +137,7 @@ const ManageUsers = () => {
               value={roleFilter} 
               onChange={e => setRoleFilter(e.target.value)}
               className={`appearance-none pl-11 pr-10 py-3 border rounded-xl transition-all cursor-pointer font-bold text-xs uppercase tracking-widest outline-none
-                ${isDark ? 'bg-slate-800/50 border-slate-700 text-slate-300 focus:border-blue-500' : 'bg-slate-50 border-slate-200 text-slate-700 focus:border-blue-600'}`}
+                ${isDark ? 'bg-slate-800/50 border-slate-700 text-slate-300 focus:border-emerald-500' : 'bg-slate-50 border-slate-200 text-slate-700 focus:border-emerald-600'}`}
             >
               <option value="All">All Roles</option>
               <option value="admin">Administrators</option>
@@ -177,7 +178,7 @@ const ManageUsers = () => {
                     <tr key={u.id} className={`border-b last:border-b-0 transition-colors ${isDark ? 'border-slate-800 hover:bg-slate-800/50' : 'border-slate-200 hover:bg-slate-50'} ${!u.is_active && (isDark ? 'opacity-50 blur-[0.5px]' : 'opacity-60 grayscale-[30%]')}`}>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center font-bold text-white bg-gradient-to-br ${cfg.color}`}>
+                          <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center font-bold text-white ${cfg.color}`}>
                             {u.name?.charAt(0).toUpperCase()}
                           </div>
                           <div className="min-w-0">

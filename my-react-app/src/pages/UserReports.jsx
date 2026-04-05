@@ -95,13 +95,13 @@ const UserReports = () => {
 
   return (
     <div className="flex flex-col min-h-screen transition-all duration-500 font-inter"
-         style={{ background: isDark ? 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%)' : 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)' }}>
+         style={{ background: isDark ? 'linear-gradient(135deg, #020617 0%, #064e3b 50%, #020617 100%)' : 'linear-gradient(135deg, #f8fafc 0%, #ecfdf5 100%)' }}>
       
       <UserNavbar />
 
       <main className="flex-1 overflow-y-auto px-6 md:px-10 py-12 relative transition-all duration-500">
         <div className={`absolute top-[10%] right-[10%] w-96 h-96 blur-[120px] rounded-full pointer-events-none transition-all duration-500
-          ${isDark ? 'bg-blue-600/10' : 'bg-blue-400/5'}`} />
+          ${isDark ? 'bg-emerald-600/10' : 'bg-emerald-400/5'}`} />
 
         <style>{`
           @keyframes toastIn { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
@@ -131,7 +131,7 @@ const UserReports = () => {
               <p className={`text-base transition-colors ${isDark ? 'text-slate-400' : 'text-slate-600'} max-w-2xl`}>See the feedback you've shared for your past bookings.</p>
             </div>
             <button onClick={() => navigate('/services')} 
-              className={`flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg text-white font-medium text-sm transition-all w-max shadow-sm cursor-pointer ${isDark ? 'bg-blue-600 hover:bg-blue-500' : 'bg-blue-600 hover:bg-blue-700'}`}>
+              className={`flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg text-white font-medium text-sm transition-all w-max shadow-sm cursor-pointer ${isDark ? 'bg-emerald-600 hover:bg-emerald-500' : 'bg-emerald-600 hover:bg-emerald-700'}`}>
               <Plus className="w-4 h-4" /> New Booking
             </button>
           </div>
@@ -156,7 +156,7 @@ const UserReports = () => {
               return (
               <div key={b.id} 
                 className={`group relative border rounded-2xl p-6 md:p-8 flex flex-col md:flex-row justify-between gap-6 transition-all duration-300 shadow-sm
-                  ${isDark ? 'bg-slate-800/80 border-slate-700 hover:border-slate-600' : 'bg-white border-slate-200 hover:border-blue-200'}`}
+                  ${isDark ? 'bg-slate-800/80 border-slate-700 hover:border-slate-600' : 'bg-white border-slate-200 hover:border-emerald-200'}`}
                 style={{ animation: `slideUp 0.4s ease-out ${i * 0.05}s forwards`, opacity: 0 }}>
                 
                 <div className="flex items-start gap-6 w-full md:w-auto">
@@ -165,7 +165,7 @@ const UserReports = () => {
                     {getCategoryIcon(b.category)}
                   </div>
                   <div className="min-w-0">
-                    <h3 className={`text-xl font-bold truncate transition-colors group-hover:text-blue-600 ${isDark ? 'text-white' : 'text-slate-900'}`}>{b.provider_name}</h3>
+                    <h3 className={`text-xl font-bold truncate transition-colors group-hover:text-emerald-600 ${isDark ? 'text-white' : 'text-slate-900'}`}>{b.provider_name}</h3>
                     <div className={`flex flex-wrap items-center gap-x-6 gap-y-2 mt-2 mb-4 text-sm transition-colors ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
                       <div className="flex items-center gap-2"><Calendar className="w-4 h-4 opacity-60" /> {new Date(b.booking_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</div>
                       <div className="flex items-center gap-2"><Clock className="w-4 h-4 opacity-60" /> {b.booking_time.substring(0,5)}</div>
@@ -190,7 +190,7 @@ const UserReports = () => {
                     className={`px-5 py-2.5 flex items-center justify-center gap-2 w-full md:w-auto rounded-lg border font-medium text-sm transition-all shadow-sm cursor-pointer
                       ${hasReviewed 
                         ? (isDark ? 'bg-slate-800 text-slate-300 border-slate-600 hover:text-white hover:bg-slate-700' : 'bg-white text-slate-600 border-slate-200 hover:text-slate-900 hover:bg-slate-50')
-                        : (isDark ? 'bg-blue-600 text-white border-blue-600 hover:bg-blue-500 hover:shadow' : 'bg-blue-600 text-white border-blue-600 hover:bg-blue-700 shadow-sm')}`}
+                        : (isDark ? 'bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-500 hover:shadow' : 'bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700 shadow-sm')}`}
                   >
                     {hasReviewed ? <><Edit className="w-4 h-4" /> Edit Review</> : <><MessageSquare className="w-4 h-4" /> Leave Review</>}
                   </button>
@@ -204,7 +204,7 @@ const UserReports = () => {
       {/* Review Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center fade-in p-4">
-          <div className="absolute inset-0 bg-[#0f172a]/70 backdrop-blur-md" onClick={closeReviewModal} />
+          <div className="absolute inset-0 bg-[#020617]/70 backdrop-blur-md" onClick={closeReviewModal} />
           
           <div className={`relative w-full max-w-lg border rounded-2xl p-8 shadow-2xl slide-up transition-all duration-300
             ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}>
@@ -220,7 +220,7 @@ const UserReports = () => {
                   value={rating}
                   onChange={(e) => setRating(Number(e.target.value))}
                   className={`w-full border rounded-xl py-3 pl-4 pr-10 outline-none transition-all font-medium appearance-none cursor-pointer text-sm
-                    ${isDark ? 'bg-slate-900 border-slate-700 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-blue-600 focus:ring-1 focus:ring-blue-600 shadow-sm'}`}
+                    ${isDark ? 'bg-slate-900 border-slate-700 text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 shadow-sm'}`}
                 >
                   <option value={0} disabled className={isDark ? "bg-slate-900 text-slate-500" : "bg-white text-slate-400"}>-- Pick a rating --</option>
                   <option value={5} className={isDark ? "bg-slate-900" : "bg-white"}>⭐⭐⭐⭐⭐ Excellent</option>
@@ -240,7 +240,7 @@ const UserReports = () => {
                 onChange={(e) => setComment(e.target.value)}
                 placeholder="Tell us what you liked or how they can improve..."
                 className={`w-full border rounded-xl p-4 outline-none transition-all font-medium resize-none h-32 text-sm
-                  ${isDark ? 'bg-slate-900 border-slate-700 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 placeholder-slate-600' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-blue-600 focus:ring-1 focus:ring-blue-600 shadow-sm placeholder-slate-400'}`}
+                  ${isDark ? 'bg-slate-900 border-slate-700 text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 placeholder-slate-600' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 shadow-sm placeholder-slate-400'}`}
               />
             </div>
 
@@ -259,7 +259,7 @@ const UserReports = () => {
                 className={`flex-1 px-4 py-2.5 rounded-lg font-medium text-sm transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer
                   ${isSubmitting || rating === 0 
                     ? (isDark ? 'bg-slate-700 text-slate-500 cursor-not-allowed border border-slate-600' : 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200') 
-                    : 'bg-blue-600 text-white hover:bg-blue-700 hover:shadow'}`}
+                    : 'bg-emerald-600 text-white hover:bg-emerald-700 hover:shadow'}`}
               >
                 {isSubmitting ? 'Posting...' : 'Submit Review'}
               </button>

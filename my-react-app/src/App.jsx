@@ -17,6 +17,7 @@ import ManageUsers from './pages/ManageUsers';
 import ManageProviders from './pages/ManageProviders';
 import ManageBookings from './pages/ManageBookings';
 import Reports from './pages/Reports';
+import AdminNotifications from './pages/AdminNotifications';
 import About from './pages/About';
 import Contact from './pages/Contact';
 import Payment from "./pages/Payment";
@@ -45,6 +46,7 @@ function App() {
             <Route path="/dashboard/admin/providers" element={<ProtectedRoute requiredRole="admin"><ManageProviders /></ProtectedRoute>} />
             <Route path="/dashboard/admin/bookings" element={<ProtectedRoute requiredRole="admin"><ManageBookings /></ProtectedRoute>} />
             <Route path="/dashboard/admin/reports" element={<ProtectedRoute requiredRole="admin"><Reports /></ProtectedRoute>} />
+            <Route path="/dashboard/admin/notifications" element={<ProtectedRoute requiredRole="admin"><AdminNotifications /></ProtectedRoute>} />
             <Route path="/dashboard/admin/profile" element={<ProtectedRoute requiredRole="admin"><AdminProfile /></ProtectedRoute>} />
             <Route path="/about" element={<ProtectedRoute><About /></ProtectedRoute>} />
             <Route path="/contact" element={<ProtectedRoute><Contact /></ProtectedRoute>} />

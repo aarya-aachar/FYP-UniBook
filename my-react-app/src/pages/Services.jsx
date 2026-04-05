@@ -9,17 +9,17 @@ const services = [
     name: "Restaurants",
     description: "Explore top-tier dining and reserve your table instantly at the city's finest spots.",
     icon: Utensils,
-    color: "text-orange-500",
-    bgHover: "hover:bg-orange-50",
-    darkBgHover: "hover:bg-orange-500/10"
+    color: "text-emerald-500",
+    bgHover: "hover:bg-emerald-50",
+    darkBgHover: "hover:bg-emerald-500/10"
   },
   {
     name: "Futsal",
     description: "Book professional courts and enjoy the competitive edge with your team.",
     icon: Activity,
-    color: "text-blue-500",
-    bgHover: "hover:bg-blue-50",
-    darkBgHover: "hover:bg-blue-500/10"
+    color: "text-emerald-500",
+    bgHover: "hover:bg-emerald-50",
+    darkBgHover: "hover:bg-emerald-500/10"
   },
   {
     name: "Hospitals",
@@ -33,9 +33,9 @@ const services = [
     name: "Salon / Spa",
     description: "Relax and pamper yourself with premium wellness and beauty services.",
     icon: Sparkles,
-    color: "text-purple-500",
-    bgHover: "hover:bg-purple-50",
-    darkBgHover: "hover:bg-purple-500/10"
+    color: "text-emerald-500",
+    bgHover: "hover:bg-emerald-50",
+    darkBgHover: "hover:bg-emerald-500/10"
   },
 ];
 
@@ -50,13 +50,13 @@ const Services = () => {
 
   return (
     <div className="flex flex-col min-h-screen transition-all duration-500 font-inter"
-         style={{ background: isDark ? 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%)' : 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)' }}>
+         style={{ backgroundColor: isDark ? '#020617' : '#f8fafc' }}>
       
       <UserNavbar />
 
       <main className="flex-1 overflow-y-auto px-6 md:px-10 py-12 relative transition-all duration-300">
-        <div className={`absolute top-0 right-0 w-full h-96 bg-gradient-to-b opacity-50 pointer-events-none transition-all duration-300
-          ${isDark ? 'from-blue-900/10 to-transparent' : 'from-blue-50 to-transparent'}`} />
+        <div className={`absolute top-0 right-0 w-full h-96 opacity-10 pointer-events-none transition-all duration-300
+          ${isDark ? 'bg-emerald-900/10' : 'bg-emerald-50/50'}`} />
 
         <div className="max-w-7xl mx-auto w-full pt-4 relative z-10">
           <div className="mb-12 border-b pb-6 transition-colors border-slate-200 dark:border-slate-800">
@@ -92,7 +92,7 @@ const Services = () => {
                   </p>
 
                   <div className={`flex items-center gap-2 text-sm font-medium transition-all duration-200
-                    ${isDark ? 'text-blue-400 group-hover:text-blue-300' : 'text-blue-600 group-hover:text-blue-700'}`}>
+                    ${isDark ? 'text-emerald-400 group-hover:text-emerald-300' : 'text-emerald-600 group-hover:text-emerald-700'}`}>
                     View Options <ArrowRight className="w-4 h-4 translate-x-0 group-hover:translate-x-1 transition-transform" />
                   </div>
                 </div>
@@ -110,7 +110,7 @@ const Services = () => {
             </div>
             <Link
               to="/dashboard"
-              className="px-6 py-2.5 rounded-lg bg-blue-600 text-white font-medium text-sm shadow-sm hover:bg-blue-700 hover:shadow shadow-blue-500/20 transition-all cursor-pointer whitespace-nowrap"
+              className="px-6 py-2.5 rounded-lg bg-emerald-600 text-white font-medium text-sm shadow-sm hover:bg-emerald-700 hover:shadow shadow-emerald-500/20 transition-all cursor-pointer whitespace-nowrap"
             >
               Back to Dashboard
             </Link>

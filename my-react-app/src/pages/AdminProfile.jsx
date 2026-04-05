@@ -4,6 +4,7 @@ import axios from "axios";
 import { useAdminTheme } from "../context/AdminThemeContext";
 import { uploadProfilePhoto } from "../services/authService";
 import { User, Sun, Moon, Crown, ShieldCheck, CheckCircle, AlertCircle, Save, Camera } from "lucide-react";
+import AdminTopHeader from "../components/AdminTopHeader";
 
 const AdminProfile = () => {
   const { adminTheme, setAdminTheme } = useAdminTheme();
@@ -101,8 +102,8 @@ const AdminProfile = () => {
   const textPrimary = isDark ? "text-white" : "text-slate-900";
   const textSecondary = isDark ? "text-slate-400" : "text-slate-500";
   const inputBase = isDark 
-    ? "bg-slate-900/50 border-slate-700 text-white placeholder-slate-600 focus:border-blue-500" 
-    : "bg-white border-slate-200 text-slate-900 placeholder-slate-400 focus:border-blue-600 focus:ring-1 focus:ring-blue-600";
+    ? "bg-slate-900/50 border-slate-700 text-white placeholder-slate-600 focus:border-emerald-500" 
+    : "bg-white border-slate-200 text-slate-900 placeholder-slate-400 focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600";
 
   return (
     <>
@@ -127,12 +128,10 @@ const AdminProfile = () => {
         <Sidebar />
         
         <div className="flex-1 px-8 py-10 max-w-7xl mx-auto w-full overflow-hidden">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 mb-8 border-b border-slate-200 dark:border-slate-800 pb-6" style={{ animation: 'fadeIn 0.4s ease-out' }}>
-            <div>
-              <h1 className={`text-2xl font-bold tracking-tight mb-1 transition-colors ${textPrimary}`}>Admin Settings</h1>
-              <p className={`text-sm font-medium transition-colors ${textSecondary}`}>Manage your administrative profile and preferences.</p>
-            </div>
-          </div>
+          <AdminTopHeader 
+            title="Admin Settings" 
+            subtitle="Manage your administrative profile and preferences." 
+          />
 
           {loading ? (
             <div className={`h-[400px] rounded-xl animate-pulse border ${isDark ? 'bg-slate-800/50 border-slate-800' : 'bg-slate-100 border-slate-200'}`} />
@@ -143,9 +142,9 @@ const AdminProfile = () => {
                    style={{ animation: 'fadeIn 0.4s ease forwards' }}>
                  <div className="relative group cursor-pointer" onClick={() => photoInputRef.current?.click()}>
                    {profilePhoto ? (
-                     <img src={`http://localhost:4001${profilePhoto}`} alt="Admin" className="w-24 h-24 rounded-full object-cover border-2 border-blue-500" />
+                     <img src={`http://localhost:4001${profilePhoto}`} alt="Admin" className="w-24 h-24 rounded-full object-cover border-2 border-emerald-500" />
                    ) : (
-                     <div className="w-24 h-24 rounded-full bg-blue-600 flex items-center justify-center text-white shrink-0">
+                     <div className="w-24 h-24 rounded-full bg-emerald-600 flex items-center justify-center text-white shrink-0">
                        <User className="w-10 h-10" />
                      </div>
                    )}
@@ -160,7 +159,7 @@ const AdminProfile = () => {
                     
                     <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
                        <div className={`px-4 py-2.5 rounded-lg border transition-all flex items-center gap-3 ${isDark ? 'bg-slate-800/50 border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
-                          <div className={`p-1.5 rounded-md ${isDark ? 'bg-blue-500/10 text-blue-400' : 'bg-blue-50 text-blue-600'}`}>
+                          <div className={`p-1.5 rounded-md ${isDark ? 'bg-emerald-500/10 text-emerald-400' : 'bg-emerald-50 text-emerald-600'}`}>
                              <Crown className="w-4 h-4" />
                           </div>
                           <div>
@@ -207,7 +206,7 @@ const AdminProfile = () => {
                       </div>
                     </div>
                     <div className="mt-8 flex-1 flex items-end">
-                      <button type="submit" disabled={updating} className={`w-full py-3 rounded-lg font-bold text-sm tracking-wide flex flex-row items-center justify-center gap-2 text-white transition-all cursor-pointer ${updating ? 'bg-slate-600 opacity-50 cursor-wait' : 'bg-blue-600 hover:bg-blue-700'}`}>
+                      <button type="submit" disabled={updating} className={`w-full py-3 rounded-lg font-bold text-sm tracking-wide flex flex-row items-center justify-center gap-2 text-white transition-all cursor-pointer ${updating ? 'bg-slate-600 opacity-50 cursor-wait' : 'bg-emerald-600 hover:bg-emerald-700'}`}>
                         <Save className="w-4 h-4" />
                         {updating ? 'Saving...' : 'Save Changes'}
                       </button>
@@ -223,13 +222,13 @@ const AdminProfile = () => {
                     <p className={`text-sm mb-4 ${textSecondary}`}>Choose a theme style for the administrative dashboard.</p>
                     
                     <div className="grid grid-cols-2 gap-4">
-                        <button onClick={() => setAdminTheme('light')} className={`flex flex-col items-center justify-center gap-3 p-5 rounded-xl border transition-all cursor-pointer ${!isDark ? 'bg-blue-50 border-blue-200 ring-1 ring-blue-500' : 'bg-slate-900 border-slate-800 hover:bg-slate-800'}`}>
-                           <Sun className={`w-6 h-6 ${!isDark ? 'text-blue-600' : 'text-slate-500'}`}/>
-                           <span className={`text-xs font-bold ${!isDark ? 'text-blue-700' : 'text-slate-400'}`}>Light Theme</span>
+                        <button onClick={() => setAdminTheme('light')} className={`flex flex-col items-center justify-center gap-3 p-5 rounded-xl border transition-all cursor-pointer ${!isDark ? 'bg-emerald-50 border-emerald-200 ring-1 ring-emerald-500' : 'bg-slate-900 border-slate-800 hover:bg-slate-800'}`}>
+                           <Sun className={`w-6 h-6 ${!isDark ? 'text-emerald-600' : 'text-slate-500'}`}/>
+                           <span className={`text-xs font-bold ${!isDark ? 'text-emerald-700' : 'text-slate-400'}`}>Light Theme</span>
                         </button>
-                        <button onClick={() => setAdminTheme('dark')} className={`flex flex-col items-center justify-center gap-3 p-5 rounded-xl border transition-all cursor-pointer ${isDark ? 'bg-slate-800 border-blue-500/50 ring-1 ring-blue-500' : 'bg-slate-50 border-slate-200 hover:bg-slate-100'}`}>
-                           <Moon className={`w-6 h-6 ${isDark ? 'text-blue-400' : 'text-slate-400'}`}/>
-                           <span className={`text-xs font-bold ${isDark ? 'text-blue-400' : 'text-slate-500'}`}>Dark Theme</span>
+                        <button onClick={() => setAdminTheme('dark')} className={`flex flex-col items-center justify-center gap-3 p-5 rounded-xl border transition-all cursor-pointer ${isDark ? 'bg-slate-800 border-emerald-500/50 ring-1 ring-emerald-500' : 'bg-slate-50 border-slate-200 hover:bg-slate-100'}`}>
+                           <Moon className={`w-6 h-6 ${isDark ? 'text-emerald-400' : 'text-slate-400'}`}/>
+                           <span className={`text-xs font-bold ${isDark ? 'text-emerald-400' : 'text-slate-500'}`}>Dark Theme</span>
                         </button>
                     </div>
                 </div>

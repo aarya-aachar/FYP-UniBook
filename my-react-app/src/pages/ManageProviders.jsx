@@ -5,6 +5,7 @@ import { getProviders, createProvider, updateProvider, deleteProvider } from '..
 import { 
   Building2, Search, Filter, CheckCircle, AlertCircle, Edit, Trash2, MapPin, SearchX, Coffee, Activity, Stethoscope, Sparkles 
 } from 'lucide-react';
+import AdminTopHeader from '../components/AdminTopHeader';
 
 const CATEGORIES = ['Restaurants', 'Futsal', 'Hospitals', 'Salon / Spa'];
 const BACKEND_URL = 'http://localhost:4001';
@@ -20,10 +21,10 @@ const getCategoryIcon = (cat) => {
 };
 
 const CAT = {
-  'Restaurants': { gradient: 'from-orange-400 to-red-500',   bg: 'bg-orange-500',   badge: 'bg-orange-500/10 text-orange-400 border border-orange-500/20', badgeLight: 'bg-orange-50 text-orange-600 border border-orange-100' },
-  'Futsal':      { gradient: 'from-blue-400 to-indigo-600',  bg: 'bg-blue-500',     badge: 'bg-blue-500/10 text-blue-400 border border-blue-500/20',     badgeLight: 'bg-blue-50 text-blue-600 border border-blue-100' },
-  'Hospitals':   { gradient: 'from-emerald-400 to-teal-600', bg: 'bg-emerald-500',  badge: 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20', badgeLight: 'bg-emerald-50 text-emerald-600 border border-emerald-100' },
-  'Salon / Spa': { gradient: 'from-purple-400 to-pink-600',  bg: 'bg-purple-500',   badge: 'bg-purple-500/10 text-purple-400 border border-purple-500/20',   badgeLight: 'bg-purple-50 text-purple-600 border border-purple-100' },
+  'Restaurants': { gradient: 'bg-emerald-500',   bg: 'bg-emerald-500',   badge: 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20', badgeLight: 'bg-emerald-50 text-emerald-600 border border-emerald-100' },
+  'Futsal':      { gradient: 'bg-teal-500',      bg: 'bg-teal-500',      badge: 'bg-teal-500/10 text-teal-400 border border-teal-500/20',     badgeLight: 'bg-teal-50 text-teal-600 border border-teal-100' },
+  'Hospitals':   { gradient: 'bg-emerald-600',   bg: 'bg-emerald-600',  badge: 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20', badgeLight: 'bg-emerald-50 text-emerald-600 border border-emerald-100' },
+  'Salon / Spa': { gradient: 'bg-teal-600',      bg: 'bg-teal-600',   badge: 'bg-teal-500/10 text-teal-400 border border-teal-500/20',   badgeLight: 'bg-teal-50 text-teal-600 border border-teal-100' },
 };
 
 const EMPTY_FORM = { name: '', address: '', description: '', category: 'Restaurants', base_price: 0, opening_time: '09:00', closing_time: '18:00' };
@@ -134,12 +135,15 @@ const ManageProviders = () => {
       </div>
 
       <div className="flex-1 px-8 py-10 max-w-7xl mx-auto w-full overflow-hidden">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 mb-8 border-b border-slate-200 dark:border-slate-800 pb-6" style={{ animation: 'fadeIn 0.4s ease-out' }}>
-          <div>
-            <h1 className={`text-2xl font-bold tracking-tight mb-1 transition-colors ${textPrimary}`}>Service Providers</h1>
-            <p className={`text-sm font-medium transition-colors ${textSecondary}`}>Manage pricing, locations, and details for {providers.length} enrolled services.</p>
-          </div>
-          <button onClick={openAdd} className="flex items-center gap-2 px-5 py-2.5 rounded-lg font-bold text-sm text-white bg-blue-600 hover:bg-blue-700 shadow-sm transition-all cursor-pointer">
+        <AdminTopHeader 
+          title="Service Providers" 
+          subtitle={`Manage pricing, locations, and details for ${providers.length} enrolled services.`} 
+        />
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end mb-8 -mt-10">
+          <button 
+            onClick={openAdd} 
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm text-white bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-500/20 active:scale-95 transition-all outline-none cursor-pointer"
+          >
             <Building2 className="w-4 h-4" />
             Add Provider
           </button>
@@ -157,7 +161,7 @@ const ManageProviders = () => {
               value={search}
               onChange={e => setSearch(e.target.value)}
               className={`w-full pl-12 pr-6 py-3 border rounded-xl transition-all font-medium text-sm outline-none
-                ${isDark ? 'bg-slate-800/50 border-slate-700 text-white placeholder-slate-500 focus:border-blue-500' : 'bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400 focus:border-blue-600 focus:bg-white'}`} 
+                ${isDark ? 'bg-slate-800/50 border-slate-700 text-white placeholder-slate-500 focus:border-emerald-500' : 'bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400 focus:border-emerald-600 focus:bg-white'}`} 
             />
           </div>
           <div className="relative md:w-64">
@@ -168,7 +172,7 @@ const ManageProviders = () => {
               value={filter} 
               onChange={e => setFilter(e.target.value)}
               className={`appearance-none w-full pl-11 pr-10 py-3 border rounded-xl transition-all cursor-pointer font-bold text-xs uppercase tracking-widest outline-none
-                ${isDark ? 'bg-slate-800/50 border-slate-700 text-slate-300 focus:border-blue-500' : 'bg-slate-50 border-slate-200 text-slate-700 focus:border-blue-600'}`}
+                ${isDark ? 'bg-slate-800/50 border-slate-700 text-slate-300 focus:border-emerald-500' : 'bg-slate-50 border-slate-200 text-slate-700 focus:border-emerald-600'}`}
             >
               <option value="All">All Categories</option>
               {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
@@ -213,7 +217,7 @@ const ManageProviders = () => {
                           {imageUrl ? (
                              <img src={imageUrl} alt={p.name} className="w-12 h-12 rounded-xl object-cover border border-white/10 shadow-sm" />
                           ) : (
-                             <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${cfg.gradient} flex items-center justify-center shadow-sm`}>
+                             <div className={`w-12 h-12 rounded-xl ${cfg.bg} flex items-center justify-center shadow-sm`}>
                                 <CatIcon className="w-6 h-6 text-white" />
                              </div>
                           )}
@@ -242,7 +246,7 @@ const ManageProviders = () => {
                         <div className="flex items-center justify-end gap-2">
                            <button 
                              onClick={() => openEdit(p)}
-                             className={`p-2 rounded-lg transition-colors cursor-pointer outline-none ${isDark ? 'text-blue-400 hover:bg-blue-500/20' : 'text-blue-600 hover:bg-blue-50'}`}
+                             className={`p-2 rounded-lg transition-colors cursor-pointer outline-none ${isDark ? 'text-emerald-400 hover:bg-emerald-500/20' : 'text-emerald-600 hover:bg-emerald-50'}`}
                              title="Edit Provider"
                            >
                               <Edit className="w-4 h-4" />
@@ -286,11 +290,11 @@ const ManageProviders = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className={`block text-xs font-bold uppercase tracking-widest mb-2 ${textSecondary}`}>Service Name</label>
-                  <input type="text" value={form.name} onChange={e => setForm({...form, name: e.target.value})} className={`w-full px-4 py-3 rounded-xl border font-semibold text-sm outline-none transition-all ${isDark ? 'bg-slate-800 border-slate-700 text-white focus:border-blue-500' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-blue-600'}`} />
+                  <input type="text" value={form.name} onChange={e => setForm({...form, name: e.target.value})} className={`w-full px-4 py-3 rounded-xl border font-semibold text-sm outline-none transition-all ${isDark ? 'bg-slate-800 border-slate-700 text-white focus:border-emerald-500' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-emerald-600'}`} />
                 </div>
                 <div>
                   <label className={`block text-xs font-bold uppercase tracking-widest mb-2 ${textSecondary}`}>Provider Image</label>
-                  <label className={`flex items-center justify-center w-full px-4 py-3 rounded-xl border font-semibold text-sm transition-all cursor-pointer ${isDark ? 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 focus-within:border-blue-500' : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100 focus-within:border-blue-600'}`}>
+                  <label className={`flex items-center justify-center w-full px-4 py-3 rounded-xl border font-semibold text-sm transition-all cursor-pointer ${isDark ? 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 focus-within:border-emerald-500' : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100 focus-within:border-emerald-600'}`}>
                     <span className="truncate">{imageFile ? imageFile.name : 'Choose File...'}</span>
                     <input type="file" ref={fileInputRef} onChange={e => setImageFile(e.target.files[0])} accept="image/*" className="hidden" />
                   </label>
@@ -299,22 +303,22 @@ const ManageProviders = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className={`block text-xs font-bold uppercase tracking-widest mb-2 ${textSecondary}`}>Category</label>
-                  <select value={form.category} onChange={e => setForm({...form, category: e.target.value})} className={`w-full px-4 py-3 rounded-xl border font-semibold text-sm outline-none transition-all ${isDark ? 'bg-slate-800 border-slate-700 text-white focus:border-blue-500' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-blue-600'}`}>
+                  <select value={form.category} onChange={e => setForm({...form, category: e.target.value})} className={`w-full px-4 py-3 rounded-xl border font-semibold text-sm outline-none transition-all ${isDark ? 'bg-slate-800 border-slate-700 text-white focus:border-emerald-500' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-emerald-600'}`}>
                     {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
                   </select>
                 </div>
                 <div>
                   <label className={`block text-xs font-bold uppercase tracking-widest mb-2 ${textSecondary}`}>Base Rate (Rs.)</label>
-                  <input type="number" value={form.base_price} onChange={e => setForm({...form, base_price: e.target.value})} className={`w-full px-4 py-3 rounded-xl border font-semibold text-sm outline-none transition-all ${isDark ? 'bg-slate-800 border-slate-700 text-white focus:border-blue-500' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-blue-600'}`} />
+                  <input type="number" value={form.base_price} onChange={e => setForm({...form, base_price: e.target.value})} className={`w-full px-4 py-3 rounded-xl border font-semibold text-sm outline-none transition-all ${isDark ? 'bg-slate-800 border-slate-700 text-white focus:border-emerald-500' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-emerald-600'}`} />
                 </div>
               </div>
               <div>
                 <label className={`block text-xs font-bold uppercase tracking-widest mb-2 ${textSecondary}`}>Full Address</label>
-                <input type="text" value={form.address} onChange={e => setForm({...form, address: e.target.value})} className={`w-full px-4 py-3 rounded-xl border font-semibold text-sm outline-none transition-all ${isDark ? 'bg-slate-800 border-slate-700 text-white focus:border-blue-500' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-blue-600'}`} />
+                <input type="text" value={form.address} onChange={e => setForm({...form, address: e.target.value})} className={`w-full px-4 py-3 rounded-xl border font-semibold text-sm outline-none transition-all ${isDark ? 'bg-slate-800 border-slate-700 text-white focus:border-emerald-500' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-emerald-600'}`} />
               </div>
               <div className="flex gap-3 pt-4">
                 <button onClick={() => setModalOpen(false)} className={`flex-1 py-3 rounded-xl font-bold text-sm transition-colors cursor-pointer ${isDark ? 'bg-slate-800 text-white/70 hover:bg-slate-700' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>Cancel</button>
-                <button onClick={handleSubmit} disabled={submitting} className={`flex-1 py-3 rounded-xl font-bold text-sm bg-blue-600 text-white hover:bg-blue-700 transition-colors shadow-sm cursor-pointer`}>{submitting ? 'Saving...' : 'Save Details'}</button>
+                <button onClick={handleSubmit} disabled={submitting} className={`flex-1 py-3 rounded-xl font-bold text-sm bg-emerald-600 text-white hover:bg-emerald-700 transition-colors shadow-sm cursor-pointer`}>{submitting ? 'Saving...' : 'Save Details'}</button>
               </div>
             </div>
           </div>

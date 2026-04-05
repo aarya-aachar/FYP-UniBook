@@ -59,7 +59,7 @@ const Payment = () => {
 
   return (
     <div className="flex flex-col min-h-screen transition-all duration-500 font-inter"
-         style={{ background: isDark ? 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%)' : 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)' }}>
+         style={{ background: isDark ? 'linear-gradient(135deg, #020617 0%, #064e3b 50%, #020617 100%)' : 'linear-gradient(135deg, #f8fafc 0%, #ecfdf5 100%)' }}>
       
       <UserNavbar />
 
@@ -140,8 +140,8 @@ const Payment = () => {
                     <div className="flex flex-col items-center justify-center slide-up py-8">
                        <div className="relative w-20 h-20 mb-8">
                           <div className={`absolute inset-0 border-4 rounded-full transition-all ${isDark ? 'border-slate-700' : 'border-slate-200'}`} />
-                          <div className="absolute inset-0 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
-                          <div className="absolute inset-0 flex items-center justify-center animate-pulse text-blue-500"><Building className="w-8 h-8" /></div>
+                          <div className="absolute inset-0 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+                          <div className="absolute inset-0 flex items-center justify-center animate-pulse text-emerald-500"><Building className="w-8 h-8" /></div>
                        </div>
                        <h3 className={`text-xl font-bold mb-2 transition-colors ${isDark ? 'text-white' : 'text-slate-900'}`}>Verifying...</h3>
                        <p className={`text-sm text-center transition-colors ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Contacting network for authorization</p>
@@ -152,14 +152,14 @@ const Payment = () => {
                     <div className="flex flex-col items-center justify-center slide-up py-4 w-full">
                        <div className={`w-20 h-20 rounded-full flex items-center justify-center mb-6 transition-all ${isDark ? 'bg-emerald-500/20 text-emerald-400' : 'bg-emerald-100 text-emerald-600'}`}>
                           <svg className="w-10 h-10 path-success" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                           </svg>
                        </div>
                         <h3 className={`text-2xl font-bold mb-2 transition-colors ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>Confirmed!</h3>
                        <p className={`text-sm text-center mb-8 leading-relaxed transition-colors ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>Your transaction has been verified. Your appointment is now completely secured.</p>
                        
                        <button onClick={handleFinish} className={`w-full py-3.5 rounded-xl font-semibold text-sm transition-all duration-200 shadow-sm cursor-pointer
-                         ${isDark ? 'bg-slate-700 text-white hover:bg-slate-600' : 'bg-slate-900 text-white hover:bg-blue-600'}`}>
+                         ${isDark ? 'bg-slate-700 text-white hover:bg-slate-600' : 'bg-emerald-600 text-white hover:bg-emerald-700'}`}>
                           View Appointments
                        </button>
                     </div>

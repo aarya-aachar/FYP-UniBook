@@ -127,13 +127,13 @@ const Booking = () => {
   if (loading) {
     return (
       <div className="flex flex-col min-h-screen transition-all duration-300 font-inter"
-           style={{ background: isDark ? 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%)' : 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)' }}>
+           style={{ background: isDark ? 'linear-gradient(135deg, #020617 0%, #064e3b 50%, #020617 100%)' : 'linear-gradient(135deg, #f8fafc 0%, #ecfdf5 100%)' }}>
         
         <UserNavbar />
 
         <div className="flex-1 flex items-center justify-center">
            <div className="animate-pulse flex flex-col items-center">
-              <div className={`w-12 h-12 border-4 border-t-transparent rounded-full animate-spin mb-4 ${isDark ? 'border-blue-500' : 'border-blue-600'}`} />
+              <div className={`w-12 h-12 border-4 border-t-transparent rounded-full animate-spin mb-4 ${isDark ? 'border-emerald-500' : 'border-emerald-600'}`} />
               <p className={`text-sm font-semibold tracking-widest uppercase ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Loading slots...</p>
            </div>
         </div>
@@ -151,13 +151,13 @@ const Booking = () => {
 
   return (
     <div className="flex flex-col min-h-screen transition-all duration-500 font-inter"
-         style={{ background: isDark ? 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%)' : 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)' }}>
+         style={{ background: isDark ? 'linear-gradient(135deg, #020617 0%, #064e3b 50%, #020617 100%)' : 'linear-gradient(135deg, #f8fafc 0%, #ecfdf5 100%)' }}>
       
       <UserNavbar />
 
       <main className="flex-1 overflow-y-auto px-6 md:px-10 py-12 relative flex flex-col transition-all duration-300">
         <div className={`absolute top-0 right-0 w-full h-96 bg-gradient-to-b opacity-50 pointer-events-none transition-all duration-300
-          ${isDark ? 'from-blue-900/10 to-transparent' : 'from-slate-100 to-transparent'}`} />
+          ${isDark ? 'from-emerald-900/10 to-transparent' : 'from-emerald-50 to-transparent'}`} />
 
         <style>{`
           @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -187,7 +187,7 @@ const Booking = () => {
                   <img src={imgSrc} alt={provider?.name} className="w-full h-full object-cover mix-blend-overlay" />
                 </div>
               )}
-              {isDark && <div className="absolute inset-0 bg-gradient-to-t from-[#0f172a] via-[#0f172a]/80 to-transparent pointer-events-none" />}
+              {isDark && <div className="absolute inset-0 bg-gradient-to-t from-[#020617] via-[#020617]/80 to-transparent pointer-events-none" />}
               
               <div className="relative z-10 flex flex-col">
                 <div className={`w-14 h-14 rounded-xl flex items-center justify-center mb-6 shadow-sm border transition-all
@@ -196,7 +196,7 @@ const Booking = () => {
                 </div>
                 <h2 className={`text-2xl font-bold mb-2 transition-colors ${isDark ? 'text-white' : 'text-slate-900'}`}>{provider?.name}</h2>
                 <span className={`inline-block px-3 py-1 rounded inline-flex items-center text-xs font-semibold uppercase tracking-wider border w-max mb-5 transition-all
-                  ${isDark ? 'border-slate-600 bg-slate-700 text-slate-300' : 'border-blue-200 bg-blue-50 text-blue-700'}`}>
+                  ${isDark ? 'border-slate-600 bg-slate-700 text-slate-300' : 'border-emerald-200 bg-emerald-50 text-emerald-700'}`}>
                    {provider?.category}
                 </span>
 
@@ -234,7 +234,7 @@ const Booking = () => {
                            key={mins}
                            type="button"
                            onClick={() => setDuration(mins)}
-                           className={`flex-1 py-2 rounded-md text-sm font-medium transition-all cursor-pointer ${duration === mins ? (isDark ? 'bg-blue-600 text-white shadow-sm' : 'bg-white text-blue-600 shadow-sm border border-slate-200/60') : (isDark ? 'text-slate-400 hover:text-slate-200' : 'text-slate-500 hover:text-slate-700')}`}
+                           className={`flex-1 py-2 rounded-md text-sm font-medium transition-all cursor-pointer ${duration === mins ? (isDark ? 'bg-emerald-600 text-white shadow-sm' : 'bg-white text-emerald-600 shadow-sm border border-slate-200/60') : (isDark ? 'text-slate-400 hover:text-slate-200' : 'text-slate-500 hover:text-slate-700')}`}
                          >
                            {mins >= 60 ? (mins % 60 === 0 ? `${mins/60}h` : `${Math.floor(mins/60)}h ${mins%60}m`) : `${mins}m`}
                          </button>
@@ -262,7 +262,7 @@ const Booking = () => {
                        value={date}
                        onChange={(e) => setDate(e.target.value)}
                        className={`w-full rounded-xl pl-12 pr-4 py-3 text-base font-medium outline-none transition-all cursor-pointer border
-                         ${isDark ? 'bg-slate-900 border-slate-700 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-blue-600 focus:bg-white focus:ring-1 focus:ring-blue-600'}`}
+                         ${isDark ? 'bg-slate-900 border-slate-700 text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-emerald-600 focus:bg-white focus:ring-1 focus:ring-emerald-600'}`}
                        required
                      />
                   </div>
@@ -271,7 +271,7 @@ const Booking = () => {
                 <div className="flex-1 mb-8">
                   <div className="flex items-center justify-between mb-4">
                      <label className={`block text-xs font-semibold uppercase tracking-wider transition-colors ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>2. Choose Availability</label>
-                     {slotsLoading && <span className="text-xs font-medium text-blue-500 animate-pulse">Syncing...</span>}
+                     {slotsLoading && <span className="text-xs font-medium text-emerald-500 animate-pulse">Syncing...</span>}
                   </div>
                   
                   {!date ? (
@@ -297,9 +297,9 @@ const Booking = () => {
                          } else if (status === 'past') {
                            btnClass += isDark ? "bg-slate-900/50 border-slate-800 text-slate-600 cursor-not-allowed" : "bg-slate-50 border-slate-100/50 text-slate-300 cursor-not-allowed";
                          } else if (isSelected) {
-                           btnClass += "bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-500/20";
+                            btnClass += "bg-emerald-600 border-emerald-600 text-white shadow-md shadow-emerald-500/20";
                          } else {
-                           btnClass += isDark ? "bg-slate-700/50 border-slate-600 text-slate-300 hover:bg-slate-700 hover:border-slate-500 cursor-pointer" : "bg-white border-slate-200 text-slate-700 hover:bg-blue-50 hover:border-blue-200 hover:text-blue-700 cursor-pointer shadow-sm";
+                            btnClass += isDark ? "bg-slate-700/50 border-slate-600 text-slate-300 hover:bg-slate-700 hover:border-slate-500 cursor-pointer" : "bg-white border-slate-200 text-slate-700 hover:bg-emerald-50 hover:border-emerald-200 hover:text-emerald-700 cursor-pointer shadow-sm";
                          }
 
                          return (
@@ -320,7 +320,7 @@ const Booking = () => {
                   {date && (
                     <div className={`flex flex-wrap items-center gap-6 mt-6 pt-6 border-t text-xs font-semibold transition-colors ${isDark ? 'border-slate-700 text-slate-400' : 'border-slate-200 text-slate-500'}`}>
                        <span className="flex items-center gap-2"><div className={`w-3 h-3 rounded border ${isDark ? 'bg-slate-700 border-slate-600' : 'bg-white border-slate-300 shadow-sm'}`} /> Available</span>
-                       <span className="flex items-center gap-2"><div className="w-3 h-3 rounded bg-blue-600 border border-blue-600 shadow-sm" /> Selected</span>
+                       <span className="flex items-center gap-2"><div className="w-3 h-3 rounded bg-emerald-600 border border-emerald-600 shadow-sm" /> Selected</span>
                        <span className="flex items-center gap-2"><div className={`w-3 h-3 rounded border flex items-center justify-center ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-slate-100 border-slate-200 shadow-sm'}`}><div className="w-1.5 h-px bg-slate-400" /></div> Unavailable</span>
                     </div>
                   )}
@@ -331,7 +331,7 @@ const Booking = () => {
                      type="submit"
                      disabled={!date || !time}
                      className={`w-full py-4 rounded-xl font-bold text-sm transition-all duration-200 flex items-center justify-center gap-2 shadow-sm
-                       ${(!date || !time) ? (isDark ? 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700' : 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200') : 'bg-blue-600 text-white hover:bg-blue-700 cursor-pointer hover:shadow-md'}`}
+                       ${(!date || !time) ? (isDark ? 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700' : 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200') : 'bg-emerald-600 text-white hover:bg-emerald-700 cursor-pointer hover:shadow-md'}`}
                    >
                      {!date || !time ? 'Pick a slot' : 'Proceed to Checkout'}
                    </button>
@@ -375,7 +375,7 @@ const Booking = () => {
                           <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center gap-3">
                               <div className={`w-10 h-10 rounded-full border flex items-center justify-center text-sm font-bold transition-all
-                                ${isDark ? 'bg-blue-500/10 border-blue-500/20 text-blue-400' : 'bg-blue-50 border-blue-100 text-blue-600'}`}>
+                                ${isDark ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-emerald-50 border-emerald-100 text-emerald-600'}`}>
                                 {r.user_name?.charAt(0) || 'U'}
                               </div>
                               <div>

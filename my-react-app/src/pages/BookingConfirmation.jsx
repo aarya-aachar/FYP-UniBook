@@ -9,7 +9,7 @@ const BookingConfirmation = () => {
 
   return (
     <div className="flex flex-col min-h-screen transition-all duration-500 font-inter"
-         style={{ background: isDark ? 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%)' : 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)' }}>
+         style={{ background: isDark ? 'linear-gradient(135deg, #020617 0%, #064e3b 50%, #020617 100%)' : 'linear-gradient(135deg, #f8fafc 0%, #ecfdf5 100%)' }}>
       
       <UserNavbar />
 
@@ -60,8 +60,8 @@ const BookingConfirmation = () => {
            <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
                <Link
                  to="/my-appointments"
-                 className={`w-full sm:w-auto px-8 py-3 rounded-xl font-semibold text-sm transition-all focus:ring-2 focus:ring-blue-500 text-center cursor-pointer shadow-sm
-                   ${isDark ? 'bg-blue-600 text-white hover:bg-blue-500' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
+                 className={`w-full sm:w-auto px-8 py-3 rounded-xl font-semibold text-sm transition-all focus:ring-2 focus:ring-emerald-500 text-center cursor-pointer shadow-sm
+                   ${isDark ? 'bg-emerald-600 text-white hover:bg-emerald-500' : 'bg-emerald-600 text-white hover:bg-emerald-700'}`}
                >
                  My Appointments
                </Link>

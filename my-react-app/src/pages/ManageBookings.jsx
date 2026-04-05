@@ -3,6 +3,7 @@ import Sidebar from '../components/Sidebar';
 import { useAdminTheme } from '../context/AdminThemeContext';
 import { getAllBookings, updateBookingStatus } from '../services/bookingService';
 import { CheckCircle, Clock, XCircle, CalendarX, Coffee, Activity, Stethoscope, Sparkles, AlertCircle, MapPin, CalendarDays, Key } from 'lucide-react';
+import AdminTopHeader from '../components/AdminTopHeader';
 
 const ManageBookings = () => {
   const { adminTheme } = useAdminTheme();
@@ -93,15 +94,15 @@ const ManageBookings = () => {
       </div>
 
       <div className="flex-1 px-8 py-10 max-w-7xl mx-auto w-full overflow-hidden">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 mb-8 border-b border-slate-200 dark:border-slate-800 pb-6" style={{ animation: 'fadeIn 0.4s ease-out' }}>
-          <div>
-            <h1 className={`text-2xl font-bold tracking-tight mb-1 transition-colors ${textPrimary}`}>Booking Overview</h1>
-            <p className={`text-sm font-medium transition-colors ${textSecondary}`}>Monitor and manage {bookings.length} operational system reservations.</p>
-          </div>
-          <div className={`flex items-center gap-3 px-4 py-2 rounded-lg border transition-all ${isDark ? 'bg-slate-800/50 border-slate-700' : 'bg-white border-slate-200'}`}>
-             <span className={`text-xs font-bold uppercase tracking-widest ${textSecondary}`}>Active Slots:</span>
-             <span className={`font-bold text-sm ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>{bookings.filter(b => b.status === 'confirmed').length}</span>
-          </div>
+        <AdminTopHeader 
+          title="Booking Overview" 
+          subtitle={`Monitor and manage ${bookings.length} operational system reservations.`} 
+        />
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 mb-8 -mt-10">
+           <div className={`flex items-center gap-3 px-4 py-2 rounded-lg border transition-all ${isDark ? 'bg-slate-800/50 border-slate-700' : 'bg-white border-slate-200'}`}>
+              <span className={`text-xs font-bold uppercase tracking-widest ${textSecondary}`}>Active Slots:</span>
+              <span className={`font-bold text-sm ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>{bookings.filter(b => b.status === 'confirmed').length}</span>
+           </div>
         </div>
 
         {loading ? (
@@ -129,7 +130,7 @@ const ManageBookings = () => {
                   
                   <div className="flex flex-col md:flex-row gap-5 lg:items-center flex-1">
                     <div className={`w-12 h-12 rounded-lg flex items-center justify-center shadow-sm flex-shrink-0
-                      ${isDark ? 'bg-slate-800 text-blue-400 border border-slate-700' : 'bg-blue-50 text-blue-600 border border-blue-100'}`}>
+                      ${isDark ? 'bg-slate-800 text-emerald-400 border border-slate-700' : 'bg-emerald-50 text-emerald-600 border border-emerald-100'}`}>
                       <CatIcon className="w-6 h-6" />
                     </div>
                     
@@ -145,7 +146,7 @@ const ManageBookings = () => {
                       
                       <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 p-3 rounded-lg ${innerCard}`}>
                         <div className="flex items-start gap-3">
-                          <MapPin className={`w-4 h-4 mt-0.5 ${isDark ? 'text-blue-400' : 'text-blue-600'}`}/>
+                          <MapPin className={`w-4 h-4 mt-0.5 ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}/>
                           <div className="flex flex-col">
                             <span className={`text-[10px] font-bold uppercase tracking-widest mb-1 ${textSecondary}`}>Provider Location</span>
                             <span className={`font-bold text-sm tracking-tight ${textPrimary}`}>{b.provider_name}</span>

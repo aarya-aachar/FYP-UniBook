@@ -15,10 +15,11 @@ import {
   ResponsiveContainer
 } from "recharts";
 import Sidebar from "../components/Sidebar";
+import AdminTopHeader from "../components/AdminTopHeader";
 import { useAdminTheme } from "../context/AdminThemeContext";
 import { getAdminMetrics } from "../services/adminService";
 
-const COLORS = ["#3B82F6", "#10B981", "#8B5CF6", "#F59E0B", "#EF4444"];
+const COLORS = ["#10B981", "#0D9488", "#14B8A6", "#059669", "#34D399"];
 
 const AdminDashboard = () => {
   const { adminTheme } = useAdminTheme();
@@ -31,7 +32,6 @@ const AdminDashboard = () => {
     recentActivity: []
   });
   const [loading, setLoading] = useState(true);
-  const [currentTime, setCurrentTime] = useState(new Date());
 
   useEffect(() => {
     document.title = "Admin Dashboard | UniBook";
@@ -48,9 +48,6 @@ const AdminDashboard = () => {
       }
     };
     fetchMetrics();
-
-    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
-    return () => clearInterval(timer);
   }, []);
 
   const formatCurrency = (val) => {
@@ -61,25 +58,12 @@ const AdminDashboard = () => {
     }).format(val).replace('NPR', 'Rs.');
   };
 
-  const formattedDate = currentTime.toLocaleDateString('en-US', {
-    weekday: 'short',
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric'
-  });
-
-  const formattedTime = currentTime.toLocaleTimeString('en-US', {
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: true
-  });
 
   const statCards = [
-    { label: 'Total Users', value: metrics.totals.users, icon: <Users className="w-5 h-5"/>, color: 'text-blue-500', bg: 'bg-blue-500/10' },
-    { label: 'Service Providers', value: metrics.totals.providers, icon: <Building2 className="w-5 h-5"/>, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
+    { label: 'Total Users', value: metrics.totals.users, icon: <Users className="w-5 h-5"/>, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
+    { label: 'Service Providers', value: metrics.totals.providers, icon: <Building2 className="w-5 h-5"/>, color: 'text-teal-500', bg: 'bg-teal-500/10' },
     { label: 'Active Bookings', value: metrics.totals.bookings, icon: <CalendarCheck className="w-5 h-5"/>, color: 'text-amber-500', bg: 'bg-amber-500/10' },
-    { label: 'Total Revenue', value: formatCurrency(metrics.totals.revenue), icon: <DollarSign className="w-5 h-5"/>, color: 'text-purple-500', bg: 'bg-purple-500/10' },
+    { label: 'Total Revenue', value: formatCurrency(metrics.totals.revenue), icon: <DollarSign className="w-5 h-5"/>, color: 'text-emerald-600', bg: 'bg-emerald-600/10' },
   ];
 
   const cardBase = isDark
@@ -101,16 +85,11 @@ const AdminDashboard = () => {
         <Sidebar />
 
         <div className="flex-1 px-8 py-10 max-w-7xl mx-auto w-full overflow-hidden">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 mb-8 border-b border-slate-200 dark:border-slate-800 pb-6" style={{ animation: 'fadeIn 0.4s ease-out' }}>
-          <div>
-            <h1 className={`text-2xl font-bold tracking-tight mb-1 transition-colors ${textPrimary}`}>Dashboard Overview</h1>
-            <p className={`text-sm font-medium transition-colors ${textSecondary}`}>Monitor system metrics and platform health.</p>
-          </div>
-          <div className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium border transition-colors ${isDark ? 'bg-slate-800/50 border-slate-700 text-slate-300' : 'bg-white border-slate-200 text-slate-600'}`}>
-            <Clock className="w-4 h-4 opacity-50" />
-            <span>{formattedDate} • {formattedTime}</span>
-          </div>
-        </div>
+        <AdminTopHeader 
+          title="Dashboard Overview" 
+          subtitle="Monitor system metrics and platform health." 
+          showTimestamp={true}
+        />
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
             {statCards.map((card, i) => (
@@ -147,8 +126,8 @@ const AdminDashboard = () => {
                   <AreaChart data={metrics.revenueTrends} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                     <defs>
                       <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.2} />
-                        <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                        <stop offset="5%" stopColor="#10B981" stopOpacity={0.2} />
+                        <stop offset="95%" stopColor="#10B981" stopOpacity={0} />
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={isDark ? '#334155' : '#e2e8f0'} />
@@ -169,7 +148,7 @@ const AdminDashboard = () => {
                     <Area
                       type="monotone"
                       dataKey="value"
-                      stroke="#3b82f6"
+                      stroke="#10B981"
                       strokeWidth={2}
                       fillOpacity={1}
                       fill="url(#colorValue)"
@@ -220,7 +199,7 @@ const AdminDashboard = () => {
             style={{ animation: 'fadeIn 0.5s ease-out 0.4s forwards', opacity: 0 }}>
             <div className="flex justify-between items-center mb-6">
               <h2 className={`text-base font-bold transition-colors ${textPrimary}`}>Recent Activity Log</h2>
-              <Link to="/dashboard/admin/bookings" className={`text-sm font-medium hover:underline ${isDark ? 'text-blue-400' : 'text-blue-600'}`}>View All</Link>
+              <Link to="/dashboard/admin/bookings" className={`text-sm font-medium hover:underline ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>View All</Link>
             </div>
 
             <div className="space-y-3">

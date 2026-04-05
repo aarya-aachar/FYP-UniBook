@@ -3,6 +3,7 @@ import Sidebar from "../components/Sidebar";
 import { useAdminTheme } from "../context/AdminThemeContext";
 import { getFullReports, getExportData } from "../services/adminService";
 import { Users, CalendarDays, Building2, DownloadCloud, Printer, FileText } from "lucide-react";
+import AdminTopHeader from "../components/AdminTopHeader";
 
 const Reports = () => {
   const { adminTheme } = useAdminTheme();
@@ -114,14 +115,14 @@ const Reports = () => {
       `}</style>
 
       <div className="flex-1 px-8 py-10 max-w-7xl mx-auto w-full overflow-hidden">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 mb-8 border-b border-slate-200 dark:border-slate-800 pb-6" style={{ animation: 'fadeIn 0.4s ease-out' }}>
-          <div>
-            <h1 className={`text-2xl font-bold tracking-tight mb-1 transition-colors ${textPrimary}`}>Data Exports</h1>
-            <p className={`text-sm font-medium transition-colors ${textSecondary}`}>Manage system archives and digital records.</p>
-          </div>
-          <div className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-all shadow-sm font-bold text-xs uppercase tracking-wider
-            ${isDark ? 'bg-slate-800/50 border-slate-700 text-slate-400' : 'bg-white border-slate-200 text-slate-500'}`}>
-            <FileText className="w-4 h-4" />
+        <AdminTopHeader 
+          title="Data Exports" 
+          subtitle="Manage system archives and digital records." 
+        />
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-6 mb-8 -mt-10">
+          <div className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl border transition-all shadow-sm font-black text-[10px] uppercase tracking-widest
+            ${isDark ? 'bg-slate-800/50 border-slate-700 text-slate-400' : 'bg-white border-slate-100 text-slate-500'}`}>
+            <FileText className="w-4 h-4 text-emerald-500" />
             PDF Engine Ready
           </div>
         </div>
@@ -161,12 +162,12 @@ const Reports = () => {
 
             <div className={`backdrop-blur-xl border rounded-[3rem] p-10 text-center transition-all duration-500
               ${cardBase}`}>
-               <div className={`w-16 h-16 mx-auto rounded-2xl flex items-center justify-center mb-6 ${isDark ? 'bg-blue-500/10 text-blue-400' : 'bg-blue-50 text-blue-600'}`}>
+               <div className={`w-16 h-16 mx-auto rounded-full flex items-center justify-center mb-6 ${isDark ? 'bg-emerald-500/10 text-emerald-400' : 'bg-emerald-50 text-emerald-600 shadow-sm'}`}>
                  <DownloadCloud className="w-8 h-8"/>
                </div>
-               <p className={`text-xl font-bold tracking-tight mb-2 ${textPrimary}`}>Archival Services Active</p>
-               <p className={`text-sm font-medium ${textSecondary}`}>
-                 Export system records smoothly as CSV or PDF documents for auditing purposes. You can open CSV with Excel.
+               <p className={`text-xl font-black tracking-tight mb-2 ${textPrimary}`}>Archival Services Active</p>
+               <p className={`text-sm font-medium leading-relaxed max-w-lg mx-auto ${textSecondary}`}>
+                 Export system records smoothly as CSV or PDF documents for auditing purposes. Comprehensive data mapping ensured.
                </p>
             </div>
           </div>
@@ -217,25 +218,25 @@ const Reports = () => {
 const ReportCard = ({ title, desc, Icon, onCSV, onPDF, isDark }) => {
   const textPrimary = isDark ? "text-white" : "text-slate-900";
   const textSecondary = isDark ? "text-white/50" : "text-slate-500";
-  const cardBase = isDark ? 'bg-slate-800/50 border border-slate-700' : 'bg-white border border-slate-200 shadow-xl shadow-slate-200/20';
+  const cardBase = isDark ? 'bg-slate-800/50 border border-slate-700' : 'bg-white border border-slate-100 shadow-xl shadow-slate-200/10';
 
   return (
-    <div className={`group relative rounded-3xl p-8 transition-all duration-300 overflow-hidden border-b-[6px] ${cardBase}
-      ${isDark ? 'hover:border-b-blue-500' : 'hover:border-b-blue-600'}`}>
+    <div className={`group relative rounded-[2.5rem] p-8 transition-all duration-300 overflow-hidden border-b-[6px] ${cardBase}
+      ${isDark ? 'hover:border-b-emerald-500' : 'hover:border-b-emerald-600'}`}>
       
-      <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-6 shadow-sm transition-all duration-300
-        ${isDark ? 'bg-slate-800 text-blue-400 group-hover:bg-blue-500/20' : 'bg-gradient-to-br from-blue-50 to-indigo-50 text-blue-600 group-hover:bg-blue-100'}`}>
+      <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-10 shadow-sm transition-all duration-300
+        ${isDark ? 'bg-slate-800 text-emerald-400 group-hover:bg-emerald-500' : 'bg-emerald-50 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white'}`}>
         <Icon className="w-6 h-6" />
       </div>
-      <h3 className={`text-xl font-black mb-2 leading-tight tracking-tight ${textPrimary}`}>{title}</h3>
-      <p className={`text-sm font-medium mb-8 flex-1 transition-colors ${textSecondary}`}>{desc}</p>
-      <div className="flex gap-3">
-         <button onClick={onCSV} className={`flex flex-1 items-center justify-center gap-2 py-3 rounded-xl font-bold text-xs uppercase tracking-widest transition-all active:scale-95 border cursor-pointer
-           ${isDark ? 'bg-slate-800 border-slate-700 text-white/80 hover:bg-slate-700' : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'}`}>
+      <h3 className={`text-2xl font-black mb-3 leading-tight tracking-tight ${textPrimary}`}>{title}</h3>
+      <p className={`text-sm font-medium mb-12 flex-1 transition-colors leading-relaxed ${textSecondary}`}>{desc}</p>
+      <div className="flex gap-4">
+         <button onClick={onCSV} className={`flex flex-1 items-center justify-center gap-2 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all active:scale-95 border cursor-pointer
+           ${isDark ? 'bg-slate-800 border-slate-700 text-white hover:bg-slate-700' : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'}`}>
            <DownloadCloud className="w-4 h-4"/>
            CSV
          </button>
-         <button onClick={onPDF} className="flex flex-1 items-center justify-center gap-2 py-3 rounded-xl bg-blue-600 text-white font-bold text-xs uppercase tracking-[0.2em] shadow-lg shadow-blue-500/20 hover:bg-blue-700 active:scale-95 transition-all cursor-pointer">
+         <button onClick={onPDF} className="flex flex-1 items-center justify-center gap-2 py-4 rounded-2xl bg-emerald-600 text-white font-black text-[10px] uppercase tracking-[0.2em] shadow-lg shadow-emerald-500/20 hover:bg-emerald-700 active:scale-95 transition-all cursor-pointer">
            <Printer className="w-4 h-4"/>
            PDF
          </button>

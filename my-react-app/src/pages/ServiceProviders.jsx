@@ -10,27 +10,27 @@ const BACKEND_URL = 'http://localhost:4001';
 const CAT_CONFIG = {
   'Restaurants': { 
     icon: Utensils, 
-    color: 'text-orange-500',
-    bgLight: 'bg-orange-50',
-    bgDark: 'bg-orange-500/10'
-  },
-  'Futsal': { 
-    icon: Activity, 
-    color: 'text-blue-500',
-    bgLight: 'bg-blue-50',
-    bgDark: 'bg-blue-500/10'
-  },
-  'Hospitals': { 
-    icon: Hospital, 
     color: 'text-emerald-500',
     bgLight: 'bg-emerald-50',
     bgDark: 'bg-emerald-500/10'
   },
+  'Futsal': { 
+    icon: Activity, 
+    color: 'text-teal-500',
+    bgLight: 'bg-teal-50',
+    bgDark: 'bg-teal-500/10'
+  },
+  'Hospitals': { 
+    icon: Hospital, 
+    color: 'text-emerald-600',
+    bgLight: 'bg-emerald-50',
+    bgDark: 'bg-emerald-600/10'
+  },
   'Salon / Spa': { 
     icon: Sparkles, 
-    color: 'text-purple-500',
-    bgLight: 'bg-purple-50',
-    bgDark: 'bg-purple-500/10'
+    color: 'text-teal-600',
+    bgLight: 'bg-teal-50',
+    bgDark: 'bg-teal-600/10'
   },
 };
 
@@ -64,13 +64,13 @@ const ServiceProviders = () => {
 
   return (
     <div className="flex flex-col min-h-screen transition-all duration-500 font-inter"
-         style={{ background: isDark ? 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%)' : 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)' }}>
+         style={{ background: isDark ? 'linear-gradient(135deg, #020617 0%, #064e3b 50%, #020617 100%)' : 'linear-gradient(135deg, #f8fafc 0%, #ecfdf5 100%)' }}>
       
       <UserNavbar />
 
       <main className="flex-1 overflow-y-auto px-6 md:px-10 py-12 relative transition-all duration-300">
         <div className={`absolute top-0 left-0 w-full h-96 bg-gradient-to-b opacity-50 pointer-events-none transition-all duration-300
-          ${isDark ? 'from-indigo-900/10 to-transparent' : 'from-indigo-50 to-transparent'}`} />
+          ${isDark ? 'from-emerald-900/10 to-transparent' : 'from-emerald-50 to-transparent'}`} />
 
         <div className="max-w-7xl mx-auto w-full pt-4 relative z-10">
           <div className="mb-10">
@@ -142,7 +142,7 @@ const ServiceProviders = () => {
                         </div>
                       </div>
 
-                    <h2 className={`text-xl font-bold mb-2 transition-colors group-hover:text-blue-500 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                    <h2 className={`text-xl font-bold mb-2 transition-colors group-hover:text-emerald-500 ${isDark ? 'text-white' : 'text-slate-900'}`}>
                       {p.name}
                     </h2>
 
@@ -170,7 +170,7 @@ const ServiceProviders = () => {
                 ${isDark ? 'bg-slate-800/50 border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
                 <Building className="w-16 h-16 mx-auto mb-4 text-slate-400 opacity-50" />
                 <h3 className={`text-lg font-semibold ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>No providers found</h3>
-                <Link to="/services" className="inline-flex items-center gap-2 mt-4 text-blue-500 font-medium text-sm hover:underline cursor-pointer">
+                <Link to="/services" className="inline-flex items-center gap-2 mt-4 text-emerald-500 font-medium text-sm hover:underline cursor-pointer">
                   Try another category <ArrowLeft className="w-4 h-4 rotate-180" />
                 </Link>
               </div>

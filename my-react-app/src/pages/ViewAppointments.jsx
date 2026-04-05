@@ -88,13 +88,13 @@ const ViewAppointments = () => {
 
   return (
     <div className="flex flex-col min-h-screen transition-all duration-500 font-inter"
-         style={{ background: isDark ? 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%)' : 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)' }}>
+         style={{ background: isDark ? 'linear-gradient(135deg, #020617 0%, #064e3b 50%, #020617 100%)' : 'linear-gradient(135deg, #f8fafc 0%, #ecfdf5 100%)' }}>
       
       <UserNavbar />
 
       <main className="flex-1 overflow-y-auto px-6 md:px-10 py-12 relative transition-all duration-500">
         <div className={`absolute top-[10%] right-[10%] w-96 h-96 blur-[120px] rounded-full pointer-events-none transition-all duration-500
-          ${isDark ? 'bg-blue-600/10' : 'bg-blue-400/5'}`} />
+          ${isDark ? 'bg-emerald-600/10' : 'bg-emerald-400/5'}`} />
 
         <style>{`
           @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
@@ -121,7 +121,7 @@ const ViewAppointments = () => {
               <p className={`text-base transition-colors ${isDark ? 'text-slate-400' : 'text-slate-600'} max-w-2xl`}>Check and manage all your active and past appointments.</p>
             </div>
             <Link to="/services" 
-              className={`flex items-center gap-2 px-6 py-2.5 rounded-lg text-white font-medium text-sm transition-all w-max shadow-sm cursor-pointer ${isDark ? 'bg-blue-600 hover:bg-blue-500' : 'bg-blue-600 hover:bg-blue-700'}`}>
+              className={`flex items-center gap-2 px-6 py-2.5 rounded-lg text-white font-medium text-sm transition-all w-max shadow-sm cursor-pointer ${isDark ? 'bg-emerald-600 hover:bg-emerald-500' : 'bg-emerald-600 hover:bg-emerald-700'}`}>
               <Plus className="w-4 h-4" /> New Booking
             </Link>
           </div>
@@ -146,7 +146,7 @@ const ViewAppointments = () => {
               return (
               <div key={a.id} 
                 className={`group relative border rounded-2xl p-6 flex flex-col md:flex-row justify-between items-center gap-6 transition-all duration-300 shadow-sm
-                  ${isDark ? 'bg-slate-800/80 border-slate-700 hover:border-slate-600' : 'bg-white border-slate-200 hover:border-blue-200'}`}
+                  ${isDark ? 'bg-slate-800/80 border-slate-700 hover:border-slate-600' : 'bg-white border-slate-200 hover:border-emerald-200'}`}
                 style={{ animation: `slideUp 0.4s ease-out ${i * 0.05}s forwards`, opacity: 0 }}>
                 
                 <div className="flex items-center gap-6 w-full md:w-auto">
@@ -156,7 +156,7 @@ const ViewAppointments = () => {
                   </div>
                   <div className="min-w-0">
                     <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-2">
-                      <h3 className={`text-lg font-bold truncate transition-colors ${isDark ? 'text-white' : 'text-slate-900 group-hover:text-blue-600'}`}>{a.provider_name}</h3>
+                      <h3 className={`text-lg font-bold truncate transition-colors ${isDark ? 'text-white' : 'text-slate-900 group-hover:text-emerald-600'}`}>{a.provider_name}</h3>
                       <span className={`text-xs font-semibold px-3 py-1 rounded inline-flex items-center gap-1.5 whitespace-nowrap tracking-wide transition-all w-max border ${cfg.badge}`}>
                         {cfg.icon} <span className="uppercase">{a.status}</span>
                       </span>

@@ -32,26 +32,23 @@ const UserNavbar = () => {
     navigate("/login");
   };
 
+  const isHomePage = location.pathname === '/';
+
   let navItems = [];
-  if (user?.role === 'admin') {
-    navItems = [
-      { path: '/dashboard/admin', label: 'Admin Dashboard', icon: Home },
-      { path: '/services', label: 'Services', icon: Search },
-    ];
-  } else if (user?.role === 'user') {
-    navItems = [
-      { path: '/dashboard', label: 'Dashboard', icon: Home },
-      { path: '/services', label: 'Find Services', icon: Search },
-      { path: '/my-appointments', label: 'My Bookings', icon: Calendar },
-      { path: '/my-reports', label: 'My Reviews', icon: Star },
-    ];
-  } else {
-    // Unauthenticated
-    navItems = [
-      { path: '/services', label: 'Services', icon: Search },
-      { path: '/about', label: 'About', icon: Info },
-      { path: '/contact', label: 'Contact', icon: Phone },
-    ];
+  if (!isHomePage) {
+    if (user?.role === 'admin') {
+      navItems = [
+        { path: '/dashboard/admin', label: 'Admin Dashboard', icon: Home },
+        { path: '/services', label: 'Services', icon: Search },
+      ];
+    } else if (user?.role === 'user') {
+      navItems = [
+        { path: '/dashboard', label: 'Dashboard', icon: Home },
+        { path: '/services', label: 'Find Services', icon: Search },
+        { path: '/my-appointments', label: 'My Bookings', icon: Calendar },
+        { path: '/my-reports', label: 'My Reviews', icon: Star },
+      ];
+    }
   }
 
   return (
@@ -62,7 +59,7 @@ const UserNavbar = () => {
           
           {/* Branding */}
           <div className="flex items-center gap-3 group cursor-pointer" onClick={() => navigate(user ? (user.role === 'admin' ? '/dashboard/admin' : '/dashboard') : '/')}>
-            <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center shadow-sm group-hover:-translate-y-[2px] transition-transform duration-200">
+            <div className="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center shadow-sm group-hover:-translate-y-[2px] transition-transform duration-200">
               <Globe className="text-white w-5 h-5" />
             </div>
             <h2 className={`text-xl font-bold tracking-tight transition-colors hidden sm:block ${isDark ? 'text-white' : 'text-slate-900'}`}>UniBook</h2>
@@ -75,11 +72,11 @@ const UserNavbar = () => {
               const Icon = item.icon;
               return (
                 <Link 
-                  key={item.path} 
+                  key={`${item.path}-${item.label}`} 
                   to={item.path} 
                   className={`flex items-center gap-2 px-4 py-2.5 rounded-lg transition-all duration-200 font-medium whitespace-nowrap cursor-pointer
                     ${isActive 
-                      ? (isDark ? 'bg-slate-800 text-blue-400' : 'bg-slate-100 text-blue-600')
+                      ? (isDark ? 'bg-slate-800 text-emerald-400' : 'bg-slate-100 text-emerald-600')
                       : (isDark ? 'text-slate-400 hover:text-white hover:bg-slate-800' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50')}`}
                 >
                   <Icon className={`w-4 h-4 ${isActive ? 'opacity-100' : 'opacity-70'}`} />
@@ -91,7 +88,7 @@ const UserNavbar = () => {
 
           {/* User Actions */}
           <div className="relative flex items-center gap-3">
-            {user ? (
+            {user && !isHomePage ? (
               <>
                 <NotificationBell isDark={isDark} />
                 <button
@@ -104,6 +101,7 @@ const UserNavbar = () => {
                     <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="User Avatar" className="w-full h-full object-cover" />
                   )}
                 </button>
+
 
                 {dropdownOpen && (
                    <>
@@ -138,10 +136,10 @@ const UserNavbar = () => {
                 )}
               </>
             ) : (
-              // Unauthenticated View
+              // Unauthenticated View OR Homepage Forced View
               <div className="flex items-center gap-2 md:gap-4">
                 <Link to="/login" className={`font-semibold transition-colors text-sm px-4 py-2 rounded-lg ${isDark ? 'text-slate-300 hover:text-white hover:bg-slate-800' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'}`}>Login</Link>
-                <Link to="/register" className="px-5 py-2.5 rounded-xl bg-blue-600 text-white font-bold hover:bg-blue-700 transition-all shadow-md text-sm hidden sm:block">Get Started</Link>
+                <Link to="/register" className="px-5 py-2.5 rounded-xl bg-emerald-600 text-white font-bold hover:bg-emerald-700 transition-all shadow-md text-sm hidden sm:block">Get Started</Link>
               </div>
             )}
           </div>
@@ -151,7 +149,7 @@ const UserNavbar = () => {
       {/* Logout Confirmation Modal */}
       {showLogoutConfirm && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in">
-          <div className={`p-8 rounded-3xl w-full max-w-sm shadow-2xl animate-in zoom-in-95 duration-200 ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-100'}`}>
+          <div className={`p-8 rounded-3xl w-full max-sm shadow-2xl animate-in zoom-in-95 duration-200 ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-100'}`}>
             <div className={`w-12 h-12 rounded-full mb-4 flex items-center justify-center ${isDark ? 'bg-rose-500/20 text-rose-400' : 'bg-rose-100 text-rose-600'}`}>
               <LogOut className="w-6 h-6" />
             </div>

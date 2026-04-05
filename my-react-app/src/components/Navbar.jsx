@@ -6,7 +6,7 @@ const Navbar = () => {
   const { user } = useContext(AuthContext);
 
   return (
-    <nav className="bg-blue-600 text-white px-6 py-4 flex justify-between items-center shadow-md">
+    <nav className="bg-emerald-600 text-white px-6 py-4 flex justify-between items-center shadow-md">
       <Link to="/" className="text-2xl font-bold">UniBook</Link>
       <div className="space-x-4 flex items-center">
         <Link to="/services" className="hover:underline">Services</Link>

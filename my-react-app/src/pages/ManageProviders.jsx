@@ -91,7 +91,17 @@ const ManageProviders = () => {
   };
 
   const handleSubmit = async () => {
-    if (!form.name.trim() || !form.address.trim()) { toast('Required fields are missing', 'error'); return; }
+    // Comprehensive required fields check
+    if (!form.name.trim() || !form.address.trim() || !form.description.trim() || !form.base_price || !form.opening_time || !form.closing_time) { 
+      toast('All text fields and pricing are required', 'error'); 
+      return; 
+    }
+    
+    if (!imageFile && modalMode === 'add') {
+      toast('Provider image is required', 'error');
+      return;
+    }
+
     try {
       setSubmitting(true);
       if (modalMode === 'edit') {
@@ -138,16 +148,15 @@ const ManageProviders = () => {
         <AdminTopHeader 
           title="Service Providers" 
           subtitle={`Manage pricing, locations, and details for ${providers.length} enrolled services.`} 
-        />
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end mb-8 -mt-10">
+        >
           <button 
             onClick={openAdd} 
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm text-white bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-500/20 active:scale-95 transition-all outline-none cursor-pointer"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm text-white bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-500/20 active:scale-95 transition-all outline-none cursor-pointer whitespace-nowrap"
           >
             <Building2 className="w-4 h-4" />
             Add Provider
           </button>
-        </div>
+        </AdminTopHeader>
 
         {/* Data Table Controls */}
         <div className={`p-4 rounded-xl border-b-0 border ${cardBase} flex flex-col md:flex-row gap-4 mb-0`} style={{ animation: 'fadeIn 0.6s ease-out' }}>
@@ -313,7 +322,16 @@ const ManageProviders = () => {
                 </div>
               </div>
               <div>
-                <label className={`block text-xs font-bold uppercase tracking-widest mb-2 ${textSecondary}`}>Full Address</label>
+                <label className={`block text-xs font-bold uppercase tracking-widest mb-2 ${textSecondary}`}>Service Description *</label>
+                <textarea 
+                  value={form.description} 
+                  onChange={e => setForm({...form, description: e.target.value})} 
+                  placeholder="Describe the service offerings..."
+                  className={`w-full px-4 py-3 rounded-xl border font-semibold text-sm outline-none transition-all h-24 resize-none ${isDark ? 'bg-slate-800 border-slate-700 text-white focus:border-emerald-500' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-emerald-600'}`}
+                />
+              </div>
+              <div>
+                <label className={`block text-xs font-bold uppercase tracking-widest mb-2 ${textSecondary}`}>Full Address *</label>
                 <input type="text" value={form.address} onChange={e => setForm({...form, address: e.target.value})} className={`w-full px-4 py-3 rounded-xl border font-semibold text-sm outline-none transition-all ${isDark ? 'bg-slate-800 border-slate-700 text-white focus:border-emerald-500' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-emerald-600'}`} />
               </div>
               <div className="flex gap-3 pt-4">

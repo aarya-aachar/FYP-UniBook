@@ -31,14 +31,56 @@ router.post('/bookings', authenticateToken, async (req, res) => {
     const user_id = req.user.id;
     const pool = getPool();
 
-    const bookingStatus = status || 'pending';
+    const bookingStatus = status || 'confirmed';
 
     const [result] = await pool.query(
       'INSERT INTO bookings (user_id, provider_id, service_id, booking_date, booking_time, status, notes) VALUES (?, ?, ?, ?, ?, ?, ?)',
       [user_id, provider_id, service_id || null, booking_date, booking_time, bookingStatus, notes || '']
     );
 
-    res.status(201).json({ message: 'Booking created successfully', id: result.insertId });
+    const bookingId = result.insertId;
+
+    // --- DEEP LOGGING & ROBUST NOTIFICATIONS ---
+    try {
+      console.log(`>>> [NOTIF] Starting notification flow for Booking #${bookingId}`);
+      
+      const [details] = await pool.query(
+        "SELECT p.name as provider_name FROM providers p WHERE p.id = ?",
+        [provider_id]
+      );
+      const providerName = details.length > 0 ? details[0].provider_name : 'Service Provider';
+      const dateStr = new Date(booking_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      const timeStr = booking_time.substring(0, 5);
+      const userName = req.user.name || 'A Customer';
+
+      console.log(`>>> [NOTIF] Context: User ID ${user_id}, Provider: ${providerName}, Time: ${timeStr}`);
+
+      // 1. Notify User (Confirmed)
+      const [userInsert] = await pool.query(
+        'INSERT INTO notifications (user_id, type, title, message, metadata, booking_id) VALUES (?, ?, ?, ?, ?, ?)',
+        [user_id, 'booking_confirmed', 'Booking Confirmed!', `Your booking for ${providerName} on ${dateStr} at ${timeStr} has been successfully confirmed.`, JSON.stringify({ booking_id: bookingId }), bookingId]
+      );
+      console.log(`>>> [NOTIF] User confirmation inserted. ID: ${userInsert.insertId}`);
+
+      // 2. Notify All Admins (New Confirmed Booking)
+      const [admins] = await pool.query("SELECT id FROM users WHERE role = 'admin'");
+      console.log(`>>> [NOTIF] Found ${admins.length} administrators to notify.`);
+      
+      for (const admin of admins) {
+        const [adminInsert] = await pool.query(
+          'INSERT INTO notifications (user_id, type, title, message, metadata, booking_id) VALUES (?, ?, ?, ?, ?, ?)',
+          [admin.id, 'new_booking', 'New Confirmed Booking', `A new confirmed booking has been made by ${userName} for ${providerName} on ${dateStr} at ${timeStr}.`, JSON.stringify({ booking_id: bookingId }), bookingId]
+        );
+        console.log(`>>> [NOTIF] Admin (ID: ${admin.id}) notification inserted. ID: ${adminInsert.insertId}`);
+      }
+      
+      console.log(`>>> [NOTIF] Notification flow completed successfully for Booking #${bookingId}`);
+    } catch (notifErr) {
+      console.error('>>> [NOTIF ERROR] Critical failure in booking notification:', notifErr.message);
+      console.error(notifErr.stack);
+    }
+
+    res.status(201).json({ message: 'Booking confirmed successfully', id: bookingId });
   } catch (error) {
     console.error('Create Booking Error:', error);
     res.status(500).json({ message: 'Internal Server Error' });

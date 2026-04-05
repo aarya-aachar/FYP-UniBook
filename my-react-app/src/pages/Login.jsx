@@ -50,8 +50,8 @@ const Login = () => {
       <div className="w-full max-w-md relative z-10 slide-up">
         {/* Branding */}
         <div className="text-center mb-10">
-          <div className="w-14 h-14 rounded-2xl bg-emerald-600 flex items-center justify-center shadow-2xl shadow-emerald-500/30 mx-auto mb-6 transform hover:rotate-3 transition-transform">
-             <Globe className="text-white w-7 h-7" />
+          <div className="flex items-center justify-center mb-6 transform hover:rotate-3 transition-transform">
+             <img src="/logo.png" alt="UniBook Logo" className="w-16 h-16 object-contain" />
           </div>
           <h1 className="text-4xl font-black text-white tracking-tight">Welcome Back</h1>
           <p className="text-slate-400 mt-2 font-medium">Log in to manage your premium appointments</p>

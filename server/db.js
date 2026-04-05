@@ -39,6 +39,7 @@ async function initDB() {
         profile_photo LONGTEXT,
         age INT,
         gender VARCHAR(20),
+        phone VARCHAR(20),
         is_active TINYINT(1) DEFAULT 1,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
@@ -137,6 +138,9 @@ async function initDB() {
       }
       if (!existingCols.includes('gender')) {
         await pool.query("ALTER TABLE users ADD COLUMN gender VARCHAR(20) AFTER age");
+      }
+      if (!existingCols.includes('phone')) {
+        await pool.query("ALTER TABLE users ADD COLUMN phone VARCHAR(20) AFTER gender");
       }
 
       // Check notifications table for metadata column

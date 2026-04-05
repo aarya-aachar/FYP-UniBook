@@ -70,8 +70,8 @@ const Sidebar = () => {
         <div>
           {/* Branding */}
           <div className="flex items-center gap-3 mb-10 px-2 cursor-pointer transition-opacity hover:opacity-80" onClick={() => navigate('/dashboard/admin')}>
-            <div className={`flex items-center justify-center ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>
-              <Hexagon className="w-8 h-8" strokeWidth={2.5} />
+            <div className="flex items-center justify-center">
+              <img src="/logo.png" alt="UniBook Logo" className="w-10 h-10 object-contain" />
             </div>
             <div>
               <h2 className={`text-xl font-bold tracking-tight leading-none ${isDark ? 'text-white' : 'text-slate-900'}`}>UniBook<span className="text-emerald-500">.</span></h2>
@@ -103,35 +103,8 @@ const Sidebar = () => {
           </nav>
         </div>
 
-        {/* Admin Information Footer */}
-        <div className={`mt-auto space-y-6 pt-6 border-t ${isDark ? 'border-slate-800' : 'border-slate-200'}`}>
-          <div className="flex flex-col items-center text-center gap-4">
-             {/* Avatar Area */}
-              <div className="relative group/avatar">
-                <Link to="/dashboard/admin/profile" className="block relative">
-                  {adminUser?.profile_photo ? (
-                    <img 
-                      src={`http://localhost:4001${adminUser.profile_photo}`} 
-                      alt="Admin" 
-                      className="w-16 h-16 rounded-2xl object-cover border-2 border-transparent group-hover/avatar:border-emerald-500 transition-all shadow-md"
-                    />
-                  ) : (
-                    <div className={`w-16 h-16 rounded-2xl flex items-center justify-center transition-all border-2 border-transparent group-hover/avatar:border-emerald-500
-                      ${isDark ? 'bg-slate-800 text-slate-400' : 'bg-slate-100 text-slate-500'}`}>
-                      <User className="w-8 h-8" />
-                    </div>
-                  )}
-                  <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-white dark:border-slate-800 rounded-full shadow-sm" />
-                </Link>
-             </div>
-
-             <div className="mt-1">
-                <h4 className={`text-sm font-bold truncate tracking-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                  {adminUser?.name || 'System Admin'}
-                </h4>
-             </div>
-          </div>
-
+        {/* Footer actions */}
+        <div className={`mt-auto pt-6 border-t ${isDark ? 'border-slate-800' : 'border-slate-200'}`}>
           <button
             onClick={() => setShowLogoutConfirm(true)}
             className={`w-full flex items-center justify-between px-4 py-3 rounded-lg text-xs font-bold uppercase tracking-wider transition-all border outline-none cursor-pointer
@@ -139,7 +112,7 @@ const Sidebar = () => {
                 ? 'bg-slate-900/50 text-slate-400 border-slate-800 hover:bg-rose-500/10 hover:text-rose-400 hover:border-rose-500/30' 
                 : 'bg-white text-slate-600 border-slate-200 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 shadow-sm'}`}
           >
-            <span>End Session</span>
+            <span>Log Out</span>
             <LogOut className="w-4 h-4" />
           </button>
         </div>

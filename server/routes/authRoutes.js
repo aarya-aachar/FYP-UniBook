@@ -25,7 +25,7 @@ const uploadProfile = multer({ storage: profileStorage, limits: { fileSize: 5 * 
 
 router.post('/auth/register', async (req, res) => {
   try {
-    const { name, email, password, role } = req.body;
+    const { name, email, password, role, age, gender, phone } = req.body;
     const pool = getPool();
 
     const [existingUsers] = await pool.query('SELECT id FROM users WHERE email = ?', [email]);
@@ -37,8 +37,8 @@ router.post('/auth/register', async (req, res) => {
     const userRole = role === 'admin' ? 'admin' : 'user';
 
     const [result] = await pool.query(
-      'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)',
-      [name, email, hashedPassword, userRole]
+      'INSERT INTO users (name, email, password, role, age, gender, phone) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [name, email, hashedPassword, userRole, age || null, gender || null, phone || null]
     );
 
     const token = jwt.sign(

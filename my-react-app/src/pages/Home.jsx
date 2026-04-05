@@ -281,12 +281,12 @@ const Home = () => {
         <div className="max-w-7xl mx-auto px-6">
            <div className="grid lg:grid-cols-12 gap-20 mb-24">
               <div className="lg:col-span-5">
-                 <div className="flex items-center gap-3 mb-10">
-                   <div className="w-12 h-12 rounded-2xl bg-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/20">
-                     <Globe className="text-white w-6 h-6" />
-                   </div>
-                   <h2 className="text-3xl font-black tracking-tight text-slate-900">UniBook<span className="text-emerald-600">.</span></h2>
-                 </div>
+                  <div className="flex items-center gap-3 mb-10">
+                    <div className="flex items-center justify-center">
+                      <img src="/logo.png" alt="UniBook Logo" className="w-12 h-12 object-contain" />
+                    </div>
+                    <h2 className="text-3xl font-black tracking-tight text-slate-900">UniBook<span className="text-emerald-600">.</span></h2>
+                  </div>
                  <p className="text-slate-500 font-medium text-lg leading-relaxed mb-10 max-w-sm">
                     The world's most intuitive ecosystem for local services. Designed for precision, built for velocity.
                  </p>

@@ -1,7 +1,7 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useUserTheme } from "../context/UserThemeContext";
-import { getProfile, logout } from "../services/authService";
+import { getProfile, logout, fetchFullProfile } from "../services/authService";
 import { 
   Home, 
   Search, 
@@ -22,8 +22,13 @@ const UserNavbar = () => {
   const location = useLocation();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
-  
-  const user = getProfile();
+  const [user, setUser] = useState(getProfile());
+
+  useEffect(() => {
+    if (user) {
+      fetchFullProfile().then(data => setUser(data)).catch(() => {});
+    }
+  }, []);
 
   const proceedLogout = () => {
     logout();
@@ -59,8 +64,8 @@ const UserNavbar = () => {
           
           {/* Branding */}
           <div className="flex items-center gap-3 group cursor-pointer" onClick={() => navigate(user ? (user.role === 'admin' ? '/dashboard/admin' : '/dashboard') : '/')}>
-            <div className="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center shadow-sm group-hover:-translate-y-[2px] transition-transform duration-200">
-              <Globe className="text-white w-5 h-5" />
+            <div className="flex items-center justify-center group-hover:-translate-y-[2px] transition-transform duration-200">
+              <img src="/logo.png" alt="UniBook Logo" className="w-10 h-10 object-contain" />
             </div>
             <h2 className={`text-xl font-bold tracking-tight transition-colors hidden sm:block ${isDark ? 'text-white' : 'text-slate-900'}`}>UniBook</h2>
           </div>
@@ -148,27 +153,30 @@ const UserNavbar = () => {
 
       {/* Logout Confirmation Modal */}
       {showLogoutConfirm && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in">
-          <div className={`p-8 rounded-3xl w-full max-sm shadow-2xl animate-in zoom-in-95 duration-200 ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-100'}`}>
-            <div className={`w-12 h-12 rounded-full mb-4 flex items-center justify-center ${isDark ? 'bg-rose-500/20 text-rose-400' : 'bg-rose-100 text-rose-600'}`}>
-              <LogOut className="w-6 h-6" />
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-slate-950/80 backdrop-blur-md animate-in fade-in transition-all">
+          <div className={`p-8 rounded-[2rem] w-full max-w-xs shadow-2xl border transition-all animate-in zoom-in duration-200
+            ${isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-100'}`}>
+            <div className={`w-14 h-14 rounded-2xl mb-6 flex items-center justify-center shadow-inner mx-auto
+              ${isDark ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' : 'bg-rose-50 text-rose-600 border border-rose-100'}`}>
+              <LogOut className="w-7 h-7" />
             </div>
-            <h3 className={`text-xl font-bold mb-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>Ready to leave?</h3>
-            <p className={`text-sm mb-8 leading-relaxed ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
-              Are you sure you want to log out of your UniBook account? You will need to log back in to manage your bookings.
+            <h3 className={`text-xl font-black mb-3 tracking-tight text-center ${isDark ? 'text-white' : 'text-slate-900'}`}>Log Out?</h3>
+            <p className={`text-sm mb-8 font-medium leading-relaxed text-center ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+              Are you sure you want to end your session?
             </p>
-            <div className="flex gap-3">
+            <div className="grid grid-cols-2 gap-4">
               <button 
                 onClick={() => setShowLogoutConfirm(false)} 
-                className={`flex-1 px-4 py-3 text-sm font-semibold rounded-xl transition-colors cursor-pointer ${isDark ? 'bg-slate-700 hover:bg-slate-600 text-white' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'}`}
+                className={`px-5 py-3 text-xs font-black uppercase tracking-widest rounded-2xl transition-all border outline-none cursor-pointer
+                  ${isDark ? 'bg-slate-800 hover:bg-slate-700 text-white border-slate-700' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200'}`}
               >
-                Cancel
+                No
               </button>
               <button 
                 onClick={proceedLogout} 
-                className="flex-1 px-4 py-3 text-sm font-semibold rounded-xl bg-rose-600 text-white hover:bg-rose-700 shadow-sm transition-all cursor-pointer"
+                className="px-5 py-3 text-xs font-black uppercase tracking-widest rounded-2xl bg-rose-600 text-white hover:bg-rose-700 shadow-lg shadow-rose-500/30 transition-all outline-none cursor-pointer"
               >
-                Log out
+                Yes
               </button>
             </div>
           </div>

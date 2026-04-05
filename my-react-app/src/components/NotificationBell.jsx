@@ -1,9 +1,12 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Bell, Check, CheckCheck, Trash2, CalendarCheck, Building2, ShieldCheck, Camera, X, Clock, CheckCircle2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { getProfile } from '../services/authService';
 import { getNotifications, getUnreadCount, markAsRead, markAllAsRead, deleteNotification } from '../services/notificationService';
 
 const ICON_MAP = {
+  booking_received: { icon: CalendarCheck, color: 'text-blue-500', bg: 'bg-blue-500/10' },
+  new_booking: { icon: Building2, color: 'text-indigo-500', bg: 'bg-indigo-500/10' },
   booking_confirmed: { icon: CheckCircle2, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
   booking_cancelled: { icon: X, color: 'text-rose-500', bg: 'bg-rose-500/10' },
   booking_reminder: { icon: Clock, color: 'text-amber-500', bg: 'bg-amber-500/10' },
@@ -67,6 +70,31 @@ const NotificationBell = ({ isDark = false }) => {
     refresh();
   };
 
+  const handleNotifClick = async (n) => {
+    const user = getProfile();
+    // Route logic
+    let target = '';
+
+    if (n.type.startsWith('booking_') || n.type === 'new_booking') {
+      target = user?.role === 'admin' ? '/dashboard/admin/bookings' : '/my-appointments';
+    } else if (n.type === 'photo_updated' || n.type === 'profile_updated') {
+      target = user?.role === 'admin' ? '/dashboard/admin/profile' : '/profile';
+    } else if (n.type === 'provider_added' && user?.role === 'admin') {
+      target = '/dashboard/admin/providers';
+    }
+
+    // Mark as read immediately if not read
+    if (!n.is_read) {
+      await markAsRead(n.id);
+      refresh();
+    }
+
+    if (target) {
+      navigate(target);
+      setOpen(false);
+    }
+  };
+
   return (
     <div className="relative" ref={panelRef}>
       {/* Bell Button */}
@@ -85,9 +113,9 @@ const NotificationBell = ({ isDark = false }) => {
         )}
       </button>
 
-      {/* Dropdown Panel */}
+      {/* Dropdown Panel - Purely Absolute and Elevated */}
       {open && (
-        <div className={`absolute right-0 top-14 w-[380px] max-h-[480px] rounded-xl shadow-2xl border overflow-hidden z-[150] animate-in fade-in slide-in-from-top-2 duration-200
+        <div className={`absolute right-0 top-12 w-[320px] sm:w-[380px] max-h-[480px] rounded-2xl shadow-2xl border overflow-hidden z-[999] animate-in fade-in duration-200
           ${isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'}`}>
           
           {/* Header */}
@@ -106,7 +134,7 @@ const NotificationBell = ({ isDark = false }) => {
           </div>
 
           {/* List */}
-          <div className="overflow-y-auto max-h-[380px]">
+          <div className="overflow-y-auto max-h-[380px] flex flex-col">
             {notifications.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 px-6">
                 <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-3 ${isDark ? 'bg-slate-800 text-slate-600' : 'bg-slate-100 text-slate-400'}`}>
@@ -117,13 +145,28 @@ const NotificationBell = ({ isDark = false }) => {
               </div>
             ) : (
               <>
+                {/* View All Header Action - Now at top */}
+                <button 
+                  onClick={() => { 
+                    const user = getProfile();
+                    const path = user?.role === 'admin' ? '/dashboard/admin/notifications' : '/notifications';
+                    navigate(path); 
+                    setOpen(false); 
+                  }}
+                  className={`w-full py-3 text-xs font-bold transition-all border-b flex items-center justify-center gap-2 sticky top-0 z-10
+                    ${isDark ? 'bg-slate-900 border-slate-800 text-emerald-400 hover:bg-slate-800' : 'bg-slate-50 border-slate-100 text-emerald-600 hover:bg-emerald-50'}`}
+                >
+                  View All Notifications
+                </button>
+
                 {notifications.slice(0, 5).map(n => {
                   const cfg = ICON_MAP[n.type] || ICON_MAP.profile_updated;
                   const Icon = cfg.icon;
                   return (
                     <div 
                       key={n.id}
-                      className={`flex items-start gap-3 px-5 py-4 transition-colors border-b cursor-default group
+                      onClick={() => handleNotifClick(n)}
+                      className={`flex items-start gap-3 px-5 py-4 transition-colors border-b cursor-pointer group
                         ${!n.is_read 
                           ? (isDark ? 'bg-emerald-500/5 border-slate-800/50' : 'bg-emerald-50/50 border-slate-100')
                           : (isDark ? 'border-slate-800/30 hover:bg-slate-800/30' : 'border-slate-50 hover:bg-slate-50')}`}
@@ -143,11 +186,19 @@ const NotificationBell = ({ isDark = false }) => {
                           <span className={`text-[10px] font-medium ${isDark ? 'text-slate-600' : 'text-slate-400'}`}>{timeAgo(n.created_at)}</span>
                           <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                             {!n.is_read && (
-                              <button onClick={() => handleMarkRead(n.id)} className={`p-1 rounded transition-colors cursor-pointer ${isDark ? 'hover:bg-slate-700 text-slate-500' : 'hover:bg-slate-200 text-slate-400'}`} title="Mark as read">
+                              <button 
+                                onClick={(e) => { e.stopPropagation(); handleMarkRead(n.id); }} 
+                                className={`p-1 rounded transition-colors cursor-pointer ${isDark ? 'hover:bg-slate-700 text-slate-500' : 'hover:bg-slate-200 text-slate-400'}`} 
+                                title="Mark as read"
+                              >
                                 <Check className="w-3 h-3" />
                               </button>
                             )}
-                            <button onClick={() => handleDelete(n.id)} className={`p-1 rounded transition-colors cursor-pointer ${isDark ? 'hover:bg-red-500/20 text-slate-500 hover:text-red-400' : 'hover:bg-red-50 text-slate-400 hover:text-red-500'}`} title="Delete">
+                            <button 
+                              onClick={(e) => { e.stopPropagation(); handleDelete(n.id); }} 
+                              className={`p-1 rounded transition-colors cursor-pointer ${isDark ? 'hover:bg-red-500/20 text-slate-500 hover:text-red-400' : 'hover:bg-red-50 text-slate-400 hover:text-red-500'}`} 
+                              title="Delete"
+                            >
                               <Trash2 className="w-3 h-3" />
                             </button>
                           </div>
@@ -156,15 +207,6 @@ const NotificationBell = ({ isDark = false }) => {
                     </div>
                   );
                 })}
-                
-                {/* View All Footer */}
-                <button 
-                  onClick={() => { navigate('/dashboard/admin/notifications'); setOpen(false); }}
-                  className={`w-full py-3.5 text-xs font-bold transition-all border-t flex items-center justify-center gap-2
-                    ${isDark ? 'bg-slate-900 border-slate-800 text-emerald-400 hover:bg-slate-800' : 'bg-slate-50 border-slate-100 text-emerald-600 hover:bg-emerald-50'}`}
-                >
-                  View All Notifications
-                </button>
               </>
             )}
           </div>

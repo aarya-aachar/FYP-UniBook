@@ -61,3 +61,22 @@ export const updateProfile = async (profileData) => {
     throw new Error(error.response?.data?.message || 'Update failed');
   }
 };
+
+export const uploadProfilePhoto = async (file) => {
+  try {
+    const formData = new FormData();
+    formData.append('photo', file);
+    const res = await api.post('/auth/profile/photo', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    // Update local storage with new photo path
+    const currentUser = getProfile();
+    if (currentUser) {
+      currentUser.profile_photo = res.data.profile_photo;
+      localStorage.setItem('user', JSON.stringify(currentUser));
+    }
+    return res.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Photo upload failed');
+  }
+};

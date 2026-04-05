@@ -1,10 +1,27 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
 const { getPool } = require('../db');
 const { authenticateToken } = require('../middleware/authMiddleware');
 
 const router = express.Router();
+
+// Multer config for profile photos
+const profileStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const dir = path.join(__dirname, 'uploads', 'profiles');
+    fs.mkdirSync(dir, { recursive: true });
+    cb(null, dir);
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    cb(null, `profile_${req.user.id}_${Date.now()}${ext}`);
+  }
+});
+const uploadProfile = multer({ storage: profileStorage, limits: { fileSize: 5 * 1024 * 1024 } });
 
 router.post('/auth/register', async (req, res) => {
   try {
@@ -78,7 +95,7 @@ router.post('/auth/login', async (req, res) => {
 router.get('/auth/me', authenticateToken, async (req, res) => {
   try {
     const pool = getPool();
-    const [users] = await pool.query('SELECT id, name, email, role, age, gender, created_at FROM users WHERE id = ?', [req.user.id]);
+    const [users] = await pool.query('SELECT id, name, email, role, profile_photo, age, gender, created_at FROM users WHERE id = ?', [req.user.id]);
     
     if (users.length === 0) {
       return res.status(404).json({ message: 'User not found' });
@@ -124,8 +141,10 @@ router.post('/auth/profile/update', authenticateToken, async (req, res) => {
     
     let updatedGender = gender !== undefined ? gender : user.gender;
 
+    let passwordChanged = false;
     if (newPassword && newPassword.trim() !== "") {
       updatedPassword = await bcrypt.hash(newPassword, 10);
+      passwordChanged = true;
     }
 
     // 4. Update database
@@ -142,6 +161,7 @@ router.post('/auth/profile/update', authenticateToken, async (req, res) => {
       sqlParams
     );
 
+    // 5. Send response first
     res.json({ 
       message: 'Profile updated successfully', 
       user: { 
@@ -153,9 +173,51 @@ router.post('/auth/profile/update', authenticateToken, async (req, res) => {
         gender: updatedGender
       } 
     });
+
+    // 6. Fire-and-forget notification on password change
+    if (passwordChanged) {
+      try {
+        await pool.query(
+          'INSERT INTO notifications (user_id, type, title, message, metadata) VALUES (?, ?, ?, ?, ?)',
+          [req.user.id, 'profile_updated', 'Password Changed', 'You recently updated your password. If this wasn\'t you, please contact support immediately.', JSON.stringify({ action: 'password_change' })]
+        );
+      } catch (notifErr) {
+        console.error('Password notification error (non-fatal):', notifErr.message);
+      }
+    }
   } catch (error) {
     console.error('>>> [SERVER ERROR] Profile Update Failed:', error.stack);
     res.status(500).json({ message: 'Internal Server Error: ' + error.message });
+  }
+});
+
+// Upload/Change profile photo
+router.post('/auth/profile/photo', authenticateToken, uploadProfile.single('photo'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: 'No file uploaded' });
+    }
+    
+    const pool = getPool();
+    const photoPath = `/uploads/profiles/${req.file.filename}`;
+    
+    await pool.query('UPDATE users SET profile_photo = ? WHERE id = ?', [photoPath, req.user.id]);
+    
+    // Send response immediately so user doesn't get 500
+    res.json({ message: 'Profile photo updated', profile_photo: photoPath });
+    
+    // Fire-and-forget notification
+    try {
+      await pool.query(
+        'INSERT INTO notifications (user_id, type, title, message, metadata) VALUES (?, ?, ?, ?, ?)',
+        [req.user.id, 'photo_updated', 'Profile Photo Updated', 'Your profile photo was updated successfully.', JSON.stringify({ photo: photoPath })]
+      );
+    } catch (notifErr) {
+      console.error('Photo notification error (non-fatal):', notifErr.message);
+    }
+  } catch (error) {
+    console.error('Photo Upload Error:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 });
 

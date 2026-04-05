@@ -128,6 +128,20 @@ router.post('/providers', authenticateToken, verifyAdmin, upload.single('image')
     );
 
     res.status(201).json({ message: 'Provider created successfully', id: result.insertId, imageUrl });
+
+    // Notify other admins (fire-and-forget)
+    try {
+      const [admins] = await pool.query("SELECT id FROM users WHERE role = 'admin' AND id != ?", [req.user.id]);
+      const creatorName = req.user.name || 'An admin';
+      for (const admin of admins) {
+        await pool.query(
+          'INSERT INTO notifications (user_id, type, title, message, metadata) VALUES (?, ?, ?, ?, ?)',
+          [admin.id, 'provider_added', 'New Provider Added', `${creatorName} added a new provider: "${name.trim()}".`, JSON.stringify({ provider_id: result.insertId })]
+        );
+      }
+    } catch (notifErr) {
+      console.error('Provider notification error (non-fatal):', notifErr.message);
+    }
   } catch (error) {
     if (error.code === 'ER_DUP_ENTRY') {
       return res.status(400).json({ message: 'A provider with this name already exists' });

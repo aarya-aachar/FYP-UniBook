@@ -13,6 +13,7 @@ import {
   Info,
   Phone
 } from "lucide-react";
+import NotificationBell from './NotificationBell';
 
 const UserNavbar = () => {
   const { userTheme } = useUserTheme();
@@ -89,14 +90,19 @@ const UserNavbar = () => {
           </div>
 
           {/* User Actions */}
-          <div className="relative flex items-center gap-4">
+          <div className="relative flex items-center gap-3">
             {user ? (
               <>
+                <NotificationBell isDark={isDark} />
                 <button
                   onClick={() => setDropdownOpen(!dropdownOpen)}
                   className={`w-10 h-10 rounded-full border-2 overflow-hidden cursor-pointer transition-all ${isDark ? 'border-slate-700 hover:border-slate-500' : 'border-slate-200 hover:border-slate-300'}`}
                 >
-                  <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="User Avatar" className="w-full h-full object-cover" />
+                  {user.profile_photo ? (
+                    <img src={`http://localhost:4001${user.profile_photo}`} alt="User Avatar" className="w-full h-full object-cover" />
+                  ) : (
+                    <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="User Avatar" className="w-full h-full object-cover" />
+                  )}
                 </button>
 
                 {dropdownOpen && (

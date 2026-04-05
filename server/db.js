@@ -102,11 +102,26 @@ async function initDB() {
       )
     `;
 
+    const createNotifications = `
+      CREATE TABLE IF NOT EXISTS notifications (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        type VARCHAR(50) NOT NULL,
+        title VARCHAR(255) NOT NULL,
+        message TEXT NOT NULL,
+        is_read TINYINT(1) DEFAULT 0,
+        metadata JSON,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+      )
+    `;
+
     await pool.query(createUsers);
     await pool.query(createProviders);
     await pool.query(createServices);
     await pool.query(createBookings);
     await pool.query(createReviews);
+    await pool.query(createNotifications);
 
     // One-time column check for existing systems
     try {
@@ -122,6 +137,13 @@ async function initDB() {
       }
       if (!existingCols.includes('gender')) {
         await pool.query("ALTER TABLE users ADD COLUMN gender VARCHAR(20) AFTER age");
+      }
+
+      // Check notifications table for metadata column
+      const notifCols = await pool.query("SHOW COLUMNS FROM notifications");
+      const existingNotifCols = notifCols[0].map(c => c.Field);
+      if (!existingNotifCols.includes('metadata')) {
+        await pool.query("ALTER TABLE notifications ADD COLUMN metadata JSON AFTER is_read");
       }
     } catch (err) {
       console.log('Migration check skipped or columns already handled:', err.message);
@@ -140,6 +162,18 @@ async function initDB() {
         ('Gourmet Restaurant', 'Restaurants', 'Fine dining with international cuisine.', '/images/restaurant1.jpg', '789 Food Court'),
         ('Relax Spa', 'Salon / Spa', 'Premium wellness and beauty solutions.', '/images/salon1.jpg', '101 Beauty Blvd')
       `);
+    }
+
+    // Seed second admin if not exists
+    const bcrypt = require('bcrypt');
+    const [existingAdmin2] = await pool.query("SELECT id FROM users WHERE email = 'admin2@unibook.com'");
+    if (existingAdmin2.length === 0) {
+      const hashedPw = await bcrypt.hash('Admin@456', 10);
+      await pool.query(
+        "INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)",
+        ['Admin Two', 'admin2@unibook.com', hashedPw, 'admin']
+      );
+      console.log('Seeded second admin: admin2@unibook.com / Admin@456');
     }
 
   } catch (error) {

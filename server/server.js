@@ -8,6 +8,7 @@ const providerRoutes = require('./routes/providerRoutes');
 const bookingRoutes = require('./routes/bookingRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const reviewRoutes = require('./routes/reviewRoutes');
+const notificationRoutes = require('./routes/notificationRoutes');
 
 const app = express();
 
@@ -49,6 +50,10 @@ async function bootstrap() {
     app.use('/api', bookingRoutes);
     app.use('/api', adminRoutes);
     app.use('/api/reviews', reviewRoutes);
+    app.use('/api/notifications', notificationRoutes);
+
+    // Serve profile photo uploads
+    app.use('/uploads/profiles', express.static(path.join(__dirname, 'routes', 'uploads', 'profiles')));
 
     // Global Error Handler
     app.use((err, req, res, next) => {
@@ -66,6 +71,44 @@ async function bootstrap() {
       setInterval(() => {
         console.log(`>>> [SERVER] Heartbeat: Active at ${new Date().toLocaleTimeString()}`);
       }, 30000);
+
+      // Booking reminder: check every 5 minutes for bookings within the next 60 minutes
+      setInterval(async () => {
+        try {
+          const { getPool } = require('./db');
+          const pool = getPool();
+          
+          // Find confirmed bookings happening within the next 60 minutes that haven't been reminded
+          const [upcoming] = await pool.query(`
+            SELECT b.id, b.user_id, b.booking_date, b.booking_time, p.name as provider_name
+            FROM bookings b
+            JOIN providers p ON b.provider_id = p.id
+            WHERE b.status = 'confirmed'
+              AND b.booking_date = CURDATE()
+              AND b.booking_time BETWEEN CURTIME() AND ADDTIME(CURTIME(), '01:00:00')
+              AND b.id NOT IN (
+                SELECT JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.booking_id')) 
+                FROM notifications 
+                WHERE type = 'booking_reminder'
+                AND JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.booking_id')) IS NOT NULL
+              )
+          `);
+          
+          for (const booking of upcoming) {
+            const timeStr = booking.booking_time.substring(0, 5);
+            await pool.query(
+              'INSERT INTO notifications (user_id, type, title, message, metadata) VALUES (?, ?, ?, ?, ?)',
+              [booking.user_id, 'booking_reminder', 'Upcoming Booking Reminder', `Reminder: Your booking at ${booking.provider_name} is in less than 1 hour (${timeStr}).`, JSON.stringify({ booking_id: String(booking.id) })]
+            );
+          }
+          
+          if (upcoming.length > 0) {
+            console.log(`>>> [REMINDER] Sent ${upcoming.length} booking reminder(s)`);
+          }
+        } catch (err) {
+          // Silent fail for reminder — non-critical
+        }
+      }, 5 * 60 * 1000); // every 5 minutes
     });
   } catch (error) {
     console.error('❌ FATAL SERVER CRASH DURING BOOTSTRAP:');

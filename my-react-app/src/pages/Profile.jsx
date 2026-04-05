@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import UserNavbar from "../components/UserNavbar";
-import { fetchFullProfile, updateProfile } from "../services/authService";
+import { fetchFullProfile, updateProfile, uploadProfilePhoto } from "../services/authService";
 import { useUserTheme } from "../context/UserThemeContext";
-import { CheckCircle, XCircle, ShieldCheck, User, Sparkles, Sun, Moon, Activity, Fingerprint } from "lucide-react";
+import { CheckCircle, XCircle, ShieldCheck, User, Sparkles, Sun, Moon, Activity, Fingerprint, Camera } from "lucide-react";
 
 const Profile = () => {
   const { userTheme, toggleUserTheme, setUserTheme } = useUserTheme();
@@ -10,6 +10,8 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const [toasts, setToasts] = useState([]);
+  const [profilePhoto, setProfilePhoto] = useState(null);
+  const photoInputRef = useRef(null);
   
   const [form, setForm] = useState({
     name: "",
@@ -43,6 +45,7 @@ const Profile = () => {
         age: data.age || "",
         gender: data.gender || "Male",
       }));
+      setProfilePhoto(data.profile_photo || null);
     } catch (err) {
       toast("Failed to load official profile data", "error");
     } finally {
@@ -52,6 +55,18 @@ const Profile = () => {
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handlePhotoUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+      const res = await uploadProfilePhoto(file);
+      setProfilePhoto(res.profile_photo);
+      toast("Profile photo updated!");
+    } catch (err) {
+      toast(err.message || "Photo upload failed", "error");
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -143,16 +158,28 @@ const Profile = () => {
             {/* Identity Header Card: More Compact & Professional */}
             <div className={`rounded-2xl p-6 flex flex-col md:flex-row items-center md:items-start gap-6 relative overflow-hidden transition-all duration-300 shadow-sm ${cardBase}`}>
                
-               <div className="relative">
+               <div className="relative group cursor-pointer" onClick={() => photoInputRef.current?.click()}>
                  <div className={`w-28 h-28 rounded-xl p-1 bg-gradient-to-br from-blue-500 to-indigo-600 shadow-lg`}>
                    <div className={`w-full h-full rounded-lg overflow-hidden border-2 transition-colors ${isDark ? 'border-slate-800' : 'border-slate-50'}`}>
-                     <img
-                       src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
-                       alt="Profile"
-                       className="w-full h-full object-cover"
-                     />
+                     {profilePhoto ? (
+                       <img
+                         src={`http://localhost:4001${profilePhoto}`}
+                         alt="Profile"
+                         className="w-full h-full object-cover"
+                       />
+                     ) : (
+                       <img
+                         src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
+                         alt="Profile"
+                         className="w-full h-full object-cover"
+                       />
+                     )}
                    </div>
                  </div>
+                 <div className="absolute inset-0 rounded-xl bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                   <Camera className="w-6 h-6 text-white" />
+                 </div>
+                 <input type="file" ref={photoInputRef} onChange={handlePhotoUpload} accept="image/*" className="hidden" />
                </div>
 
                 <div className="flex-1 text-center md:text-left space-y-3 mt-2">

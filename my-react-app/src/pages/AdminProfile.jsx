@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Sidebar from "../components/Sidebar";
 import axios from "axios";
 import { useAdminTheme } from "../context/AdminThemeContext";
-import { User, Sun, Moon, Crown, ShieldCheck, CheckCircle, AlertCircle, Save } from "lucide-react";
+import { uploadProfilePhoto } from "../services/authService";
+import { User, Sun, Moon, Crown, ShieldCheck, CheckCircle, AlertCircle, Save, Camera } from "lucide-react";
 
 const AdminProfile = () => {
   const { adminTheme, setAdminTheme } = useAdminTheme();
@@ -12,6 +13,8 @@ const AdminProfile = () => {
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const [toasts, setToasts] = useState([]);
+  const [profilePhoto, setProfilePhoto] = useState(null);
+  const photoInputRef = useRef(null);
   
   const [form, setForm] = useState({
     name: "",
@@ -39,6 +42,7 @@ const AdminProfile = () => {
       });
       setUser(res.data);
       setForm(f => ({ ...f, name: res.data.name }));
+      setProfilePhoto(res.data.profile_photo || null);
     } catch (err) {
       toast("Failed to load profile", "error");
     } finally {
@@ -48,6 +52,18 @@ const AdminProfile = () => {
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handlePhotoUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+      const res = await uploadProfilePhoto(file);
+      setProfilePhoto(res.profile_photo);
+      toast("Profile photo updated!");
+    } catch (err) {
+      toast(err.message || "Photo upload failed", "error");
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -125,8 +141,18 @@ const AdminProfile = () => {
               
               <div className={`rounded-xl p-8 flex flex-col md:flex-row items-center gap-8 transition-all duration-300 border ${cardBase}`}
                    style={{ animation: 'fadeIn 0.4s ease forwards' }}>
-                 <div className="w-24 h-24 rounded-full bg-blue-600 flex items-center justify-center text-white shrink-0">
-                    <User className="w-10 h-10" />
+                 <div className="relative group cursor-pointer" onClick={() => photoInputRef.current?.click()}>
+                   {profilePhoto ? (
+                     <img src={`http://localhost:4001${profilePhoto}`} alt="Admin" className="w-24 h-24 rounded-full object-cover border-2 border-blue-500" />
+                   ) : (
+                     <div className="w-24 h-24 rounded-full bg-blue-600 flex items-center justify-center text-white shrink-0">
+                       <User className="w-10 h-10" />
+                     </div>
+                   )}
+                   <div className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                     <Camera className="w-6 h-6 text-white" />
+                   </div>
+                   <input type="file" ref={photoInputRef} onChange={handlePhotoUpload} accept="image/*" className="hidden" />
                  </div>
                  <div className="flex-1 text-center md:text-left">
                     <h2 className={`text-xl font-bold tracking-tight mb-1 ${textPrimary}`}>{user?.name}</h2>

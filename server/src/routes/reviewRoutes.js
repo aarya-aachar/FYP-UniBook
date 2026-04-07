@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getPool } = require('../db');
+const { getPool } = require('../config/db');
 const { authenticateToken } = require('../middleware/authMiddleware');
 
 // Get all reviews for a specific provider

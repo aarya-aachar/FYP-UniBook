@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
-const { getPool } = require('../db');
+const { getPool } = require('../config/db');
 const { authenticateToken } = require('../middleware/authMiddleware');
 
 const router = express.Router();

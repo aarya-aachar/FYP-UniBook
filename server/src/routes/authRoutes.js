@@ -4,10 +4,24 @@ const jwt = require('jsonwebtoken');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const nodemailer = require('nodemailer');
 const { getPool } = require('../config/db');
 const { authenticateToken } = require('../middleware/authMiddleware');
 
 const router = express.Router();
+
+// In-memory OTP store: { email -> { otp, data, expiresAt } }
+const otpStore = new Map();
+
+// Email transporter
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
+
 
 // Multer config for profile photos
 const profileStorage = multer.diskStorage({
@@ -22,6 +36,107 @@ const profileStorage = multer.diskStorage({
   }
 });
 const uploadProfile = multer({ storage: profileStorage, limits: { fileSize: 5 * 1024 * 1024 } });
+
+/**
+ * @route POST /api/auth/send-otp
+ * @desc Step 1 of registration: validate email and send OTP
+ */
+router.post('/auth/send-otp', async (req, res) => {
+  try {
+    const { name, email, password, age, gender, phone } = req.body;
+    if (!name || !email || !password) {
+      return res.status(400).json({ message: 'Name, email and password are required.' });
+    }
+
+    const pool = getPool();
+    const [existing] = await pool.query('SELECT id FROM users WHERE email = ?', [email]);
+    if (existing.length > 0) {
+      return res.status(400).json({ message: 'This email is already registered.' });
+    }
+
+    // Generate 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = Date.now() + 10 * 60 * 1000; // 10 minutes
+
+    // Store pending registration
+    otpStore.set(email, { otp, expiresAt, data: { name, email, password, age, gender, phone } });
+
+    // Send OTP email
+    await transporter.sendMail({
+      from: `"UniBook" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: 'Your UniBook Verification Code',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 480px; margin: auto; padding: 32px; border: 1px solid #e2e8f0; border-radius: 12px; background: #f8fafc;">
+          <h2 style="color: #0f172a; margin-bottom: 4px;">Verify your email</h2>
+          <p style="color: #64748b; font-size: 14px; margin-top: 0;">Welcome to <strong>UniBook</strong>! Use the code below to complete your registration.</p>
+          <div style="background: #0f172a; color: #10b981; font-size: 36px; font-weight: bold; letter-spacing: 8px; text-align: center; padding: 24px; border-radius: 10px; margin: 24px 0;">
+            ${otp}
+          </div>
+          <p style="color: #94a3b8; font-size: 12px; text-align: center;">This code expires in <strong>10 minutes</strong>. Do not share it with anyone.</p>
+        </div>
+      `
+    });
+
+    console.log(`>>> [OTP] Sent code to ${email}`);
+    res.json({ message: 'OTP sent successfully. Check your email.' });
+
+  } catch (error) {
+    console.error('Send OTP Error:', error);
+    res.status(500).json({ message: 'Failed to send OTP. Please try again.' });
+  }
+});
+
+/**
+ * @route POST /api/auth/verify-otp
+ * @desc Step 2 of registration: verify OTP and create account
+ */
+router.post('/auth/verify-otp', async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+    const record = otpStore.get(email);
+
+    if (!record) {
+      return res.status(400).json({ message: 'No pending registration for this email. Please start over.' });
+    }
+    if (Date.now() > record.expiresAt) {
+      otpStore.delete(email);
+      return res.status(400).json({ message: 'OTP has expired. Please request a new one.' });
+    }
+    if (record.otp !== otp) {
+      return res.status(400).json({ message: 'Invalid OTP. Please try again.' });
+    }
+
+    // OTP is valid — create the user
+    const { name, password, age, gender, phone } = record.data;
+    otpStore.delete(email);
+
+    const pool = getPool();
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const [result] = await pool.query(
+      'INSERT INTO users (name, email, password, role, age, gender, phone) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [name, email, hashedPassword, 'user', age || null, gender || null, phone || null]
+    );
+
+    const token = jwt.sign(
+      { id: result.insertId, email, role: 'user', name },
+      process.env.JWT_SECRET || 'super_secret_unibook_key_12345',
+      { expiresIn: '24h' }
+    );
+
+    console.log(`>>> [REGISTER] New user created: ${email}`);
+    res.status(201).json({
+      message: 'Registration successful!',
+      token,
+      user: { id: result.insertId, name, email, role: 'user' }
+    });
+
+  } catch (error) {
+    console.error('Verify OTP Error:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
 
 router.post('/auth/register', async (req, res) => {
   try {
@@ -57,6 +172,7 @@ router.post('/auth/register', async (req, res) => {
     res.status(500).json({ message: 'Internal Server Error' });
   }
 });
+
 
 router.post('/auth/login', async (req, res) => {
   try {

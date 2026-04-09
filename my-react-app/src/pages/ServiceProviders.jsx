@@ -63,31 +63,29 @@ const ServiceProviders = () => {
   }, [serviceName]);
 
   return (
-    <div className="flex flex-col min-h-screen transition-all duration-500 font-inter"
-         style={{ background: isDark ? 'linear-gradient(135deg, #020617 0%, #064e3b 50%, #020617 100%)' : 'linear-gradient(135deg, #f8fafc 0%, #ecfdf5 100%)' }}>
+    <div className={`flex flex-col min-h-screen transition-all duration-500 font-inter user-panel-bg ${isDark ? 'dark' : 'light'}`}>
       
       <UserNavbar />
 
       <main className="flex-1 overflow-y-auto px-6 md:px-10 py-12 relative transition-all duration-300">
-        <div className={`absolute top-0 left-0 w-full h-96 bg-gradient-to-b opacity-50 pointer-events-none transition-all duration-300
-          ${isDark ? 'from-emerald-900/10 to-transparent' : 'from-emerald-50 to-transparent'}`} />
-
-        <div className="max-w-7xl mx-auto w-full pt-4 relative z-10">
+        <div className="max-w-7xl mx-auto w-full pt-16 relative z-10">
           <div className="mb-10">
             <button onClick={() => navigate('/services')} className={`flex items-center gap-2 transition-colors font-medium mb-6 group cursor-pointer ${isDark ? 'text-slate-400 hover:text-white' : 'text-slate-500 hover:text-slate-900'}`}>
               <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" /> Back to Services
             </button>
             
-            <div className="flex items-center gap-6">
-              <div className={`w-16 h-16 rounded-2xl border flex items-center justify-center shadow-sm transition-all
-                ${isDark ? `bg-slate-800 border-slate-700 ${cfg.color}` : `bg-white border-slate-200 ${cfg.color}`}`}>
-                <cfg.icon className="w-8 h-8" />
-              </div>
-              <div>
-                <h1 className={`text-3xl font-bold tracking-tight transition-colors ${isDark ? 'text-white' : 'text-slate-900'}`}>Recommended {serviceName}</h1>
-                <p className={`text-base mt-1 transition-colors ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-                  We found {providers.length} top-rated options for you
-                </p>
+            <div className="glass-header">
+              <div className="flex items-center gap-6">
+                <div className={`w-16 h-16 rounded-2xl border flex items-center justify-center shadow-sm transition-all
+                  ${isDark ? `bg-slate-800 border-slate-700 ${cfg.color}` : `bg-white border-slate-200 ${cfg.color}`}`}>
+                  <cfg.icon className="w-8 h-8" />
+                </div>
+                <div>
+                  <h1 className={`text-4xl font-bold tracking-tight transition-colors ${isDark ? 'text-white' : 'text-slate-900'}`}>Recommended {serviceName}</h1>
+                  <p className={`text-base font-medium mt-1 transition-colors ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
+                    We found {providers.length} top-rated options for you
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -104,8 +102,7 @@ const ServiceProviders = () => {
                 return (
                   <div
                     key={p.id}
-                    className={`group relative rounded-2xl p-6 flex flex-col transition-all duration-200 shadow-sm hover:-translate-y-[2px] hover:shadow-md border overflow-hidden
-                      ${isDark ? 'bg-slate-800/50 border-slate-700 hover:border-slate-600' : 'bg-white border-slate-200 hover:border-slate-300'}`}
+                    className={`group relative rounded-2xl p-6 flex flex-col transition-all duration-200 shadow-sm hover:-translate-y-[2px] hover:shadow-md border overflow-hidden glass-card`}
                   >
                     {imgSrc && (
                       <div className="absolute inset-0 opacity-[0.03] group-hover:opacity-[0.06] transition-opacity duration-300 pointer-events-none">

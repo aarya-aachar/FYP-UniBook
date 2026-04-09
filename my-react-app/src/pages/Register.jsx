@@ -56,28 +56,61 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center py-12 px-6 bg-[#020617] relative overflow-y-auto font-inter">
-      {/* Background Decor */}
-      <div className="absolute top-[-15%] right-[-5%] w-[45%] h-[45%] rounded-full bg-emerald-600/10 blur-[130px] transition-all duration-1000" />
-      <div className="absolute bottom-[-15%] left-[-5%] w-[45%] h-[45%] rounded-full bg-teal-600/10 blur-[130px] transition-all duration-1000" />
-
-      <style>{`
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        .slide-up { animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-      `}</style>
-
-      <div className="w-full max-w-xl relative z-10 slide-up my-auto">
-        {/* Branding */}
-        <div className="text-center mb-10">
-          <div className="flex items-center justify-center mb-6 transform hover:-rotate-3 transition-transform">
-             <img src="/logo.png" alt="UniBook Logo" className="w-16 h-16 object-contain shadow-2xl shadow-emerald-500/20" />
+    <div className="min-h-screen flex flex-col md:flex-row bg-[#020617] font-inter">
+      {/* Left Pane - Visual Branding */}
+      <div className="hidden md:flex md:w-1/2 lg:w-[40%] relative overflow-hidden bg-slate-900 border-r border-white/5">
+        <img 
+          src="https://images.unsplash.com/photo-1563986768609-322da13575f3?q=80&w=1470&auto=format&fit=crop" 
+          alt="Time Efficiency" 
+          className="absolute inset-0 w-full h-full object-cover opacity-50 grayscale hover:grayscale-0 transition-all duration-1000"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
+        
+        <div className="relative z-10 p-12 flex flex-col justify-end h-full">
+          <div className="flex items-center gap-3 mb-8">
+            <img src="/logo.png" alt="UniBook Logo" className="w-10 h-10 object-contain" />
+            <h2 className="text-2xl font-black tracking-tighter text-white">UniBook<span className="text-emerald-500">.</span></h2>
           </div>
-          <h1 className="text-4xl font-black text-white tracking-tight">Create Account</h1>
-          <p className="text-slate-400 mt-2 font-medium">Join the premium multi-service booking platform</p>
+          <h2 className="text-4xl font-extrabold text-white tracking-tight mb-6 leading-tight">
+            The future of <br/>
+            <span className="text-emerald-500">automated</span> <br/>
+            scheduling.
+          </h2>
+          <p className="text-slate-400 text-sm font-medium max-w-xs leading-relaxed">
+            Join the platform designed for professionals. Optimize your appointments and focus on what truly matters.
+          </p>
+          <div className="mt-8 pt-8 border-t border-white/5">
+             <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4">Trusted features</p>
+             <div className="space-y-3">
+                {['Real-time Availability', 'Instant Verification', 'Secure Management'].map(f => (
+                  <div key={f} className="flex items-center gap-2 text-white text-xs font-bold">
+                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                    {f}
+                  </div>
+                ))}
+             </div>
+          </div>
         </div>
+      </div>
 
-        {/* Card */}
-        <div className="bg-white/5 backdrop-blur-3xl border border-white/10 rounded-[2.5rem] p-8 md:p-10 shadow-2xl">
+      {/* Right Pane - Registration Form */}
+      <div className="w-full md:w-1/2 lg:w-[60%] flex items-center justify-center p-8 md:p-16 bg-[#020617] relative overflow-y-auto">
+        {/* Background Decor */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full max-w-lg bg-emerald-600/5 blur-[120px] -z-0" />
+        
+        <div className="w-full max-w-xl relative z-10 py-12">
+          <div className="mb-12 md:hidden">
+             <div className="flex items-center gap-2.5 mb-2">
+                <img src="/logo.png" alt="UniBook Logo" className="w-8 h-8 object-contain" />
+                <h2 className="text-lg font-black tracking-tighter text-white">UniBook<span className="text-emerald-600">.</span></h2>
+             </div>
+          </div>
+
+          <div className="mb-10">
+            <h1 className="text-3xl font-extrabold text-white tracking-tight mb-2">Create Account</h1>
+            <p className="text-slate-400 font-medium text-sm">Join the premium multi-service booking ecosystem</p>
+          </div>
+
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid md:grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -199,31 +232,24 @@ const Register = () => {
             <button 
               type="submit" 
               disabled={loading}
-              className={`group w-full py-5 rounded-2xl bg-emerald-600 font-black text-xs text-white hover:bg-emerald-500 hover:shadow-2xl hover:shadow-emerald-500/40 hover:-translate-y-1 transition-all uppercase tracking-[0.3em] mt-6 flex items-center justify-center gap-2
-                ${loading ? 'opacity-50 cursor-not-allowed translate-y-0 shadow-none' : 'cursor-pointer'}`}
+              className={`group w-full py-5 rounded-2xl bg-emerald-600 font-black text-[11px] text-white hover:bg-emerald-500 transition-all uppercase tracking-[0.3em] mt-6 flex items-center justify-center gap-2
+                ${loading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:shadow-2xl hover:shadow-emerald-500/20 hover:-translate-y-0.5'}`}
             >
               {loading ? 'Creating Account...' : (
                 <>
-                  Create Account
+                  Begin Your Journey
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </>
               )}
             </button>
           </form>
 
-          <div className="mt-10 text-center">
-            <p className="text-slate-500 text-xs font-bold uppercase tracking-widest">
-              Already have an account? {' '}
-              <Link to="/login" className="text-emerald-400 font-black hover:text-emerald-300 transition-colors ml-1">Sign In</Link>
+          <div className="mt-12 pt-8 border-t border-white/5 text-center">
+            <p className="text-slate-500 text-[11px] font-bold uppercase tracking-widest leading-loose">
+              Already using UniBook? <br/>
+              <Link to="/login" className="text-emerald-400 font-black hover:text-emerald-300 transition-colors">Sign In to Dashboard</Link>
             </p>
           </div>
-        </div>
-
-        {/* Footer info */}
-        <div className="mt-12 flex items-center justify-center gap-10 text-slate-600 text-[10px] font-black uppercase tracking-[0.3em]">
-          <span className="hover:text-emerald-500 cursor-pointer transition-colors">Terms of Service</span>
-          <span className="w-1 h-1 rounded-full bg-slate-800" />
-          <span className="hover:text-emerald-500 cursor-pointer transition-colors">Privacy Policy</span>
         </div>
       </div>
     </div>

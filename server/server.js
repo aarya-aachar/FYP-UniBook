@@ -9,6 +9,7 @@ const bookingRoutes = require('./src/routes/bookingRoutes');
 const adminRoutes = require('./src/routes/adminRoutes');
 const reviewRoutes = require('./src/routes/reviewRoutes');
 const notificationRoutes = require('./src/routes/notificationRoutes');
+const paymentRoutes = require('./src/routes/paymentRoutes');
 const { startReminderJob } = require('./src/jobs/reminderJob');
 
 const app = express();
@@ -50,6 +51,7 @@ async function bootstrap() {
     app.use('/api', providerRoutes);
     app.use('/api', bookingRoutes);
     app.use('/api', adminRoutes);
+    app.use('/api', paymentRoutes);
     app.use('/api/reviews', reviewRoutes);
     app.use('/api/notifications', notificationRoutes);
 

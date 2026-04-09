@@ -99,6 +99,7 @@ router.get('/bookings/user', authenticateToken, async (req, res) => {
       JOIN providers p ON b.provider_id = p.id
       LEFT JOIN services s ON b.service_id = s.id
       WHERE b.user_id = ?
+        AND b.status != 'pending'
         AND NOT (b.status = 'confirmed' AND (b.booking_date < CURDATE() OR (b.booking_date = CURDATE() AND b.booking_time <= CURTIME())))
       ORDER BY b.booking_date DESC, b.booking_time DESC
     `;
@@ -149,6 +150,7 @@ router.get('/bookings/admin', authenticateToken, verifyAdmin, async (req, res) =
       JOIN users u ON b.user_id = u.id
       JOIN providers p ON b.provider_id = p.id
       LEFT JOIN services s ON b.service_id = s.id
+      WHERE b.status != 'pending'
       ORDER BY b.booking_date DESC, b.booking_time DESC
     `;
 

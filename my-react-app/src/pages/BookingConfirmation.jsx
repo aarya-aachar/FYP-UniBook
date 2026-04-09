@@ -8,14 +8,11 @@ const BookingConfirmation = () => {
   const { id } = useParams();
 
   return (
-    <div className="flex flex-col min-h-screen transition-all duration-500 font-inter"
-         style={{ background: isDark ? 'linear-gradient(135deg, #020617 0%, #064e3b 50%, #020617 100%)' : 'linear-gradient(135deg, #f8fafc 0%, #ecfdf5 100%)' }}>
+    <div className={`flex flex-col min-h-screen transition-all duration-500 font-inter user-panel-bg ${isDark ? 'dark' : 'light'}`}>
       
       <UserNavbar />
 
-      <main className="flex-1 flex flex-col items-center justify-center p-6 relative overflow-hidden transition-all duration-300">
-        <div className={`absolute top-0 w-full h-96 bg-gradient-to-b opacity-50 pointer-events-none transition-all duration-300
-          ${isDark ? 'from-emerald-900/10 to-transparent' : 'from-emerald-50 to-transparent'}`} />
+      <main className="flex-1 flex flex-col items-center justify-start pt-24 p-6 relative overflow-hidden transition-all duration-300">
 
         <style>{`
           @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
@@ -42,8 +39,7 @@ const BookingConfirmation = () => {
               Your appointment has been successfully secured in our systems.
            </p>
 
-           <div className={`border rounded-2xl p-6 mb-8 shadow-sm transition-all duration-300
-             ${isDark ? 'bg-slate-800/50 border-slate-700' : 'bg-white border-slate-200'}`}>
+           <div className={`border rounded-2xl p-6 mb-8 shadow-sm transition-all duration-300 glass-card`}>
               <div className="space-y-3">
                  <div className={`flex justify-between items-center py-2 border-b transition-colors ${isDark ? 'border-slate-700' : 'border-slate-100'}`}>
                     <span className={`text-xs font-semibold uppercase tracking-wider transition-colors ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Status</span>

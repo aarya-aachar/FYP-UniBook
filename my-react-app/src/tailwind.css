@@ -19,3 +19,43 @@ h1, h2, h3, h4, h5, h6 {
 .font-outfit { font-family: 'Outfit', sans-serif; }
 .font-inter   { font-family: 'Inter', sans-serif; }
 .font-condensed { font-family: 'Inter', sans-serif; font-feature-settings: "tnum" 1, "lnum" 1; } /* For numbers/tabular data */
+
+/* Global User Panel Background System */
+.user-panel-bg {
+  background-image: url('./assets/booking-bg.jpg');
+  background-attachment: fixed;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  position: relative;
+}
+
+/* Base Glassmorphism utility */
+.glass-surface {
+  @apply backdrop-blur-lg border border-white/20 shadow-lg;
+}
+
+/* Robust Card background for both themes */
+.glass-card {
+  @apply backdrop-blur-xl border transition-all duration-300;
+}
+.light .glass-card { @apply bg-white/95 border-white/60 shadow-xl shadow-slate-200/50; }
+.dark .glass-card { @apply bg-slate-950/95 border-slate-800/60 shadow-2xl shadow-black/50; }
+
+/* Header container for legibility */
+.glass-header {
+  @apply backdrop-blur-sm rounded-2xl px-6 py-4 border transition-all duration-300;
+}
+.light .glass-header { @apply bg-white/95 border-white/60; }
+.dark .glass-header { @apply bg-slate-950/95 border-slate-800/60; }
+
+/* Base styles for scrollbars in panel */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  @apply bg-emerald-500/20 rounded-full;
+}

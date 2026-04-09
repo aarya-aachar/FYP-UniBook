@@ -32,8 +32,7 @@ const ServiceDetails = () => {
   }, [providerId]);
 
   if (loading) return (
-    <div className={`min-h-screen flex items-center justify-center transition-colors duration-500
-      ${isDark ? 'bg-[#0f172a] text-white' : 'bg-slate-50 text-slate-900'}`}>
+    <div className={`min-h-screen flex items-center justify-center transition-colors duration-500 user-panel-bg ${isDark ? 'dark' : 'light'}`}>
       <div className="flex flex-col items-center gap-4">
         <div className="w-12 h-12 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin" />
         <p className="font-black uppercase tracking-widest text-xs opacity-50">Securely Loading...</p>
@@ -42,21 +41,18 @@ const ServiceDetails = () => {
   );
 
   return (
-    <div className="flex flex-col min-h-screen transition-all duration-500 font-inter"
-         style={{ background: isDark ? 'linear-gradient(135deg, #020617 0%, #064e3b 50%, #020617 100%)' : 'linear-gradient(135deg, #f8fafc 0%, #ecfdf5 100%)' }}>
+    <div className={`flex flex-col min-h-screen transition-all duration-500 font-inter user-panel-bg ${isDark ? 'dark' : 'light'}`}>
       
       <UserNavbar />
 
       <main className="flex-1 overflow-y-auto px-6 md:px-10 py-12 relative flex flex-col items-center transition-all duration-300">
-        <div className={`absolute top-0 right-0 w-full h-96 bg-gradient-to-b opacity-50 pointer-events-none transition-all duration-300
-          ${isDark ? 'from-emerald-900/10 to-transparent' : 'from-emerald-50 to-transparent'}`} />
 
         <style>{`
           @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
           .fade-in { animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         `}</style>
 
-        <div className="max-w-7xl mx-auto w-full fade-in pt-4">
+        <div className="max-w-4xl mx-auto w-full pt-16 relative z-10 transition-all">
           
           {/* Breadcrumbs */}
           <button onClick={() => navigate(-1)} 
@@ -65,8 +61,7 @@ const ServiceDetails = () => {
             <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" /> Back
           </button>
 
-          <div className={`relative group border rounded-2xl p-8 md:p-10 shadow-sm transition-all duration-200
-            ${isDark ? 'bg-slate-800/50 border-slate-700' : 'bg-white border-slate-200'}`}>
+          <div className={`relative group border rounded-2xl p-8 md:p-10 shadow-sm transition-all duration-200 glass-card`}>
             
             {/* Image Banner Section */}
             <div className={`relative w-full h-[400px] rounded-2xl overflow-hidden mb-10 shadow-sm border transition-all

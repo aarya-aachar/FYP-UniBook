@@ -112,8 +112,7 @@ const Profile = () => {
     : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400 focus:border-emerald-600 focus:bg-white";
 
   return (
-    <div className="flex flex-col min-h-screen transition-all duration-500 font-inter"
-         style={{ background: isDark ? 'linear-gradient(135deg, #020617 0%, #064e3b 50%, #020617 100%)' : 'linear-gradient(135deg, #f8fafc 0%, #ecfdf5 100%)' }}>
+    <div className={`flex flex-col min-h-screen transition-all duration-500 font-inter user-panel-bg ${isDark ? 'dark' : 'light'}`}>
       
       <UserNavbar />
 
@@ -135,19 +134,15 @@ const Profile = () => {
       </div>
 
       <main className="flex-1 overflow-y-auto px-6 md:px-10 py-12 relative transition-all duration-500">
-        {/* Ambient background glow */}
-        <div className={`absolute top-[10%] right-[10%] w-96 h-96 blur-[120px] rounded-full pointer-events-none transition-all duration-500
-          ${isDark ? 'bg-emerald-600/10' : 'bg-emerald-400/5'}`} />
-
-        <div className="max-w-4xl mx-auto w-full fade-in pt-4">
+        <div className="max-w-4xl mx-auto w-full fade-in pt-16">
           
           {/* Header with simplified alignment */}
-          <div className={`flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 border-b pb-6 transition-colors ${isDark ? 'border-slate-800' : 'border-slate-200'}`}>
-            <div>
-              <h1 className={`text-3xl font-bold mb-2 tracking-tight transition-colors ${textPrimary}`}>
+          <div className="mb-8 fade-in">
+            <div className="glass-header">
+              <h1 className={`text-4xl font-bold mb-2 tracking-tight transition-colors ${textPrimary}`}>
                 Profile Settings
               </h1>
-              <p className={`text-base transition-colors ${textSecondary} max-w-2xl`}>
+              <p className={`text-base font-medium transition-colors ${textSecondary} max-w-2xl`}>
                 Update your personal info, change your theme, and manage account security.
               </p>
             </div>
@@ -156,7 +151,7 @@ const Profile = () => {
           <form onSubmit={handleSubmit} className="space-y-8 pb-12">
             
             {/* Identity Header Card: More Compact & Professional */}
-            <div className={`rounded-2xl p-6 flex flex-col md:flex-row items-center md:items-start gap-6 relative overflow-hidden transition-all duration-300 shadow-sm ${cardBase}`}>
+            <div className={`rounded-2xl p-6 flex flex-col md:flex-row items-center md:items-start gap-6 relative overflow-hidden transition-all duration-300 shadow-sm glass-card`}>
                
                <div className="relative group cursor-pointer" onClick={() => photoInputRef.current?.click()}>
                  <div className={`w-28 h-28 rounded-xl p-1 bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg`}>
@@ -208,7 +203,7 @@ const Profile = () => {
             <div className="grid lg:grid-cols-2 gap-6 items-start">
                
                {/* 1. Account Core Card */}
-               <div className={`rounded-2xl p-6 space-y-6 transition-all duration-300 shadow-sm ${cardBase}`}>
+               <div className={`rounded-2xl p-6 space-y-6 transition-all duration-300 shadow-sm glass-card`}>
                   <div className={`flex items-center justify-between border-b pb-4 transition-colors ${isDark ? 'border-slate-800' : 'border-slate-100'}`}>
                      <div className="flex items-center gap-3">
                         <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${isDark ? 'bg-slate-800 text-emerald-400' : 'bg-emerald-50 text-emerald-600'}`}><User className="w-4 h-4" /></div>
@@ -251,7 +246,7 @@ const Profile = () => {
                </div>
 
                {/* 2. Security Suite Card */}
-               <div className={`rounded-2xl p-6 space-y-6 transition-all duration-300 shadow-sm ${cardBase}`}>
+               <div className={`rounded-2xl p-6 space-y-6 transition-all duration-300 shadow-sm glass-card`}>
                   <div className={`flex items-center justify-between border-b pb-4 transition-colors ${isDark ? 'border-slate-800' : 'border-slate-100'}`}>
                      <div className="flex items-center gap-3">
                         <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${isDark ? 'bg-slate-800 text-teal-400' : 'bg-teal-50 text-teal-600'}`}><ShieldCheck className="w-4 h-4" /></div>
@@ -285,7 +280,7 @@ const Profile = () => {
                </div>
 
                {/* 3. Theme Preferences: Professional Full Width Integration */}
-               <div className={`rounded-2xl p-6 transition-all duration-300 col-span-1 lg:col-span-2 shadow-sm ${cardBase}`}>
+               <div className={`rounded-2xl p-6 transition-all duration-300 col-span-1 lg:col-span-2 shadow-sm glass-card`}>
                   <div className={`flex items-center gap-3 border-b pb-4 mb-6 transition-colors ${isDark ? 'border-slate-800' : 'border-slate-100'}`}>
                     <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${isDark ? 'bg-slate-800 text-teal-400' : 'bg-teal-50 text-teal-600'}`}><Sparkles className="w-4 h-4" /></div>
                     <h3 className={`text-base font-semibold transition-colors ${textPrimary}`}>App Theme</h3>

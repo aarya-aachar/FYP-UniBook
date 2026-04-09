@@ -99,8 +99,7 @@ const UserNotifications = () => {
   const cardBase = isDark ? "bg-slate-900 border border-slate-800 shadow-sm" : "bg-white border border-slate-200 shadow-sm";
 
   return (
-    <div className="flex flex-col min-h-screen transition-all duration-500 font-inter"
-         style={{ background: isDark ? 'linear-gradient(135deg, #020617 0%, #064e3b 50%, #020617 100%)' : 'linear-gradient(135deg, #f8fafc 0%, #ecfdf5 100%)' }}>
+    <div className={`flex flex-col min-h-screen transition-all duration-500 font-inter user-panel-bg ${isDark ? 'dark' : 'light'}`}>
       
       <UserNavbar />
 
@@ -121,16 +120,17 @@ const UserNotifications = () => {
         ))}
       </div>
 
-      <main className="flex-1 px-6 md:px-10 py-12 relative z-10 max-w-5xl mx-auto w-full">
+      <main className="flex-1 px-6 md:px-10 py-12 relative z-10 max-w-5xl mx-auto w-full pt-16">
         
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-10 border-b pb-8 transition-colors border-slate-200 dark:border-slate-800">
-          <div>
-            <h1 className={`text-3xl font-black tracking-tight mb-2 transition-colors ${textPrimary}`}>
-              Notifications
-            </h1>
-            <p className={`text-sm font-medium transition-colors ${textSecondary}`}>
-              Stay updated on your bookings and account activity.
-            </p>
+          <div className="mb-10">
+            <div className="glass-header">
+              <h1 className={`text-4xl font-black tracking-tight mb-2 transition-colors ${textPrimary}`}>
+                Notifications
+              </h1>
+              <p className={`text-sm font-medium transition-colors ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
+                Stay updated on your bookings and account activity.
+              </p>
+            </div>
           </div>
 
           {notifications.some(n => !n.is_read) && (
@@ -143,10 +143,9 @@ const UserNotifications = () => {
               Mark all as read
             </button>
           )}
-        </div>
 
         {/* Content Area */}
-        <div className={`rounded-3xl overflow-hidden shadow-sm border transition-all ${cardBase}`} style={{ animation: 'fadeIn 0.6s ease-out' }}>
+        <div className={`rounded-3xl overflow-hidden shadow-sm border transition-all glass-card`} style={{ animation: 'fadeIn 0.6s ease-out' }}>
           {loading ? (
              <div className="p-8 space-y-4">
                {[1, 2, 3, 4].map(i => (

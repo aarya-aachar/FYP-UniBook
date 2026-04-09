@@ -167,22 +167,11 @@ const ManageBookings = () => {
                   
                   <div className="flex flex-row xl:flex-col gap-2 min-w-[130px]">
                     {b.status?.toLowerCase() === 'pending' && (
-                      <>
-                        <button 
-                          onClick={() => updateStatus(b.id, 'confirmed')} 
-                          className={`flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-lg font-bold text-xs uppercase tracking-wider transition-all cursor-pointer bg-emerald-600 text-white hover:bg-emerald-700`}
-                        >
-                           <CheckCircle className="w-4 h-4"/>
-                           Approve
-                        </button>
-                        <button 
-                          onClick={() => updateStatus(b.id, 'cancelled')} 
-                          className={`flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-lg font-bold text-xs uppercase tracking-wider transition-all cursor-pointer ${isDark ? 'bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700 hover:text-white' : 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-50 hover:text-slate-900'}`}
-                        >
-                           <XCircle className="w-4 h-4"/>
-                           Decline
-                        </button>
-                      </>
+                      <div className={`flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-lg text-[10px] font-bold uppercase tracking-wider border transition-all select-none
+                        ${isDark ? 'bg-amber-500/10 border-amber-500/20 text-amber-400' : 'bg-amber-50 border-amber-200 text-amber-600 font-bold'}`}>
+                        <Clock className="w-4 h-4"/>
+                        Awaiting Payment
+                      </div>
                     )}
                     {b.status?.toLowerCase() !== 'pending' && (
                       <div className={`flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-lg text-[10px] font-bold uppercase tracking-wider border transition-all select-none

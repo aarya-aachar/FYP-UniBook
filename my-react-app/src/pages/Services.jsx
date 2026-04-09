@@ -49,23 +49,21 @@ const Services = () => {
   }, []);
 
   return (
-    <div className="flex flex-col min-h-screen transition-all duration-500 font-inter"
-         style={{ backgroundColor: isDark ? '#020617' : '#f8fafc' }}>
+    <div className={`flex flex-col min-h-screen transition-all duration-500 font-inter user-panel-bg ${isDark ? 'dark' : 'light'}`}>
       
       <UserNavbar />
 
       <main className="flex-1 overflow-y-auto px-6 md:px-10 py-12 relative transition-all duration-300">
-        <div className={`absolute top-0 right-0 w-full h-96 opacity-10 pointer-events-none transition-all duration-300
-          ${isDark ? 'bg-emerald-900/10' : 'bg-emerald-50/50'}`} />
-
-        <div className="max-w-7xl mx-auto w-full pt-4 relative z-10">
-          <div className="mb-12 border-b pb-6 transition-colors border-slate-200 dark:border-slate-800">
-            <h1 className={`text-3xl font-bold mb-2 tracking-tight transition-colors ${isDark ? 'text-white' : 'text-slate-900'}`}>
-              Choose a Category
-            </h1>
-            <p className={`text-base transition-colors ${isDark ? 'text-slate-400' : 'text-slate-600'} max-w-2xl`}>
-              Pick a service to find the best providers near you. Explore top-rated places and book instantly.
-            </p>
+        <div className="max-w-7xl mx-auto w-full pt-16 relative z-10">
+          <div className="mb-12">
+            <div className="glass-header">
+              <h1 className={`text-4xl font-bold mb-2 tracking-tight transition-colors ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                Choose a Category
+              </h1>
+              <p className={`text-base font-medium transition-colors ${isDark ? 'text-slate-300' : 'text-slate-600'} max-w-2xl`}>
+                Pick a service to find the best providers near you. Explore top-rated places and book instantly.
+              </p>
+            </div>
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-6">
@@ -75,8 +73,7 @@ const Services = () => {
               <div
                 key={service.name}
                 onClick={() => navigate(`/services/${encodeURIComponent(service.name)}`)}
-                className={`group cursor-pointer relative rounded-2xl p-6 transition-all duration-200 shadow-sm hover:-translate-y-[2px] hover:shadow-md border
-                  ${isDark ? `bg-slate-800/50 border-slate-700 hover:border-slate-600 ${service.darkBgHover}` : `bg-white border-slate-200 hover:border-slate-300 ${service.bgHover}`}`}
+                className={`group cursor-pointer relative rounded-2xl p-6 transition-all duration-200 shadow-sm hover:-translate-y-[2px] hover:shadow-md border glass-card`}
               >
                 
                 <div className="relative z-10">

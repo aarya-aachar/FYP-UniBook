@@ -80,6 +80,9 @@ async function initDB() {
         booking_date DATE NOT NULL,
         booking_time TIME NOT NULL,
         status ENUM('pending', 'confirmed', 'cancelled') DEFAULT 'pending',
+        payment_status ENUM('pending', 'paid', 'failed') DEFAULT 'pending',
+        transaction_uuid VARCHAR(255) UNIQUE DEFAULT NULL,
+        paid_amount DECIMAL(10,2) DEFAULT 0.00,
         notes TEXT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
@@ -148,6 +151,19 @@ async function initDB() {
       const existingNotifCols = notifCols[0].map(c => c.Field);
       if (!existingNotifCols.includes('metadata')) {
         await pool.query("ALTER TABLE notifications ADD COLUMN metadata JSON AFTER is_read");
+      }
+
+      // Check bookings table for payment columns
+      const bookingCols = await pool.query("SHOW COLUMNS FROM bookings");
+      const existingBookingCols = bookingCols[0].map(c => c.Field);
+      if (!existingBookingCols.includes('payment_status')) {
+        await pool.query("ALTER TABLE bookings ADD COLUMN payment_status ENUM('pending', 'paid', 'failed') DEFAULT 'pending' AFTER status");
+      }
+      if (!existingBookingCols.includes('transaction_uuid')) {
+        await pool.query("ALTER TABLE bookings ADD COLUMN transaction_uuid VARCHAR(255) UNIQUE DEFAULT NULL AFTER payment_status");
+      }
+      if (!existingBookingCols.includes('paid_amount')) {
+        await pool.query("ALTER TABLE bookings ADD COLUMN paid_amount DECIMAL(10,2) DEFAULT 0.00 AFTER transaction_uuid");
       }
     } catch (err) {
       console.log('Migration check skipped or columns already handled:', err.message);

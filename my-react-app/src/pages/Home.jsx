@@ -4,23 +4,25 @@ import UserNavbar from '../components/UserNavbar';
 import { 
   ArrowRight, 
   CheckCircle2, 
-  Users, 
   MapPin, 
   ShieldCheck, 
-  TrendingUp, 
   Calendar, 
   Search, 
   Phone, 
   Mail, 
   Globe,
-  Camera,
-  Share2,
   Clock,
   Star,
   Zap,
-  Award,
   Lock,
-  Headphones
+  Headphones,
+  Layout,
+  MousePointer2,
+  CheckCircle,
+  Building2,
+  Trophy,
+  Activity,
+  UserCheck
 } from 'lucide-react';
 
 const Home = () => {
@@ -30,313 +32,325 @@ const Home = () => {
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener('scroll', handleScroll);
-    document.title = "UniBook | The Smart Way to Book Everything";
+    document.title = "UniBook | Professional Appointment Scheduling Platform";
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const services = [
-    { name: "Restaurants", icon: "🍽️", desc: "Reserve your table at the city's finest dining spots with instant digital confirmation.", stats: "1200+ Tables Booked" },
-    { name: "Futsal", icon: "⚽", desc: "Book professional turf courts for your team. Real-time pitch availability tracking.", stats: "450+ Weekly Matches" },
-    { name: "Hospitals", icon: "🏥", desc: "Secure priority appointments with top-tier medical specialists and holistic clinics.", stats: "800+ Verified Doctors" },
-    { name: "Salon / Spa", icon: "💆", desc: "Premium wellness, grooming, and luxury spa treatments at your preferred time.", stats: "600+ Stylists" }
+  const serviceCategories = [
+    { name: "Hospitality", icon: "🍴", label: "Dining & Events" },
+    { name: "Sports", icon: "⚽", label: "Arena Booking" },
+    { name: "Healthcare", icon: "🏥", label: "Medical Visits" },
+    { name: "Lifestyle", icon: "💆", label: "Salon & Wellness" },
+    { name: "Education", icon: "📚", label: "Tutors & Labs" },
+    { name: "Corporate", icon: "🏢", label: "Meeting Rooms" }
   ];
 
-  const valueProps = [
-    { icon: Zap, title: "Instant Booking", desc: "No more waiting for callbacks. Confirmation in seconds." },
-    { icon: ShieldCheck, title: "Verified Providers", desc: "Every service provider is strictly vetted for quality and trust." },
-    { icon: Headphones, title: "24/7 Support", desc: "Our concierge team is always here to help with your bookings." },
-    { icon: Lock, title: "Secure Payments", desc: "Industry-standard encryption for all your transactions." }
+  const steps = [
+    { 
+      id: "01", 
+      title: "Discover Services", 
+      desc: "Browse through our network of verified service providers in your local area.",
+      icon: Search 
+    },
+    { 
+      id: "02", 
+      title: "Schedule Time", 
+      desc: "Select the perfect time slot from real-time availability calendars.",
+      icon: Calendar 
+    },
+    { 
+      id: "03", 
+      title: "Instant Confirmation", 
+      desc: "Book your appointment instantly with secure digital verification.",
+      icon: CheckCircle2 
+    }
   ];
 
   return (
-    <div className="min-h-screen bg-[#fcfcfd] text-slate-900 font-inter overflow-x-hidden selection:bg-emerald-100 selection:text-emerald-900">
+    <div className="min-h-screen bg-white text-slate-900 font-inter selection:bg-emerald-100 selection:text-emerald-900">
       <UserNavbar />
       
-      {/* Hero Section */}
-      <section className="relative pt-24 pb-32 overflow-hidden">
-        {/* Background Decorative Elements */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl -z-10 opacity-10 pointer-events-none">
-          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-emerald-300 rounded-full blur-[120px]" />
-          <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-teal-200 rounded-full blur-[100px]" />
-        </div>
-
+      {/* Hero Section - Clean & Refined */}
+      <section className="relative pt-32 pb-40 overflow-hidden bg-white">
         <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-20 items-center">
-          <div className="animate-in fade-in slide-in-from-left-8 duration-1000">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-700 text-xs font-black mb-8 shadow-sm">
-              <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-              Empowering 50,000+ Users Monthly
+          <div className="text-left animate-in fade-in slide-in-from-left duration-1000">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-50 border border-slate-100 text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-10">
+              Trusted by 5,000+ businesses nationwide
             </div>
-            <h1 className="text-6xl lg:text-8xl font-black leading-[1.1] mb-8 tracking-tight text-slate-900">
-              The Smart Way to <br/>
-              <span className="text-emerald-600">Book Everything.</span>
+            <h1 className="text-4xl md:text-5xl lg:text-7xl font-extrabold leading-[1.1] mb-8 tracking-tight text-slate-950 px-0">
+              The Professional Way to <br/>
+              Manage Your <span className="text-emerald-600 underline underline-offset-[8px] decoration-4 decoration-emerald-100">Time.</span>
             </h1>
-            <p className="text-xl text-slate-600 mb-12 max-w-xl leading-relaxed font-medium">
-              UniBook is the all-in-one ecosystem connecting you to premium local services. From futsal pitches to medical specialists, experience seamless scheduling today.
+            <p className="text-lg text-slate-500 mb-12 max-w-xl leading-relaxed font-normal">
+              UniBook is the enterprise-grade scheduling ecosystem. One platform to discover, book, and manage every appointment in your lifestyle.
             </p>
-            <div className="flex flex-col sm:flex-row items-center gap-5">
-              <button onClick={() => navigate('/login')} className="w-full sm:w-auto px-12 py-5 rounded-2xl bg-slate-900 text-white font-black text-lg hover:bg-emerald-600 hover:shadow-2xl hover:shadow-emerald-500/30 hover:-translate-y-1 transition-all flex items-center justify-center gap-3 cursor-pointer group">
-                Get Started Now <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            <div className="flex flex-col sm:flex-row items-center gap-4">
+              <button onClick={() => navigate('/login')} className="w-full sm:w-auto px-10 py-5 rounded-xl bg-slate-950 text-white font-bold text-lg hover:bg-emerald-600 shadow-xl shadow-slate-950/20 transition-all flex items-center justify-center gap-2 cursor-pointer group">
+                Start Booking Now <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </button>
-            </div>
-            
-            <div className="mt-16 flex items-center gap-12 border-t border-slate-100 pt-10">
-               <div>
-                  <p className="text-3xl font-black text-slate-900">950+</p>
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-[0.2em] mt-1">Verified Partners</p>
-               </div>
-               <div className="w-px h-12 bg-slate-200" />
-               <div className="">
-                  <div className="flex -space-x-3 mb-2">
-                     {[1,2,3,4].map(i => (
-                        <div key={i} className="w-10 h-10 rounded-full border-2 border-white bg-slate-100 overflow-hidden shadow-sm">
-                           <img src={`https://i.pravatar.cc/100?u=user${i}`} alt="user" className="w-full h-full object-cover" />
-                        </div>
-                     ))}
-                     <div className="w-10 h-10 rounded-full border-2 border-white bg-emerald-600 flex items-center justify-center text-[10px] font-black text-white shadow-sm">+2k</div>
-                  </div>
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-[0.2em]">Community Members</p>
-               </div>
+              <button onClick={() => navigate('/login')} className="w-full sm:w-auto px-10 py-5 rounded-xl bg-white text-slate-900 border border-slate-200 font-bold text-lg hover:bg-slate-50 transition-all flex items-center justify-center cursor-pointer">
+                Apply as Provider
+              </button>
             </div>
           </div>
 
-          <div className="relative animate-in fade-in zoom-in-95 duration-1000 hidden lg:block">
-            <div className="relative z-10 p-6 bg-white rounded-[4rem] shadow-2xl border border-slate-100 transform hover:rotate-1 transition-transform duration-700">
-               <img src="/images/booking.jpg" alt="Platform usage" className="rounded-[3rem] w-full h-[550px] object-cover shadow-inner" />
-               
-               {/* Floating Card 1 */}
-               <div className="absolute top-1/4 -right-12 bg-white p-5 rounded-3xl shadow-2xl border border-slate-100 animate-bounce-slow">
-                  <div className="flex items-center gap-4 mb-3">
-                     <div className="w-12 h-12 rounded-2xl bg-emerald-500 flex items-center justify-center shadow-lg shadow-emerald-500/20">
-                        <CheckCircle2 className="text-white w-6 h-6" />
-                     </div>
-                     <div>
-                        <p className="text-xs font-black uppercase text-slate-400 tracking-widest leading-none">Status</p>
-                        <p className="text-sm font-bold text-slate-900">Booking Verified</p>
-                     </div>
-                  </div>
-               </div>
-
-               {/* Floating Card 2 */}
-               <div className="absolute -bottom-6 -left-12 bg-white p-6 rounded-3xl shadow-2xl border border-slate-100">
-                  <div className="flex items-center gap-4">
-                     <div className="flex text-amber-400">
-                        {[1,2,3,4,5].map(i => <Star key={i} className="w-4 h-4 fill-current" />)}
-                     </div>
-                     <p className="text-sm font-black text-slate-900">4.9/5 Rating</p>
-                  </div>
-               </div>
+          <div className="relative hidden lg:block animate-in fade-in zoom-in duration-1000 delay-200">
+            <div className="relative z-10 p-2 bg-slate-100 rounded-[2rem] shadow-2xl overflow-hidden group hover:shadow-emerald-500/10 transition-shadow duration-500">
+               <img 
+                 src="https://images.unsplash.com/photo-1506784911079-53934eaad337?q=80&w=2070&auto=format&fit=crop" 
+                 alt="Professional Scheduling Interface" 
+                 className="rounded-[1.8rem] w-full h-[500px] object-cover grayscale hover:grayscale-0 transition-all duration-700"
+               />
+               <div className="absolute inset-0 bg-gradient-to-tr from-emerald-600/5 to-transparent pointer-events-none" />
             </div>
-            
-            {/* Background Orbs */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-emerald-600/5 rounded-full blur-[100px] -z-10" />
+            {/* Background elements */}
+            <div className="absolute -top-10 -right-10 w-64 h-64 bg-emerald-50 rounded-full blur-3xl -z-10 animate-pulse" />
+            <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-slate-50 rounded-full blur-2xl -z-10" />
           </div>
         </div>
       </section>
 
-      {/* Trust & Logos Section */}
-      <section className="py-24 border-y border-slate-100 bg-white/50 backdrop-blur-md relative z-10">
+      {/* Social Proof - Subtle Grayscale */}
+      <section className="py-12 border-y border-slate-100 bg-slate-50/30">
         <div className="max-w-7xl mx-auto px-6">
-          <p className="text-center text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] mb-16">The Ecosystem Trusted by Leaders</p>
-          <div className="flex flex-wrap justify-center items-center gap-12 md:gap-24 opacity-40 grayscale hover:grayscale-0 transition-all duration-700">
-            {['HOSPITAL NETWORK', 'FIFA PARTNERS', 'ELITE DINING', 'SPA ASSOCIATION', 'GYM GLOBAL'].map(name => (
-              <span key={name} className="text-2xl font-black tracking-tighter text-slate-900 hover:text-emerald-600 cursor-default transition-colors">{name}</span>
+          <p className="text-center text-[10px] font-bold text-slate-400 uppercase tracking-[0.4em] mb-10">Integration Ecosystem</p>
+          <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16 opacity-30 grayscale pointer-events-none">
+            {['RESTAURANTS', 'FOOTBALL ARENAS', 'HEALTH CENTERS', 'SPA & SALON', 'TUTORING HUBS', 'AUTO CARE'].map(name => (
+              <span key={name} className="text-sm font-extrabold tracking-widest text-slate-900">{name}</span>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Services Showcase */}
-      <section className="py-32 px-6 relative">
+      {/* How it Works - Structured & Subtle */}
+      <section className="py-24 px-6 bg-white">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-24 max-w-3xl mx-auto">
-            <h2 className="text-5xl font-black mb-8 tracking-tight text-slate-900">Professional Booking. <br/><span className="text-emerald-600">Zero Complications.</span></h2>
-            <p className="text-xl text-slate-500 font-medium leading-relaxed">No matter your need, UniBook provides a unified interface to reach the best service providers in the region.</p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
-            {services.map((s, i) => (
-              <div key={s.name} 
-                onClick={() => navigate('/login')}
-                className="group relative p-10 rounded-[3rem] bg-white border border-slate-100 hover:border-emerald-200 transition-all duration-500 hover:-translate-y-3 cursor-pointer shadow-sm hover:shadow-2xl hover:shadow-emerald-500/10 overflow-hidden">
-                <div className="text-6xl mb-10 group-hover:scale-110 transition-transform duration-500 inline-block">{s.icon}</div>
-                <div className="absolute top-8 right-8 w-12 h-12 rounded-full border border-slate-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 scale-50 group-hover:scale-100">
-                   <ArrowRight className="w-5 h-5 text-emerald-600" />
+           <div className="text-center mb-20">
+             <p className="text-emerald-600 font-bold text-[10px] uppercase tracking-[0.4em] mb-4">The Workflow</p>
+             <h2 className="text-3xl md:text-4xl font-extrabold mb-4 tracking-tight text-slate-950">How it works.</h2>
+             <p className="text-slate-500 font-medium text-base">Three simple steps to bridge the gap between need and service.</p>
+           </div>
+           
+           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 lg:gap-20">
+             {steps.map((step) => (
+                <div key={step.id} className="relative group">
+                   <div className="text-5xl font-black text-slate-100 absolute -top-8 -left-2 -z-0">
+                      {step.id}
+                   </div>
+                   <div className="relative z-10">
+                      <div className="w-12 h-12 rounded-xl bg-white border border-slate-200 flex items-center justify-center mb-6 shadow-sm group-hover:border-emerald-500 group-hover:bg-emerald-500 transition-all">
+                         <step.icon className="w-5 h-5 text-slate-900 group-hover:text-white" />
+                      </div>
+                      <h3 className="text-xl font-bold mb-3 text-slate-950">{step.title}</h3>
+                      <p className="text-slate-500 font-normal leading-relaxed text-sm">{step.desc}</p>
+                   </div>
                 </div>
-                <p className="text-[10px] font-black tracking-[0.2em] uppercase text-emerald-500 mb-3">{s.stats}</p>
-                <h3 className="text-2xl font-black mb-5 text-slate-900">{s.name}</h3>
-                <p className="text-slate-500 leading-relaxed font-medium text-sm">{s.desc}</p>
-                
-                {/* Decorative background element */}
-                <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-emerald-50 rounded-full -z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+             ))}
+           </div>
+        </div>
+      </section>
+
+      {/* Featured Service Grid - Professional & Clean */}
+      <section className="py-24 bg-slate-50/30 border-y border-slate-100 px-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-10 mb-16 px-2">
+            <div className="max-w-2xl">
+              <p className="text-emerald-600 font-bold text-[10px] uppercase tracking-[0.4em] mb-4">Enterprise Reach</p>
+              <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight text-slate-950">A category for every lifestyle.</h2>
+            </div>
+            <button onClick={() => navigate('/services')} className="flex items-center gap-2 font-bold text-sm text-slate-900 hover:text-emerald-600 transition-colors cursor-pointer group pb-1 border-b-2 border-transparent hover:border-emerald-600">
+              Explore All Categories <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </button>
+          </div>
+
+          <div className="grid grid-cols-2 lg:grid-cols-6 gap-6">
+            {serviceCategories.map((c) => (
+              <div key={c.name} 
+                className="p-6 rounded-xl bg-white border border-slate-100 hover:border-emerald-500 hover:shadow-xl hover:shadow-emerald-500/5 transition-all cursor-pointer group text-center"
+                onClick={() => navigate('/login')}
+              >
+                <div className="text-3xl mb-4 group-hover:scale-105 transition-transform">{c.icon}</div>
+                <h4 className="text-xs font-bold text-slate-900 mb-1">{c.name}</h4>
+                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{c.label}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Why Choose Us - Real Life Benefits */}
-      <section className="py-32 bg-slate-900 text-white relative overflow-hidden">
-          <div className="absolute inset-0 opacity-10 pointer-events-none">
-             <div className="absolute -top-24 -left-24 w-96 h-96 bg-emerald-500 rounded-full blur-[150px]" />
-             <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-teal-500 rounded-full blur-[150px]" />
-          </div>
-
-          <div className="max-w-7xl mx-auto px-6 relative z-10">
-             <div className="text-center mb-24">
-                <h2 className="text-4xl lg:text-5xl font-black mb-6 tracking-tight">The UniBook Advantage</h2>
-                <p className="text-slate-400 text-lg font-medium max-w-2xl mx-auto">We've built a platform that prioritizes your time, security, and peace of mind.</p>
-             </div>
-
-             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12">
-                {[
-                  { icon: Zap, title: "Velocity", desc: "Confirm your appointment in under 60 seconds with our optimized booking engine." },
-                  { icon: ShieldCheck, title: "Trust", desc: "Every partner undergoes a 12-point authentication process before joining." },
-                  { icon: Headphones, title: "Concierge", desc: "Dedicated support team available 24/7 to resolve any scheduling issues." },
-                  { icon: Lock, title: "Encryption", desc: "Your data and payment info are protected by banking-grade security protocols." }
-                ].map((item, i) => (
-                   <div key={i} className="text-center group">
-                      <div className="w-16 h-16 rounded-3xl bg-emerald-600 flex items-center justify-center mx-auto mb-8 shadow-xl shadow-emerald-500/20 group-hover:scale-110 transition-transform duration-300">
-                         <item.icon className="w-8 h-8 text-white" />
-                      </div>
-                      <h4 className="text-xl font-bold mb-4">{item.title}</h4>
-                      <p className="text-slate-400 font-medium text-sm leading-relaxed">{item.desc}</p>
-                   </div>
-                ))}
-             </div>
-          </div>
-      </section>
-
-      {/* Testimonials - Enhanced */}
-      <section className="py-32 bg-white">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-10 mb-20">
-             <div className="max-w-2xl">
-               <h2 className="text-5xl font-black tracking-tight mb-6 text-slate-900 leading-tight">Stories from our <br/><span className="text-emerald-600">Community.</span></h2>
-               <p className="text-xl text-slate-500 font-medium italic">"UniBook didn't just give me an app; it gave me back my weekends."</p>
-             </div>
-             <div className="flex gap-4">
-                <div className="px-6 py-4 rounded-3xl bg-emerald-50 border border-emerald-100 flex flex-col items-center">
-                   <p className="text-3xl font-black text-emerald-600 leading-none mb-1">4.9</p>
-                   <p className="text-[10px] font-black uppercase tracking-widest text-emerald-700">App Store</p>
-                </div>
-                <div className="px-6 py-4 rounded-3xl bg-slate-50 border border-slate-100 flex flex-col items-center">
-                   <p className="text-3xl font-black text-slate-900 leading-none mb-1">2M+</p>
-                   <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">Active Daily</p>
-                </div>
-             </div>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-             {[
-               { name: "Anish Thapa", role: "Futsal Enthusiast", text: "UniBook has revolutionized how we organize our weekly matches. No more calling around—just tap and play.", avatar: "https://i.pravatar.cc/150?u=anish" },
-               { name: "Suman Gurung", role: "Restaurateur", text: "As a partner, the platform reduced our no-shows by 45%. The automation is truly world-class tech.", avatar: "https://i.pravatar.cc/150?u=suman" },
-               { name: "Prabin Rai", role: "Regular Client", text: "I book everything from my dental checkups to spa days here. It's the most reliable app on my phone.", avatar: "https://i.pravatar.cc/150?u=prabin" }
-             ].map((t, idx) => (
-               <div key={idx} className="p-12 rounded-[3.5rem] bg-[#fcfcfd] border border-slate-100 flex flex-col justify-between hover:border-emerald-200 transition-all duration-300 shadow-sm relative group">
-                  <div className="absolute top-10 right-10 opacity-5 group-hover:opacity-10 transition-opacity">
-                     <Star className="w-12 h-12 fill-emerald-600" />
-                  </div>
-                  <div>
-                    <div className="flex gap-1 mb-8 text-emerald-500">
-                       {[1, 2, 3, 4, 5].map(i => <Star key={i} className="w-4 h-4 fill-current" />)}
+      {/* Core Values - Professional Hierarchy */}
+      <section className="py-24 px-6">
+         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-20">
+            <div className="lg:w-1/2">
+               <p className="text-emerald-600 font-bold text-[10px] uppercase tracking-[0.4em] mb-4">Why UniBook?</p>
+               <h2 className="text-3xl md:text-4xl font-extrabold mb-10 tracking-tight leading-tight text-slate-950">
+                  Built for scale. <br/>
+                  Defined by precision.
+               </h2>
+               
+               <div className="space-y-8">
+                  {[
+                    { icon: Zap, title: "Velocity First", desc: "Our real-time engine handles thousands of bookings per second with zero latency." },
+                    { icon: ShieldCheck, title: "Verified Ecosystem", desc: "Every service provider is strictly audited to ensure the highest standards." },
+                    { icon: Activity, title: "Live Tracking", desc: "Monitor your appointment status and updates in real-time on any device." }
+                  ].map((v, i) => (
+                    <div key={i} className="flex gap-5">
+                       <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center flex-shrink-0">
+                          <v.icon className="w-4 h-4 text-emerald-600" />
+                       </div>
+                       <div>
+                          <h4 className="text-base font-bold text-slate-900 mb-1.5">{v.title}</h4>
+                          <p className="text-slate-500 font-normal leading-relaxed max-w-sm text-sm">{v.desc}</p>
+                       </div>
                     </div>
-                    <p className="text-slate-700 italic font-medium leading-relaxed mb-12 text-lg">"{t.text}"</p>
-                  </div>
-                  <div className="flex items-center gap-5">
-                    <img src={t.avatar} alt={t.name} className="w-14 h-14 rounded-2xl object-cover ring-4 ring-white shadow-md" />
-                    <div className="text-left">
-                       <h5 className="font-black text-slate-900 leading-none mb-1.5 text-base">{t.name}</h5>
-                       <p className="text-[10px] font-black text-emerald-600 uppercase tracking-[0.2em]">{t.role}</p>
-                    </div>
+                  ))}
+               </div>
+            </div>
+            
+            <div className="lg:w-1/2 w-full">
+               <div className="relative p-1 bg-slate-100/50 rounded-2xl overflow-hidden">
+                  <div className="bg-white rounded-xl p-8 shadow-sm">
+                     <div className="flex items-center justify-between mb-10">
+                        <div className="flex gap-1.5">
+                           <div className="w-2.5 h-2.5 rounded-full bg-slate-200" />
+                           <div className="w-2.5 h-2.5 rounded-full bg-slate-100" />
+                           <div className="w-2.5 h-2.5 rounded-full bg-slate-50" />
+                        </div>
+                        <div className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-600 text-[9px] font-bold uppercase tracking-widest">
+                           Live Interface
+                        </div>
+                     </div>
+                     
+                     <div className="space-y-4">
+                        <div className="h-10 bg-slate-50 rounded-lg w-full animate-pulse" />
+                        <div className="grid grid-cols-3 gap-4">
+                           <div className="h-24 bg-slate-50 rounded-xl animate-pulse" />
+                           <div className="h-24 bg-emerald-600 rounded-xl shadow-lg border border-emerald-500" />
+                           <div className="h-24 bg-slate-50 rounded-xl animate-pulse" />
+                        </div>
+                        <div className="h-32 bg-slate-50 rounded-xl w-full animate-pulse" />
+                        <div className="flex justify-end pt-2">
+                           <div className="h-10 w-32 bg-slate-950 rounded-lg" />
+                        </div>
+                     </div>
                   </div>
                </div>
-             ))}
+            </div>
+         </div>
+      </section>
+
+      {/* Testimonials - Balanced Typography */}
+      <section className="py-24 bg-slate-950 text-white px-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-16 lg:gap-24 items-center">
+             <div className="text-center lg:text-left">
+                <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-8 leading-tight">The Voice of <br/>Our Global Partners.</h2>
+                <div className="flex items-center justify-center lg:justify-start gap-8 py-6 border-t border-slate-800">
+                   <div>
+                      <p className="text-3xl font-bold text-emerald-500 mb-1">4.9/5</p>
+                      <p className="text-[9px] font-bold uppercase tracking-widest text-slate-500">Platform Rating</p>
+                   </div>
+                   <div className="w-px h-10 bg-slate-800" />
+                   <div>
+                      <p className="text-3xl font-bold text-white mb-1">2M+</p>
+                      <p className="text-[9px] font-bold uppercase tracking-widest text-slate-500">Reminders Sent</p>
+                   </div>
+                </div>
+             </div>
+             <div>
+                <div className="p-8 lg:p-10 rounded-2xl bg-slate-900 border border-slate-800 relative">
+                   <div className="text-5xl text-emerald-600/30 font-serif absolute top-4 left-6">“</div>
+                   <p className="text-lg font-normal leading-relaxed text-slate-300 italic mb-10 relative z-10">
+                      "UniBook has transformed the way we handle our weekly scheduling. The automation is flawless, and the real-time confirmation has reduced our coordination overhead by 60%."
+                   </p>
+                   <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-xl bg-emerald-600 flex items-center justify-center font-bold text-base">S</div>
+                      <div>
+                         <h5 className="font-bold text-white text-base">Suman Gurung</h5>
+                         <p className="text-emerald-500 text-[9px] font-bold uppercase tracking-widest">Elite Futsal Hub Manager</p>
+                      </div>
+                   </div>
+                </div>
+             </div>
           </div>
         </div>
       </section>
 
-      {/* Global Reach CTA */}
-      <section className="py-32 px-6">
-        <div className="max-w-5xl mx-auto">
-            <div className="relative p-20 rounded-[4rem] bg-emerald-600 text-white shadow-3xl shadow-emerald-600/20 overflow-hidden group">
-               <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-white rounded-full blur-[120px] opacity-20 -z-0 group-hover:scale-110 transition-transform duration-1000" />
-               <div className="absolute -bottom-24 -left-24 w-80 h-80 bg-teal-400 rounded-full blur-[100px] opacity-30 -z-0" />
-               
-               <div className="relative z-10 text-center">
-                  <h2 className="text-5xl lg:text-6xl font-black mb-10 tracking-tight leading-none">Your Next Appointment <br/> is Seconds Away.</h2>
+      {/* Final Refined CTA */}
+      <section className="py-32 bg-white">
+         <div className="max-w-5xl mx-auto px-6">
+            <div className="relative p-12 md:p-20 rounded-3xl bg-emerald-600 text-white text-center overflow-hidden">
+               <div className="relative z-10">
+                  <h2 className="text-3xl md:text-5xl font-extrabold mb-10 tracking-tight leading-tight">
+                     Ready to automate <br/> your lifestyle?
+                  </h2>
                   <div className="flex flex-col sm:flex-row justify-center gap-6 items-center">
-                    <button onClick={() => navigate('/login')} className="px-12 py-5 bg-white text-emerald-700 rounded-2xl font-black text-xl hover:bg-slate-900 hover:text-white transition-all shadow-2xl cursor-pointer">Start Booking Now</button>
-                    <div className="flex flex-col items-center sm:items-start text-emerald-100">
-                       <Link to="/login" className="text-sm font-bold flex items-center gap-2 underline underline-offset-4 cursor-pointer hover:text-white transition-colors">Apply as a Service Provider</Link>
-                       <p className="text-[10px] font-medium opacity-70 mt-1 uppercase tracking-widest text-center sm:text-left">Join 5,000+ growing businesses</p>
+                    <button onClick={() => navigate('/login')} className="w-full sm:w-auto px-10 py-4 bg-slate-950 text-white rounded-xl font-bold text-lg hover:bg-white hover:text-emerald-700 transition-all shadow-xl shadow-slate-950/20 cursor-pointer">
+                       Book Your Slot Now
+                    </button>
+                    <div className="flex flex-col items-center sm:items-start text-emerald-50">
+                       <Link to="/login" className="text-xs font-bold underline underline-offset-4 decoration-emerald-300 hover:text-white transition-colors cursor-pointer">Explore Platform</Link>
+                       <p className="text-[9px] font-bold opacity-70 mt-2 uppercase tracking-widest">Join 50k+ local users</p>
                     </div>
                   </div>
                </div>
             </div>
-        </div>
+         </div>
       </section>
 
-      {/* Simplified, Modern Footer */}
-      <footer className="pt-32 pb-16 bg-white border-t border-slate-100 relative z-10">
+      {/* Minimalist Footer */}
+      <footer className="pt-24 pb-12 bg-white border-t border-slate-100">
         <div className="max-w-7xl mx-auto px-6">
-           <div className="grid lg:grid-cols-12 gap-20 mb-24">
+           <div className="grid lg:grid-cols-12 gap-16 mb-20">
               <div className="lg:col-span-5">
-                  <div className="flex items-center gap-3 mb-10">
-                    <div className="flex items-center justify-center">
-                      <img src="/logo.png" alt="UniBook Logo" className="w-12 h-12 object-contain" />
-                    </div>
-                    <h2 className="text-3xl font-black tracking-tight text-slate-900">UniBook<span className="text-emerald-600">.</span></h2>
+                  <div className="flex items-center gap-2.5 mb-8">
+                    <img src="/logo.png" alt="UniBook Logo" className="w-8 h-8 object-contain" />
+                    <h2 className="text-xl font-bold tracking-tight text-slate-900">UniBook<span className="text-emerald-600">.</span></h2>
                   </div>
-                 <p className="text-slate-500 font-medium text-lg leading-relaxed mb-10 max-w-sm">
-                    The world's most intuitive ecosystem for local services. Designed for precision, built for velocity.
+                 <p className="text-slate-500 font-medium text-base mb-10 max-w-sm leading-relaxed">
+                    The premium standard for local service discovery and automated appointment management.
                  </p>
-                 <div className="flex gap-5">
-                    {[Globe, Share2, Camera].map((Icon, i) => (
-                      <a key={i} href="#" className="w-12 h-12 rounded-2xl border border-slate-100 flex items-center justify-center text-slate-400 hover:bg-emerald-600 hover:text-white hover:border-emerald-600 transition-all shadow-sm">
-                        <Icon className="w-5 h-5" />
+                 <div className="flex gap-4">
+                    {[Globe, Mail, Phone].map((Icon, i) => (
+                      <a key={i} href="#" className="w-10 h-10 rounded-xl border border-slate-100 flex items-center justify-center text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-all">
+                        <Icon className="w-4 h-4" />
                       </a>
                     ))}
                  </div>
               </div>
 
-              <div className="lg:col-span-7 grid grid-cols-2 md:grid-cols-3 gap-12">
+              <div className="lg:col-span-7 grid grid-cols-2 md:grid-cols-3 gap-10">
                  <div>
-                    <h5 className="font-black text-slate-900 mb-8 uppercase text-xs tracking-[0.3em]">Resources</h5>
-                    <ul className="space-y-5">
-                       {['Marketplace', 'Booking API', 'Documentation', 'Security Hub'].map(link => (
-                         <li key={link}><Link to="/login" className="text-slate-500 hover:text-emerald-600 transition-colors font-bold text-sm">{link}</Link></li>
+                    <h5 className="font-bold text-slate-900 mb-6 uppercase text-[9px] tracking-[0.3em]">Services</h5>
+                    <ul className="space-y-4">
+                       {['Healthcare', 'Sports', 'Hospitality', 'Beauty'].map(link => (
+                         <li key={link}><Link to="/login" className="text-slate-500 hover:text-emerald-600 transition-colors font-bold text-xs tracking-tight">{link}</Link></li>
                        ))}
                     </ul>
                  </div>
                  <div>
-                    <h5 className="font-black text-slate-900 mb-8 uppercase text-xs tracking-[0.3em]">Company</h5>
-                    <ul className="space-y-5">
-                       {['Mission', 'Strategic Partners', 'Global Career', 'Press Kit'].map(link => (
-                         <li key={link}><Link to="/login" className="text-slate-500 hover:text-emerald-600 transition-colors font-bold text-sm">{link}</Link></li>
+                    <h5 className="font-bold text-slate-900 mb-6 uppercase text-[9px] tracking-[0.3em]">Platform</h5>
+                    <ul className="space-y-4">
+                       {['Security', 'API Support', 'Enterprise', 'Providers'].map(link => (
+                         <li key={link}><Link to="/login" className="text-slate-500 hover:text-emerald-600 transition-colors font-bold text-xs tracking-tight">{link}</Link></li>
                        ))}
                     </ul>
                  </div>
-                 <div className="col-span-2 md:col-span-1">
-                    <h5 className="font-black text-slate-900 mb-8 uppercase text-xs tracking-[0.3em]">Headquarters</h5>
-                    <ul className="space-y-5 text-slate-500 font-bold text-sm">
-                       <li className="flex items-center gap-4 group"><Phone className="w-5 h-5 text-emerald-600" /> <span className="group-hover:text-emerald-600 transition-colors">+977-1-4XXXXXX</span></li>
-                       <li className="flex items-center gap-4 group"><Mail className="w-5 h-5 text-emerald-600" /> <span className="group-hover:text-emerald-600 transition-colors">hello@unibook.io</span></li>
-                       <li className="flex items-center gap-4 group"><MapPin className="w-5 h-5 text-emerald-600" /> <span className="group-hover:text-emerald-600 transition-colors">Kathmandu, Nepal</span></li>
+                 <div>
+                    <h5 className="font-bold text-slate-900 mb-6 uppercase text-[9px] tracking-[0.3em]">Support</h5>
+                    <ul className="space-y-4 text-slate-500 font-bold text-xs">
+                       <li className="flex items-center gap-2.5 truncate"><Mail className="w-3.5 h-3.5 text-emerald-600" /> contact@unibook.io</li>
+                       <li className="flex items-center gap-2.5"><Phone className="w-3.5 h-3.5 text-emerald-600" /> +977-1-4XXXXXX</li>
                     </ul>
                  </div>
               </div>
            </div>
 
-           <div className="pt-16 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-10">
-              <div className="flex items-center gap-3">
-                 <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                 <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">Platform Operational 24/7</p>
-              </div>
-              <p className="text-slate-400 text-xs font-bold">© 2026 UniBook Ecosystem. Global Operations.</p>
-              <div className="flex gap-10 text-[10px] font-black uppercase tracking-widest text-slate-400">
+           <div className="pt-12 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-10 text-[9px] font-bold uppercase tracking-widest text-slate-400">
+              <p>© 2026 UniBook Ecosystem.</p>
+              <div className="flex gap-8">
                  <a href="#" className="hover:text-emerald-600 transition-colors">Privacy</a>
-                 <a href="#" className="hover:text-emerald-600 transition-colors">Compliance</a>
-                 <a href="#" className="hover:text-emerald-600 transition-colors">Legal</a>
+                 <a href="#" className="hover:text-emerald-600 transition-colors">Terms</a>
               </div>
            </div>
         </div>

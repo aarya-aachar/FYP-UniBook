@@ -50,34 +50,42 @@ const UserDashboard = () => {
   ];
 
   return (
-    <div className="flex flex-col min-h-screen transition-all duration-500 font-inter"
-         style={{ background: isDark ? 'linear-gradient(135deg, #020617 0%, #064e3b 50%, #020617 100%)' : 'linear-gradient(135deg, #f8fafc 0%, #ecfdf5 100%)' }}>
+    <div className={`flex flex-col min-h-screen transition-all duration-500 font-inter user-panel-bg ${isDark ? 'dark' : 'light'}`}>
       
       <UserNavbar />
 
       <main className="flex-1 overflow-y-auto px-6 md:px-10 py-12 relative transition-all duration-300">
-        <div className={`absolute top-0 right-0 w-full h-96 bg-gradient-to-b opacity-50 pointer-events-none transition-all duration-300
-          ${isDark ? 'from-emerald-900/10 to-transparent' : 'from-emerald-50 to-transparent'}`} />
+        <div className="max-w-7xl mx-auto w-full pt-16 relative z-10">
 
-        <div className="max-w-7xl mx-auto w-full pt-4 relative z-10">
-
-          <div className={`flex flex-col mb-10 border-b pb-6 transition-colors ${isDark ? 'border-slate-800' : 'border-slate-200'}`}>
-            <h1 className={`text-3xl font-bold tracking-tight mb-2 transition-colors ${isDark ? 'text-white' : 'text-slate-900'}`}>
-              Welcome, {user?.name?.split(' ')[0] || 'User'}
-            </h1>
-            <p className={`text-base transition-colors ${isDark ? 'text-slate-400' : 'text-slate-500'} max-w-2xl`}>
-              What would you like to book today? Here is your dashboard overview.
-            </p>
+          <div className="mb-10 fade-in">
+            <div className="glass-header">
+              <h1 className={`text-4xl font-bold tracking-tight mb-2 transition-colors ${isDark ? 'text-white drop-shadow-sm' : 'text-slate-900'}`}>
+                Welcome, {user?.name?.split(' ')[0] || 'User'}
+              </h1>
+              <p className={`text-base font-medium transition-colors ${isDark ? 'text-slate-300' : 'text-slate-600'} max-w-2xl`}>
+                What would you like to book today? Here is your dashboard overview.
+              </p>
+            </div>
           </div>
 
           <div className="grid grid-cols-12 gap-8">
             
-            <div className={`col-span-12 lg:col-span-8 group relative rounded-2xl p-8 overflow-hidden transition-all duration-200 border
-              ${isDark ? 'bg-slate-800/50 border-slate-700 hover:border-slate-600' : 'bg-white border-slate-200 hover:border-slate-300 shadow-sm'}`}>
+            <div className={`col-span-12 lg:col-span-8 group relative rounded-2xl p-8 overflow-hidden transition-all duration-200 border glass-card`}>
+               
+               {/* Background Image with Overlay */}
+               <div className="absolute inset-0 z-0">
+                  <img 
+                    src="https://images.unsplash.com/photo-1501139083538-0139583c060f?q=80&w=2070&auto=format&fit=crop" 
+                    alt="Scheduling" 
+                    className="w-full h-full object-cover opacity-10 group-hover:opacity-20 transition-opacity duration-700" 
+                  />
+                  <div className={`absolute inset-0 ${isDark ? 'bg-slate-900/60' : 'bg-white/40'}`} />
+               </div>
+
                <div className="relative z-10">
                   <div className="flex items-center justify-between mb-8">
                      <span className={`px-3 py-1 rounded-md text-xs font-semibold tracking-wide ${isDark ? 'bg-emerald-500/20 text-emerald-400' : 'bg-emerald-100 text-emerald-700'}`}>
-                       Next Appointment
+                        Next Appointment
                      </span>
                   </div>
 
@@ -120,8 +128,7 @@ const UserDashboard = () => {
                   const Icon = item.icon;
                   return (
                   <div key={i} onClick={() => navigate(item.path)} 
-                     className={`group cursor-pointer border rounded-2xl p-5 transition-all outline-none focus:ring-2 focus:ring-emerald-500 hover:-translate-y-[2px]
-                     ${isDark ? 'bg-slate-800/50 border-slate-700 hover:bg-slate-800' : 'bg-white border-slate-200 hover:border-slate-300 shadow-sm'}`}>
+                     className={`group cursor-pointer border rounded-2xl p-5 transition-all outline-none focus:ring-2 focus:ring-emerald-500 hover:-translate-y-[2px] glass-card`}>
                      <div className="flex items-center gap-4">
                        <div className={`p-3 rounded-lg ${isDark ? 'bg-slate-700/50 text-slate-300' : 'bg-slate-100 text-slate-600'}`}>
                          <Icon className="w-5 h-5" />
@@ -138,7 +145,9 @@ const UserDashboard = () => {
           </div>
           
           <div className="mt-12 flex flex-col gap-4">
-             <span className={`text-sm font-semibold tracking-wide ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>Browse Categories</span>
+             <div className="glass-header !py-2 !px-4 w-max">
+               <span className={`text-sm font-bold tracking-wide ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>Browse Categories</span>
+             </div>
              <div className="flex items-center gap-4 overflow-x-auto pb-4 scrollbar-hide">
                {categories.map((cat, i) => {
                   const Icon = cat.icon;

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import UserNavbar from '../components/UserNavbar';
 import { getUserBookings, updateBookingStatus } from '../services/bookingService';
 import { useUserTheme } from '../context/UserThemeContext';
@@ -11,6 +11,7 @@ const ViewAppointments = () => {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [toasts, setToasts] = useState([]);
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const toast = (message, type = 'success') => {
     const id = Date.now();
@@ -20,8 +21,26 @@ const ViewAppointments = () => {
 
   useEffect(() => {
     document.title = "My Bookings | UniBook";
+    
+    // Check for payment status in URL
+    const paymentStatus = searchParams.get('payment');
+    if (paymentStatus === 'success') {
+      toast('Payment successful! Your booking is confirmed.');
+    } else if (paymentStatus === 'cancelled') {
+      toast('Payment was cancelled.', 'error');
+    } else if (paymentStatus === 'failed') {
+      toast('Payment failed. Please try again.', 'error');
+    } else if (paymentStatus === 'error') {
+      toast('An error occurred during payment verification.', 'error');
+    }
+
+    // Clear params from URL for a clean look
+    if (paymentStatus) {
+      setSearchParams({});
+    }
+
     fetchBookings();
-  }, []);
+  }, [searchParams]);
 
   const fetchBookings = async () => {
     try {
@@ -87,14 +106,11 @@ const ViewAppointments = () => {
   }
 
   return (
-    <div className="flex flex-col min-h-screen transition-all duration-500 font-inter"
-         style={{ background: isDark ? 'linear-gradient(135deg, #020617 0%, #064e3b 50%, #020617 100%)' : 'linear-gradient(135deg, #f8fafc 0%, #ecfdf5 100%)' }}>
+    <div className={`flex flex-col min-h-screen transition-all duration-500 font-inter user-panel-bg ${isDark ? 'dark' : 'light'}`}>
       
       <UserNavbar />
 
       <main className="flex-1 overflow-y-auto px-6 md:px-10 py-12 relative transition-all duration-500">
-        <div className={`absolute top-[10%] right-[10%] w-96 h-96 blur-[120px] rounded-full pointer-events-none transition-all duration-500
-          ${isDark ? 'bg-emerald-600/10' : 'bg-emerald-400/5'}`} />
 
         <style>{`
           @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
@@ -113,15 +129,15 @@ const ViewAppointments = () => {
           ))}
         </div>
 
-        <div className="max-w-7xl mx-auto w-full slide-up pt-4 relative z-10">
+        <div className="max-w-7xl mx-auto w-full slide-up pt-16 relative z-10">
           
-          <div className={`flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10 border-b pb-6 transition-colors ${isDark ? 'border-slate-800' : 'border-slate-200'}`}>
-            <div>
-              <h1 className={`text-3xl font-bold mb-2 tracking-tight transition-colors ${isDark ? 'text-white' : 'text-slate-900'}`}>My Appointments</h1>
-              <p className={`text-base transition-colors ${isDark ? 'text-slate-400' : 'text-slate-600'} max-w-2xl`}>Check and manage all your active and past appointments.</p>
+          <div className="mb-10">
+            <div className="glass-header">
+              <h1 className={`text-4xl font-bold mb-2 tracking-tight transition-colors ${isDark ? 'text-white' : 'text-slate-900'}`}>My Appointments</h1>
+              <p className={`text-base font-medium transition-colors ${isDark ? 'text-slate-300' : 'text-slate-600'} max-w-2xl`}>Check and manage all your active and past appointments.</p>
             </div>
             <Link to="/services" 
-              className={`flex items-center gap-2 px-6 py-2.5 rounded-lg text-white font-medium text-sm transition-all w-max shadow-sm cursor-pointer ${isDark ? 'bg-emerald-600 hover:bg-emerald-500' : 'bg-emerald-600 hover:bg-emerald-700'}`}>
+              className={`flex items-center gap-2 px-6 py-2.5 rounded-lg text-white font-medium text-sm transition-all w-max shadow-sm cursor-pointer mt-6 ${isDark ? 'bg-emerald-600 hover:bg-emerald-500' : 'bg-emerald-600 hover:bg-emerald-700'}`}>
               <Plus className="w-4 h-4" /> New Booking
             </Link>
           </div>
@@ -145,8 +161,7 @@ const ViewAppointments = () => {
               const cfg = getStatusConfig(a.status);
               return (
               <div key={a.id} 
-                className={`group relative border rounded-2xl p-6 flex flex-col md:flex-row justify-between items-center gap-6 transition-all duration-300 shadow-sm
-                  ${isDark ? 'bg-slate-800/80 border-slate-700 hover:border-slate-600' : 'bg-white border-slate-200 hover:border-emerald-200'}`}
+                className={`group relative border rounded-2xl p-6 flex flex-col md:flex-row justify-between items-center gap-6 transition-all duration-300 shadow-sm glass-card`}
                 style={{ animation: `slideUp 0.4s ease-out ${i * 0.05}s forwards`, opacity: 0 }}>
                 
                 <div className="flex items-center gap-6 w-full md:w-auto">

@@ -94,14 +94,11 @@ const UserReports = () => {
   }
 
   return (
-    <div className="flex flex-col min-h-screen transition-all duration-500 font-inter"
-         style={{ background: isDark ? 'linear-gradient(135deg, #020617 0%, #064e3b 50%, #020617 100%)' : 'linear-gradient(135deg, #f8fafc 0%, #ecfdf5 100%)' }}>
+    <div className={`flex flex-col min-h-screen transition-all duration-500 font-inter user-panel-bg ${isDark ? 'dark' : 'light'}`}>
       
       <UserNavbar />
 
       <main className="flex-1 overflow-y-auto px-6 md:px-10 py-12 relative transition-all duration-500">
-        <div className={`absolute top-[10%] right-[10%] w-96 h-96 blur-[120px] rounded-full pointer-events-none transition-all duration-500
-          ${isDark ? 'bg-emerald-600/10' : 'bg-emerald-400/5'}`} />
 
         <style>{`
           @keyframes toastIn { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
@@ -123,15 +120,15 @@ const UserReports = () => {
           ))}
         </div>
 
-        <div className="max-w-7xl mx-auto w-full slide-up pt-4 relative z-10">
+        <div className="max-w-7xl mx-auto w-full slide-up pt-16 relative z-10">
           
-          <div className={`flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10 border-b pb-6 transition-colors ${isDark ? 'border-slate-800' : 'border-slate-200'}`}>
-            <div>
-              <h1 className={`text-3xl font-bold mb-2 tracking-tight transition-colors ${isDark ? 'text-white' : 'text-slate-900'}`}>My Reviews</h1>
-              <p className={`text-base transition-colors ${isDark ? 'text-slate-400' : 'text-slate-600'} max-w-2xl`}>See the feedback you've shared for your past bookings.</p>
+          <div className="mb-10">
+            <div className="glass-header">
+              <h1 className={`text-4xl font-bold mb-2 tracking-tight transition-colors ${isDark ? 'text-white' : 'text-slate-900'}`}>My Reviews</h1>
+              <p className={`text-base font-medium transition-colors ${isDark ? 'text-slate-300' : 'text-slate-600'} max-w-2xl`}>See the feedback you've shared for your past bookings.</p>
             </div>
             <button onClick={() => navigate('/services')} 
-              className={`flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg text-white font-medium text-sm transition-all w-max shadow-sm cursor-pointer ${isDark ? 'bg-emerald-600 hover:bg-emerald-500' : 'bg-emerald-600 hover:bg-emerald-700'}`}>
+              className={`flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg text-white font-medium text-sm transition-all w-max shadow-sm cursor-pointer mt-6 ${isDark ? 'bg-emerald-600 hover:bg-emerald-500' : 'bg-emerald-600 hover:bg-emerald-700'}`}>
               <Plus className="w-4 h-4" /> New Booking
             </button>
           </div>
@@ -155,8 +152,7 @@ const UserReports = () => {
               const hasReviewed = !!b.review_id;
               return (
               <div key={b.id} 
-                className={`group relative border rounded-2xl p-6 md:p-8 flex flex-col md:flex-row justify-between gap-6 transition-all duration-300 shadow-sm
-                  ${isDark ? 'bg-slate-800/80 border-slate-700 hover:border-slate-600' : 'bg-white border-slate-200 hover:border-emerald-200'}`}
+                className={`group relative border rounded-2xl p-6 md:p-8 flex flex-col md:flex-row justify-between gap-6 transition-all duration-300 shadow-sm glass-card`}
                 style={{ animation: `slideUp 0.4s ease-out ${i * 0.05}s forwards`, opacity: 0 }}>
                 
                 <div className="flex items-start gap-6 w-full md:w-auto">
@@ -206,8 +202,7 @@ const UserReports = () => {
         <div className="fixed inset-0 z-[100] flex items-center justify-center fade-in p-4">
           <div className="absolute inset-0 bg-[#020617]/70 backdrop-blur-md" onClick={closeReviewModal} />
           
-          <div className={`relative w-full max-w-lg border rounded-2xl p-8 shadow-2xl slide-up transition-all duration-300
-            ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}>
+          <div className={`relative w-full max-w-lg border rounded-2xl p-8 shadow-2xl slide-up transition-all duration-300 glass-card`}>
             <h2 className={`text-2xl font-bold mb-2 transition-colors ${isDark ? 'text-white' : 'text-slate-900'}`}>
               {activeBooking?.review_id ? 'Edit Review' : 'Rate Your Experience'}
             </h2>

@@ -3,7 +3,8 @@ import { useState, useEffect } from "react";
 import UserNavbar from "../components/UserNavbar";
 import { createBooking } from "../services/bookingService";
 import { useUserTheme } from "../context/UserThemeContext";
-import { Lock, ShieldCheck, Check, Building, QrCode } from "lucide-react";
+import { Lock, ShieldCheck, Check, Building, QrCode, CreditCard } from "lucide-react";
+import api from "../services/api";
 
 const Payment = () => {
   const { userTheme } = useUserTheme();
@@ -26,31 +27,48 @@ const Payment = () => {
     document.title = "Secure Checkout | UniBook";
   }, [date, time, navigate]);
 
-  const handleSimulateScan = async () => {
-    const validDemoId = "DEMO12345K";
-    
-    if (transactionId !== validDemoId) {
-      return setError(`Verification failed. Use the demo ID: ${validDemoId}`);
-    }
-    
-    setStep('processing');
+  const handleEsewaPayment = async () => {
+    setLoading(true);
     setError(null);
+    try {
+      // 1. Create a pending booking first
+      const booking = await createBooking({
+        provider_id: providerId,
+        booking_date: date,
+        booking_time: time,
+        status: 'pending',
+        notes: "eSewa Transaction Initiation"
+      });
 
-    setTimeout(async () => {
-      try {
-        await createBooking({
-          provider_id: providerId,
-          booking_date: date,
-          booking_time: time,
-          status: 'confirmed',
-          notes: "Verified QR Payment. ID: " + transactionId
-        });
-        setStep('success');
-      } catch (err) {
-        setError(err.message || "Payment failed. Please try again.");
-        setStep('scan');
-      }
-    }, 2500);
+      // 2. Call backend to get signed parameters
+      const response = await api.post('/payment/initiate', {
+        amount: price,
+        booking_id: booking.id
+      });
+      
+      const params = response.data;
+      
+      // 3. Create a hidden form and submit it to eSewa Sandbox
+      const form = document.createElement('form');
+      form.setAttribute('method', 'POST');
+      form.setAttribute('action', 'https://rc-epay.esewa.com.np/api/epay/main/v2/form');
+
+      Object.keys(params).forEach(key => {
+        const input = document.createElement('input');
+        input.setAttribute('type', 'hidden');
+        input.setAttribute('name', key);
+        input.setAttribute('value', params[key]);
+        form.appendChild(input);
+      });
+
+      document.body.appendChild(form);
+      form.submit();
+      
+    } catch (err) {
+      console.error('>>> [eSewa Error]:', err);
+      setError(err.response?.data?.message || err.message || "Failed to initiate eSewa payment.");
+      setLoading(false);
+    }
   };
 
   const handleFinish = () => {
@@ -58,14 +76,11 @@ const Payment = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen transition-all duration-500 font-inter"
-         style={{ background: isDark ? 'linear-gradient(135deg, #020617 0%, #064e3b 50%, #020617 100%)' : 'linear-gradient(135deg, #f8fafc 0%, #ecfdf5 100%)' }}>
+    <div className={`flex flex-col min-h-screen transition-all duration-500 font-inter user-panel-bg ${isDark ? 'dark' : 'light'}`}>
       
       <UserNavbar />
 
-      <main className="flex-1 flex flex-col items-center justify-center p-6 relative overflow-hidden transition-all duration-300">
-        <div className={`absolute top-0 right-0 w-full h-96 bg-gradient-to-b opacity-50 pointer-events-none transition-all duration-300
-          ${isDark ? 'from-emerald-900/10 to-transparent' : 'from-emerald-50 to-transparent'}`} />
+      <main className="flex-1 flex flex-col items-center justify-start pt-24 p-6 relative overflow-hidden transition-all duration-300">
 
         <style>{`
           @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
@@ -83,12 +98,11 @@ const Payment = () => {
                 ${isDark ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-emerald-50 border-emerald-200 text-emerald-600 md:shadow-inner'}`}>
                  <Lock className="w-6 h-6" />
               </div>
-              <h1 className={`text-3xl font-bold tracking-tight mb-2 transition-colors ${isDark ? 'text-white' : 'text-slate-900'}`}>Complete Booking</h1>
-              <p className={`text-sm transition-colors ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Secure Payment via QR Scan</p>
+              <h1 className={`text-3xl font-bold tracking-tight mb-2 transition-colors ${isDark ? 'text-white' : 'text-slate-900'}`}>Secure Checkout</h1>
+              <p className={`text-sm transition-colors ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Pay with eSewa (Sandbox)</p>
            </div>
 
-           <div className={`rounded-2xl border p-8 shadow-sm relative transition-all duration-300
-             ${isDark ? 'bg-slate-800/50 border-slate-700' : 'bg-white border-slate-200'}`}>
+           <div className={`rounded-2xl border p-8 shadow-sm relative transition-all duration-300 glass-card`}>
               
               <div className={`rounded-xl p-5 mb-6 border transition-all ${isDark ? 'bg-slate-900/50 border-slate-700' : 'bg-slate-50 border-slate-200 md:shadow-inner'}`}>
                  <p className={`text-xs font-semibold uppercase tracking-wider mb-3 transition-colors ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Booking Details</p>
@@ -102,39 +116,43 @@ const Payment = () => {
               </div>
 
               <div className="min-h-[260px] flex flex-col items-center justify-center transition-all duration-300">
-                 
-                 {step === 'scan' && (
+                                  {step === 'scan' && (
                     <div className="w-full flex flex-col items-center slide-up">
-                       <div className={`relative p-2 rounded-2xl mb-6 group border transition-all ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200 shadow-sm'}`}>
-                          <div className={`w-40 h-40 border-2 rounded-xl flex items-center justify-center transition-transform overflow-hidden ${isDark ? 'border-slate-700 shadow-inner' : 'border-slate-100 bg-white'}`}>
-                             <img src="/images/qr.png" alt="Merchant QR" className="w-full h-full object-contain" />
+                       <div className={`relative p-2 rounded-2xl mb-10 group border transition-all ${isDark ? 'bg-white/10 border-white/10' : 'bg-white border-slate-200 shadow-sm'}`}>
+                          <div className={`w-40 h-40 rounded-xl flex items-center justify-center transition-transform overflow-hidden bg-[#60bb46]`}>
+                             <img 
+                               src="https://upload.wikimedia.org/wikipedia/commons/f/ff/Esewa_logo.webp" 
+                               alt="eSewa Logo" 
+                               className="w-32 object-contain" 
+                               onError={(e) => { e.target.src='/images/qr.png'; }}
+                             />
                           </div>
-                       </div>
-                       
-                       <div className="w-full mb-6">
-                         <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 text-center transition-colors ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Transaction ID</label>
-                         <input 
-                           type="text"
-                           value={transactionId}
-                           onChange={(e) => setTransactionId(e.target.value.toUpperCase())}
-                           placeholder="Enter: DEMO12345K"
-                           className={`w-full border rounded-xl px-4 py-3 text-center font-bold outline-none transition-all uppercase tracking-widest text-sm
-                             ${isDark ? 'bg-slate-900 border-slate-700 text-emerald-400 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 placeholder-slate-600' : 'bg-slate-50 border-slate-200 text-emerald-600 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 shadow-sm placeholder-slate-400'}`}
-                         />
                        </div>
                        
                        {error && <p className={`text-xs font-medium mb-6 w-full text-center px-4 py-3 rounded-xl border transition-all ${isDark ? 'text-red-400 bg-red-500/10 border-red-500/20' : 'text-red-600 bg-red-50 border-red-100'}`}>{error}</p>}
                        
                        <button 
-                         onClick={handleSimulateScan} 
-                         disabled={transactionId.length === 0}
-                         className={`w-full py-3.5 rounded-xl font-bold uppercase tracking-wider text-sm transition-all duration-200 flex items-center justify-center gap-2 shadow-sm
-                           ${transactionId.length === 0 ? (isDark ? 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700' : 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200') : 'bg-emerald-600 text-white hover:bg-emerald-700 cursor-pointer hover:shadow'}`}
+                         onClick={handleEsewaPayment} 
+                         disabled={loading}
+                         className={`w-full py-4 rounded-xl font-bold uppercase tracking-wider text-sm transition-all duration-300 flex items-center justify-center gap-3 shadow-md border-b-4 
+                           ${loading 
+                             ? (isDark ? 'bg-slate-800 text-slate-500 border-slate-900' : 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed') 
+                             : 'bg-[#60bb46] text-white hover:bg-[#52a43b] border-[#458b32] hover:translate-y-[2px] hover:border-b-0 active:translate-y-[4px]'}`}
                        >
-                          <ShieldCheck className="w-4 h-4" /> {transactionId.length === 0 ? 'Waiting for ID' : 'Confirm Payment'}
+                          {loading ? (
+                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                          ) : (
+                            <CreditCard className="w-5 h-5" />
+                          )}
+                          {loading ? 'Initiating...' : 'Proceed to eSewa'}
                        </button>
+
+                       <p className={`mt-6 text-[11px] text-center font-medium transition-colors ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
+                          You will be redirected to eSewa's secure payment portal
+                       </p>
                     </div>
                  )}
+
 
                  {step === 'processing' && (
                     <div className="flex flex-col items-center justify-center slide-up py-8">
@@ -171,7 +189,7 @@ const Payment = () => {
            
            <div className={`mt-8 flex items-center justify-center gap-1.5 text-[10px] font-bold uppercase tracking-widest transition-colors z-10 relative ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
               <ShieldCheck className="w-3.5 h-3.5" />
-              <span>Verified by UniBook SecurePay™</span>
+              <span>Secure Payment processed by eSewa ePay</span>
            </div>
 
         </div>

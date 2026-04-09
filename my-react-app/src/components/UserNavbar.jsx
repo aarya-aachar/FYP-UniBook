@@ -11,7 +11,8 @@ import {
   Settings,
   Globe,
   Info,
-  Phone
+  Phone,
+  LayoutDashboard
 } from "lucide-react";
 import NotificationBell from './NotificationBell';
 
@@ -43,7 +44,7 @@ const UserNavbar = () => {
   if (!isHomePage) {
     if (user?.role === 'admin') {
       navItems = [
-        { path: '/dashboard/admin', label: 'Admin Dashboard', icon: Home },
+        { path: '/dashboard/admin', label: 'Admin Dashboard', icon: LayoutDashboard },
         { path: '/services', label: 'Services', icon: Search },
       ];
     } else if (user?.role === 'user') {
@@ -58,20 +59,20 @@ const UserNavbar = () => {
 
   return (
     <>
-      <nav className={`sticky top-0 z-[100] w-full border-b transition-all duration-300 backdrop-blur-lg
-        ${isDark ? 'bg-[#0f172a]/90 border-slate-800 shadow-sm shadow-black/20' : 'bg-white/95 border-slate-200 shadow-sm'}`}>
-        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+      <nav className={`fixed top-0 z-[100] w-full border-b transition-all duration-300 backdrop-blur-md
+        ${isDark ? 'bg-slate-950/90 border-slate-800' : 'bg-white/90 border-slate-100 shadow-sm shadow-slate-200/20'}`}>
+        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           
           {/* Branding */}
-          <div className="flex items-center gap-3 group cursor-pointer" onClick={() => navigate(user ? (user.role === 'admin' ? '/dashboard/admin' : '/dashboard') : '/')}>
-            <div className="flex items-center justify-center group-hover:-translate-y-[2px] transition-transform duration-200">
-              <img src="/logo.png" alt="UniBook Logo" className="w-10 h-10 object-contain" />
-            </div>
-            <h2 className={`text-xl font-bold tracking-tight transition-colors hidden sm:block ${isDark ? 'text-white' : 'text-slate-900'}`}>UniBook</h2>
+          <div className="flex items-center gap-2.5 group cursor-pointer" onClick={() => navigate(user ? (user.role === 'admin' ? '/dashboard/admin' : '/dashboard') : '/')}>
+            <img src="/logo.png" alt="UniBook Logo" className="w-8 h-8 object-contain" />
+            <h2 className={`text-lg font-extrabold tracking-tighter transition-colors hidden sm:block ${isDark ? 'text-white' : 'text-slate-950'}`}>
+              UniBook<span className="text-emerald-500">.</span>
+            </h2>
           </div>
 
-          {/* Navigation */}
-          <div className="flex items-center gap-1 md:gap-4 overflow-x-auto no-scrollbar py-2">
+          {/* Navigation - Centered for Professional feel */}
+          <div className="flex items-center gap-1">
             {navItems.map((item) => {
               const isActive = location.pathname === item.path;
               const Icon = item.icon;
@@ -79,104 +80,110 @@ const UserNavbar = () => {
                 <Link 
                   key={`${item.path}-${item.label}`} 
                   to={item.path} 
-                  className={`flex items-center gap-2 px-4 py-2.5 rounded-lg transition-all duration-200 font-medium whitespace-nowrap cursor-pointer
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 font-semibold whitespace-nowrap cursor-pointer text-xs
                     ${isActive 
-                      ? (isDark ? 'bg-slate-800 text-emerald-400' : 'bg-slate-100 text-emerald-600')
-                      : (isDark ? 'text-slate-400 hover:text-white hover:bg-slate-800' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50')}`}
+                      ? (isDark ? 'bg-slate-900 text-emerald-400' : 'bg-slate-50 text-emerald-600')
+                      : (isDark ? 'text-slate-400 hover:text-white hover:bg-slate-900' : 'text-slate-600 hover:text-slate-950 hover:bg-slate-50')}`}
                 >
-                  <Icon className={`w-4 h-4 ${isActive ? 'opacity-100' : 'opacity-70'}`} />
-                  <span className="text-sm hidden lg:block">{item.label}</span>
+                  <Icon className={`w-3.5 h-3.5 ${isActive ? 'opacity-100' : 'opacity-70'}`} />
+                  <span className="hidden lg:block">{item.label}</span>
                 </Link>
               );
             })}
           </div>
 
           {/* User Actions */}
-          <div className="relative flex items-center gap-3">
+          <div className="relative flex items-center gap-4">
             {user && !isHomePage ? (
               <>
                 <NotificationBell isDark={isDark} />
                 <button
                   onClick={() => setDropdownOpen(!dropdownOpen)}
-                  className={`w-10 h-10 rounded-full border-2 overflow-hidden cursor-pointer transition-all ${isDark ? 'border-slate-700 hover:border-slate-500' : 'border-slate-200 hover:border-slate-300'}`}
+                  className={`flex items-center gap-3 pl-3 pr-1 py-1 rounded-full border transition-all cursor-pointer bg-transparent
+                    ${isDark ? 'border-slate-800 hover:border-slate-700' : 'border-slate-100 hover:border-slate-200'}`}
                 >
-                  {user.profile_photo ? (
-                    <img src={`http://localhost:4001${user.profile_photo}`} alt="User Avatar" className="w-full h-full object-cover" />
-                  ) : (
-                    <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="User Avatar" className="w-full h-full object-cover" />
-                  )}
+                  <span className={`text-[10px] font-black uppercase tracking-widest hidden md:block ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                    Account
+                  </span>
+                  <div className="w-8 h-8 rounded-full border border-slate-200 overflow-hidden">
+                    {user.profile_photo ? (
+                      <img src={`http://localhost:4001${user.profile_photo}`} alt="User Avatar" className="w-full h-full object-cover" />
+                    ) : (
+                      <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="User Avatar" className="w-full h-full object-cover" />
+                    )}
+                  </div>
                 </button>
 
 
                 {dropdownOpen && (
                    <>
-                     {/* Click outside overlay */}
                      <div className="fixed inset-0 z-[110]" onClick={() => setDropdownOpen(false)} />
-                     
-                     {/* Dropdown Menu */}
-                     <div className={`absolute right-0 top-12 mt-2 w-48 rounded-xl shadow-lg border p-1 z-[120] transition-all animate-in fade-in slide-in-from-top-2
-                       ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}>
+                     <div className={`absolute right-0 top-12 mt-2 w-56 rounded-2xl shadow-2xl border p-2 z-[120] animate-in fade-in slide-in-from-top-2
+                       ${isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-100'}`}>
+                       <div className="px-3 py-3 border-b border-slate-100/10 mb-2">
+                          <p className={`text-xs font-black uppercase tracking-widest leading-none mb-1 ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>Logged in as</p>
+                          <p className={`text-sm font-bold truncate ${isDark ? 'text-white' : 'text-slate-950'}`}>{user.email}</p>
+                       </div>
                        <Link
                          to={user.role === 'admin' ? "/dashboard/admin/profile" : "/profile"}
                          onClick={() => setDropdownOpen(false)}
-                         className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors cursor-pointer
-                           ${isDark ? 'text-slate-300 hover:bg-slate-700 hover:text-white' : 'text-slate-700 hover:bg-slate-50 hover:text-slate-900'}`}
+                         className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer
+                           ${isDark ? 'text-slate-300 hover:bg-slate-800 hover:text-white' : 'text-slate-700 hover:bg-slate-50 hover:text-slate-950'}`}
                        >
-                         <Settings className="w-4 h-4" />
-                         Profile Settings
+                         <Settings className="w-4 h-4 opacity-70" />
+                         Account Settings
                        </Link>
                        <button
                          onClick={() => {
                            setDropdownOpen(false);
                            setShowLogoutConfirm(true);
                          }}
-                         className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-left cursor-pointer
+                         className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all text-left cursor-pointer
                            ${isDark ? 'text-rose-400 hover:bg-rose-500/10' : 'text-rose-600 hover:bg-rose-50'}`}
                        >
-                         <LogOut className="w-4 h-4" />
-                         Log out
+                         <LogOut className="w-4 h-4 opacity-70" />
+                         Sign Out
                        </button>
                      </div>
                    </>
-                )}
+                 )}
               </>
             ) : (
-              // Unauthenticated View OR Homepage Forced View
-              <div className="flex items-center gap-2 md:gap-4">
-                <Link to="/login" className={`font-semibold transition-colors text-sm px-4 py-2 rounded-lg ${isDark ? 'text-slate-300 hover:text-white hover:bg-slate-800' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'}`}>Login</Link>
-                <Link to="/register" className="px-5 py-2.5 rounded-xl bg-emerald-600 text-white font-bold hover:bg-emerald-700 transition-all shadow-md text-sm hidden sm:block">Get Started</Link>
+              <div className="flex items-center gap-5">
+                <Link to="/login" className={`font-bold transition-colors text-xs uppercase tracking-widest ${isDark ? 'text-slate-400 hover:text-white' : 'text-slate-600 hover:text-slate-950'}`}>Login</Link>
+                <Link to="/register" className="px-6 py-2.5 rounded-xl bg-slate-950 text-white text-[10px] font-black uppercase tracking-[0.2em] hover:bg-emerald-600 transition-all shadow-xl shadow-slate-950/20">Get Started</Link>
               </div>
             )}
           </div>
         </div>
       </nav>
 
-      {/* Logout Confirmation Modal */}
+      {/* Logout Confirmation Modal - Sharpened for Professional feel */}
       {showLogoutConfirm && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-slate-950/80 backdrop-blur-md animate-in fade-in transition-all">
-          <div className={`p-8 rounded-[2rem] w-full max-w-xs shadow-2xl border transition-all animate-in zoom-in duration-200
-            ${isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-100'}`}>
-            <div className={`w-14 h-14 rounded-2xl mb-6 flex items-center justify-center shadow-inner mx-auto
-              ${isDark ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' : 'bg-rose-50 text-rose-600 border border-rose-100'}`}>
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-slate-950/60 backdrop-blur-sm animate-in fade-in transition-all">
+          <div className={`p-8 rounded-3xl w-full max-w-xs shadow-2xl border transition-all animate-in zoom-in duration-200
+            ${isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-50'}`}>
+            <div className={`w-14 h-14 rounded-2xl mb-6 flex items-center justify-center mx-auto
+               bg-rose-500/10 text-rose-500 border border-rose-500/20`}>
               <LogOut className="w-7 h-7" />
             </div>
-            <h3 className={`text-xl font-black mb-3 tracking-tight text-center ${isDark ? 'text-white' : 'text-slate-900'}`}>Log Out?</h3>
+            <h3 className={`text-xl font-black mb-2 tracking-tight text-center ${isDark ? 'text-white' : 'text-slate-950'}`}>Sign Out?</h3>
             <p className={`text-sm mb-8 font-medium leading-relaxed text-center ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
-              Are you sure you want to end your session?
+               Confirm that you want to sign out of your account.
             </p>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-3">
               <button 
                 onClick={() => setShowLogoutConfirm(false)} 
-                className={`px-5 py-3 text-xs font-black uppercase tracking-widest rounded-2xl transition-all border outline-none cursor-pointer
-                  ${isDark ? 'bg-slate-800 hover:bg-slate-700 text-white border-slate-700' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200'}`}
+                className={`px-5 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all border outline-none cursor-pointer
+                  ${isDark ? 'bg-slate-800 hover:bg-slate-700 text-white border-slate-700' : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-100'}`}
               >
-                No
+                Cancel
               </button>
               <button 
                 onClick={proceedLogout} 
-                className="px-5 py-3 text-xs font-black uppercase tracking-widest rounded-2xl bg-rose-600 text-white hover:bg-rose-700 shadow-lg shadow-rose-500/30 transition-all outline-none cursor-pointer"
+                className="px-5 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl bg-slate-950 text-white hover:bg-rose-600 shadow-xl shadow-slate-950/10 transition-all outline-none cursor-pointer"
               >
-                Yes
+                Sign Out
               </button>
             </div>
           </div>

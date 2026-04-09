@@ -1,6 +1,20 @@
 # Node modules
 node_modules/
-npm-debug.log*
+.gemini/
+artifacts/
+/tmp/
+*.log
+.DS_Store
+check_*.js
+test_*.js
+migrate_*.js
+dump_*.js
+debug_*.js
+cleanup_*.js
+seed_*.js
+reset_*.js
+final_seed.js
+bug.log*
 yarn-debug.log*
 yarn-error.log*
 

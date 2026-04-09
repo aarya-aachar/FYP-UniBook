@@ -22,11 +22,13 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Global User Panel Background System */
 .user-panel-bg {
-  background-image: url('./assets/booking-bg.jpg');
+  background-image: linear-gradient(to bottom, rgba(2, 6, 23, 0.45), rgba(2, 6, 23, 0.85)), 
+                    url('./assets/booking-bg.jpg');
   background-attachment: fixed;
   background-position: center;
   background-size: cover;
   background-repeat: no-repeat;
+  background-color: #020617; /* Fallback deep navy */
   position: relative;
 }
 

@@ -105,10 +105,10 @@ router.get('/payment/success', async (req, res) => {
     }
 
     // Always redirect back to frontend with success if we reached here
-    res.redirect('http://localhost:3000/my-appointments?payment=success');
+    res.redirect('http://localhost:3000/payment-success?payment=success');
   } catch (error) {
     console.error('>>> [ESEWA ERROR] Success processing failed:', error);
-    res.redirect('http://localhost:3000/my-appointments?payment=success');
+    res.redirect('http://localhost:3000/payment-success?payment=success');
   }
 });
 

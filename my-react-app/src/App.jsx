@@ -25,6 +25,7 @@ import UserReports from "./pages/UserReports";
 import AdminProfile from "./pages/AdminProfile";
 import UserNotifications from "./pages/UserNotifications";
 import ProtectedRoute from "./components/ProtectedRoute";
+import PaymentSuccess from "./pages/PaymentSuccess";
 
 function App() {
   return (
@@ -56,6 +57,7 @@ function App() {
             <Route path="/payment/:providerId" element={<ProtectedRoute requiredRole="user"><Payment /></ProtectedRoute>} />
             <Route path="/my-reports" element={<ProtectedRoute requiredRole="user"><UserReports /></ProtectedRoute>} />
             <Route path="/my-appointments" element={<ProtectedRoute requiredRole="user"><ViewAppointments /></ProtectedRoute>} />
+            <Route path="/payment-success" element={<ProtectedRoute requiredRole="user"><PaymentSuccess /></ProtectedRoute>} />
           </Routes>
         </UserThemeProvider>
       </AdminThemeProvider>

@@ -98,7 +98,7 @@ const Services = () => {
           </div>
 
           <div className={`mt-16 p-8 rounded-2xl border flex flex-col sm:flex-row items-center justify-between gap-6 transition-all duration-300
-            ${isDark ? 'bg-slate-800/50 border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
+            ${isDark ? 'bg-slate-900 border-slate-800 shadow-2xl shadow-black/20' : 'bg-white border-slate-200 shadow-xl'}`}>
             <div>
               <h2 className={`text-xl font-bold mb-2 transition-colors ${isDark ? 'text-white' : 'text-slate-900'}`}>Need to check your bookings?</h2>
               <p className={`text-sm transition-colors ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>

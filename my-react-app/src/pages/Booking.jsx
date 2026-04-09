@@ -5,7 +5,7 @@ import { getProviderById } from "../services/providerService";
 import { getBookedTimes } from "../services/bookingService";
 import { getProviderReviews } from "../services/reviewService";
 import { useUserTheme } from "../context/UserThemeContext";
-import { Hospital, Utensils, Activity, Sparkles, MapPin, Clock, CreditCard, ChevronDown, Calendar, Ban, Star, ArrowLeft } from "lucide-react";
+import { Hospital, Utensils, Activity, Sparkles, MapPin, Clock, CreditCard, ChevronDown, Calendar, Ban, Star, ArrowLeft, X } from "lucide-react";
 
 const BACKEND_URL = 'http://localhost:4001';
 
@@ -23,6 +23,7 @@ const Booking = () => {
   
   const [bookedSlots, setBookedSlots] = useState([]);
   const [slotsLoading, setSlotsLoading] = useState(false);
+  const [showImageModal, setShowImageModal] = useState(false);
   
   const [duration, setDuration] = useState(30);
   const [reviews, setReviews] = useState([]);
@@ -149,7 +150,7 @@ const Booking = () => {
   const timeSlots = generateTimeSlots();
 
   return (
-    <div className="flex flex-col min-h-screen transition-all duration-500 font-inter user-panel-bg">
+    <div className={`flex flex-col min-h-screen transition-all duration-500 font-inter user-panel-bg ${isDark ? 'dark' : 'light'}`}>
       
       <UserNavbar />
 
@@ -178,13 +179,21 @@ const Booking = () => {
             
             <div className={`lg:col-span-4 h-max rounded-2xl border p-8 shadow-sm relative overflow-hidden transition-all duration-200 glass-card`}>
               {imgSrc && (
-                <div className="absolute inset-0 opacity-40 pointer-events-none transition-opacity duration-700">
-                  <img src={imgSrc} alt={provider?.name} className="w-full h-full object-cover mix-blend-overlay" />
-                </div>
+                <>
+                  <div className="absolute inset-0 opacity-100 pointer-events-none transition-opacity duration-700">
+                    <img src={imgSrc} alt={provider?.name} className="w-full h-full object-cover" />
+                  </div>
+                  <button 
+                    onClick={() => setShowImageModal(true)}
+                    className="absolute top-4 right-4 px-4 py-2 rounded-xl bg-black/40 backdrop-blur-md border border-white/20 text-white hover:bg-black/60 transition-all z-20 cursor-pointer flex items-center gap-2 group"
+                  >
+                    <span className="text-[10px] font-black uppercase tracking-widest">View Photo</span>
+                  </button>
+                </>
               )}
-              {isDark && <div className="absolute inset-0 bg-gradient-to-t from-[#020617] via-[#020617]/80 to-transparent pointer-events-none" />}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none" />
               
-              <div className="relative z-10 flex flex-col">
+              <div className={`relative z-10 flex flex-col p-6 rounded-[1.5rem] border ${isDark ? 'bg-slate-950/80 border-slate-800' : 'bg-white/90 border-slate-100 shadow-sm'}`}>
                 <div className={`w-14 h-14 rounded-xl flex items-center justify-center mb-6 shadow-sm border transition-all
                   ${isDark ? 'bg-slate-700 border-slate-600 text-slate-200' : 'bg-slate-50 border-slate-200 text-slate-600'}`}>
                    <ProviderIcon className="w-6 h-6" />
@@ -397,6 +406,22 @@ const Booking = () => {
           </div>
         </div>
       </main>
+      
+      {/* Image Modal */}
+      {showImageModal && imgSrc && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 animate-in fade-in duration-300">
+          <div className="absolute inset-0 bg-slate-950/90 backdrop-blur-xl" onClick={() => setShowImageModal(false)} />
+          <div className="relative max-w-5xl w-full h-full max-h-[80vh] bg-slate-900 rounded-3xl overflow-hidden shadow-2xl border border-white/10 slide-up">
+            <img src={imgSrc} alt="Provider" className="w-full h-full object-contain" />
+            <button 
+              onClick={() => setShowImageModal(false)}
+              className="absolute top-6 right-6 p-3 rounded-2xl bg-black/60 text-white hover:bg-red-500 transition-all cursor-pointer border border-white/10"
+            >
+              <X className="w-6 h-6" />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

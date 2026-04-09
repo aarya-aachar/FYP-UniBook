@@ -215,13 +215,25 @@ const Register = () => {
 
   // ─── Success Step ─────────────────────────────────────────────────────
   if (step === 'success') return (
-    <div className="min-h-screen flex items-center justify-center bg-[#020617] font-inter">
-      <div className="text-center">
-        <div className="w-20 h-20 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center mx-auto mb-6">
-          <CheckCircle className="w-10 h-10 text-emerald-400" />
+    <div className="min-h-screen flex items-center justify-center font-inter user-panel-bg">
+      <div className="absolute inset-0 bg-slate-950/40 backdrop-blur-[2px]" />
+      <div className="relative z-10 text-center animate-in fade-in zoom-in duration-700">
+        <div className="w-24 h-24 rounded-3xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center mx-auto mb-8 shadow-2xl shadow-emerald-500/20">
+          <CheckCircle className="w-12 h-12 text-emerald-400" />
         </div>
-        <h1 className="text-3xl font-extrabold text-white mb-2">Account Created!</h1>
-        <p className="text-slate-400 text-sm">Redirecting you to login...</p>
+        <h1 className="text-4xl font-extrabold text-white mb-3 tracking-tight">Account Verified!</h1>
+        <p className="text-slate-300 font-medium text-lg max-w-sm mx-auto leading-relaxed">
+          Welcome to the UniBook ecosystem. <br/>
+          Preparing your personalized dashboard...
+        </p>
+        <div className="mt-10 flex flex-col items-center gap-2">
+           <div className="flex gap-1">
+              {[0, 1, 2].map(i => (
+                <div key={i} className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-bounce" style={{ animationDelay: `${i * 0.2}s` }} />
+              ))}
+           </div>
+           <p className="text-[10px] font-black text-emerald-500/50 uppercase tracking-[0.3em]">Transitioning to login</p>
+        </div>
       </div>
     </div>
   );

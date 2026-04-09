@@ -21,26 +21,8 @@ const ViewAppointments = () => {
 
   useEffect(() => {
     document.title = "My Bookings | UniBook";
-    
-    // Check for payment status in URL
-    const paymentStatus = searchParams.get('payment');
-    if (paymentStatus === 'success') {
-      toast('Payment successful! Your booking is confirmed.');
-    } else if (paymentStatus === 'cancelled') {
-      toast('Payment was cancelled.', 'error');
-    } else if (paymentStatus === 'failed') {
-      toast('Payment failed. Please try again.', 'error');
-    } else if (paymentStatus === 'error') {
-      toast('An error occurred during payment verification.', 'error');
-    }
-
-    // Clear params from URL for a clean look
-    if (paymentStatus) {
-      setSearchParams({});
-    }
-
     fetchBookings();
-  }, [searchParams]);
+  }, []);
 
   const fetchBookings = async () => {
     try {

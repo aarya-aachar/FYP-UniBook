@@ -49,12 +49,16 @@ const Reports = () => {
       const data = await getExportData(type);
       if (!data || data.length === 0) return alert("System data index is empty.");
 
-      let csv = "";
-      const headers = Object.keys(data[0]);
-      csv += headers.join(",") + "\n";
-      
       data.forEach(row => {
-        csv += headers.map(h => `"${row[h] || ''}"`).join(",") + "\n";
+        csv += headers.map(h => {
+          let val = row[h];
+          // Detect dates and format if found
+          if ((h.toLowerCase().includes('date') || h.toLowerCase().includes('at')) && val && !isNaN(Date.parse(val))) {
+            const d = new Date(val);
+            val = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+          }
+          return `"${val || ''}"`;
+        }).join(",") + "\n";
       });
 
       const blob = new Blob([csv], { type: 'text/csv' });
@@ -176,37 +180,52 @@ const Reports = () => {
 
       {printType && (
         <div style={{ position: 'absolute', top: '-10000px', left: '-10000px' }}>
-          <div id="report-to-print" style={{ padding: '80px', width: '1300px', fontFamily: 'Inter, sans-serif', color: '#000000' }}>
-             <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '4px solid #000000', paddingBottom: '40px', marginBottom: '50px' }}>
+          <div id="report-to-print" style={{ padding: '40px', width: '1050px', fontFamily: 'Inter, system-ui, sans-serif', color: '#0f172a' }}>
+             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: '2px solid #e2e8f0', paddingBottom: '30px', marginBottom: '40px' }}>
                <div>
-                 <h1 style={{ fontSize: '40px', fontWeight: '900', textTransform: 'uppercase', margin: 0, color: '#000000', letterSpacing: '-0.05em' }}>UniBook System Record</h1>
-                 <p style={{ fontSize: '14px', color: '#333', fontWeight: '900', marginTop: '10px', textTransform: 'uppercase', letterSpacing: '0.4em' }}>Official Archive Protocol</p>
+                  <div style={{ display: 'flex', itemsCenter: 'center', gap: '10px', marginBottom: '15px' }}>
+                    <div style={{ width: '32px', hieght: '32px', background: '#10b981', borderRadius: '8px' }}></div>
+                    <h1 style={{ fontSize: '28px', fontWeight: '900', textTransform: 'uppercase', margin: 0, color: '#0f172a', letterSpacing: '-0.02em' }}>UniBook<span style={{ color: '#10b981' }}>.</span></h1>
+                  </div>
+                 <p style={{ fontSize: '10px', color: '#64748b', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.3em' }}>Official Management Archive Protocol</p>
                </div>
                <div style={{ textAlign: 'right' }}>
-                 <p style={{ fontSize: '13px', fontWeight: '900', color: '#000000', textTransform: 'uppercase', letterSpacing: '0.1em' }}>ARCHIVE: {printType.toUpperCase()}</p>
-                 <p style={{ fontSize: '13px', color: '#000000', fontWeight: '700' }}>EXPORTED: {new Date().toLocaleString()}</p>
+                 <p style={{ fontSize: '11px', fontWeight: '900', color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Archive Category: <span style={{ color: '#10b981' }}>{printType.toUpperCase()}</span></p>
+                 <p style={{ fontSize: '10px', color: '#64748b', fontWeight: '600' }}>Generated: {new Date().toLocaleString('en-US', { dateStyle: 'long', timeStyle: 'short' })}</p>
                </div>
              </div>
-             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '11px', color: '#000000' }}>
-               <thead>
-                 <tr style={{ background: '#f1f5f9' }}>
-                   {printData.length > 0 && Object.keys(printData[0]).map(h => (
-                     <th key={h} style={{ border: '2px solid #e2e8f0', padding: '18px', textAlign: 'left', textTransform: 'uppercase', fontWeight: '900', letterSpacing: '0.1em' }}>{h.replace(/_/g, ' ')}</th>
-                   ))}
-                 </tr>
-               </thead>
-               <tbody>
-                 {printData.map((row, i) => (
-                   <tr key={i}>
-                     {Object.values(row).map((val, idx) => (
-                       <td key={idx} style={{ border: '2px solid #e2e8f0', padding: '15px', fontWeight: '700' }}>{String(val || '')}</td>
+
+             <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', overflow: 'hidden' }}>
+               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '10px' }}>
+                 <thead>
+                   <tr style={{ background: '#f1f5f9' }}>
+                     {printData.length > 0 && Object.keys(printData[0]).map(h => (
+                       <th key={h} style={{ borderBottom: '1px solid #e2e8f0', borderRight: '1px solid #e2e8f0', padding: '12px 10px', textAlign: 'left', textTransform: 'uppercase', fontWeight: '800', color: '#475569', letterSpacing: '0.02em whitespace-nowrap' }}>{h.replace(/_/g, ' ')}</th>
                      ))}
                    </tr>
-                 ))}
-               </tbody>
-             </table>
-             <div style={{ marginTop: '100px', borderTop: '4px solid #000000', paddingTop: '30px', fontSize: '11px', color: '#000000', textAlign: 'center', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '0.5em' }}>
-               UNIBOOK DIGITAL ARCHIVE - CONFIDENTIAL RECORD
+                 </thead>
+                 <tbody>
+                   {printData.map((row, i) => (
+                     <tr key={i} style={{ background: i % 2 === 0 ? '#ffffff' : '#f8fafc' }}>
+                       {Object.keys(row).map((key, idx) => {
+                         let val = row[key];
+                         // Format dates in PDF table as well
+                         if ((key.toLowerCase().includes('date') || key.toLowerCase().includes('at')) && val && !isNaN(Date.parse(val))) {
+                           const d = new Date(val);
+                           val = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+                         }
+                         return (
+                           <td key={idx} style={{ borderBottom: '1px solid #e2e8f0', borderRight: '1px solid #e2e8f0', padding: '10px', color: '#1e293b', fontWeight: '600' }}>{String(val || '')}</td>
+                         );
+                       })}
+                     </tr>
+                   ))}
+                 </tbody>
+               </table>
+             </div>
+
+             <div style={{ marginTop: '60px', borderTop: '1px solid #e2e8f0', paddingTop: '20px', fontSize: '9px', color: '#94a3b8', textAlign: 'center', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.3em' }}>
+               UniBook Digital Systems &bull; Secured Record &bull; Verification Required
              </div>
           </div>
         </div>

@@ -42,7 +42,7 @@ const ManageProviders = () => {
   const [modalMode, setModalMode] = useState('add');
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(EMPTY_FORM);
-  const [imageFile, setImageFile] = useState(null);
+  const [imageFiles, setImageFiles] = useState([null, null, null, null]);
   const [submitting, setSubmitting] = useState(false);
 
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -76,18 +76,25 @@ const ManageProviders = () => {
   });
 
   const openAdd = () => {
-    setForm(EMPTY_FORM); setImageFile(null); setEditingId(null);
+    setForm(EMPTY_FORM); setImageFiles([null, null, null, null]); setEditingId(null);
     setModalMode('add'); setModalOpen(true);
   };
 
   const openEdit = (p) => {
+    // Populate gallery from existing gallery_images or fallback to primary image
+    let gallery = p.gallery_images;
+    if (!gallery || gallery === '[]' || (Array.isArray(gallery) && gallery.length === 0)) {
+      gallery = p.image ? [p.image] : null;
+    }
+
     setForm({ 
       name: p.name || '', address: p.address || '', description: p.description || '', 
       category: p.category || 'Restaurants', existingImage: p.image || '',
       base_price: p.base_price || 0, opening_time: (p.opening_time || '09:00:00').substring(0, 5),
       closing_time: (p.closing_time || '18:00:00').substring(0, 5),
+      gallery_images: gallery
     });
-    setImageFile(null); setEditingId(p.id); setModalMode('edit'); setModalOpen(true);
+    setImageFiles([null, null, null, null]); setEditingId(p.id); setModalMode('edit'); setModalOpen(true);
   };
 
   const handleSubmit = async () => {
@@ -97,22 +104,45 @@ const ManageProviders = () => {
       return; 
     }
     
-    if (!imageFile && modalMode === 'add') {
-      toast('Provider image is required', 'error');
+    if (!imageFiles[0] && modalMode === 'add') {
+      toast('Background image (Slot 1) is required', 'error');
       return;
     }
 
     try {
       setSubmitting(true);
+      
+      // Separate existing URLs from new File objects
+      const existingGalleryToKeep = [];
+      const newFilesToUpload = [];
+
+      imageFiles.forEach((item, index) => {
+        if (item instanceof File) {
+          newFilesToUpload.push(item);
+        } else {
+          // If the slot is null in imageFiles, it might still have an existing photo in form.gallery_images
+          const currentGallery = form.gallery_images ? (typeof form.gallery_images === 'string' ? JSON.parse(form.gallery_images) : form.gallery_images) : [];
+          if (currentGallery[index]) {
+             existingGalleryToKeep.push(currentGallery[index]);
+          }
+        }
+      });
+
+      const submissionForm = { ...form, existing_gallery: existingGalleryToKeep };
+      
       if (modalMode === 'edit') {
-        await updateProvider(editingId, form, imageFile);
+        await updateProvider(editingId, submissionForm, newFilesToUpload);
         toast(`"${form.name}" updated successfully`);
       } else {
-        await createProvider(form, imageFile);
+        await createProvider(submissionForm, newFilesToUpload);
         toast(`"${form.name}" added to platform`);
       }
       setModalOpen(false); fetchProviders();
-    } catch (err) { toast(err.message, 'error'); }
+    } catch (err) { 
+      // Extract the most helpful message from the error
+      const errMsg = err.message || "Server Communication Error";
+      toast(errMsg, 'error'); 
+    }
     finally { setSubmitting(false); }
   };
 
@@ -133,7 +163,7 @@ const ManageProviders = () => {
         @keyframes fadeIn  { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
       `}</style>
 
-      <div className="fixed top-6 right-6 z-[200] flex flex-col gap-3 pointer-events-none">
+      <div className="fixed top-6 right-6 z-[9999] flex flex-col gap-3 pointer-events-none">
         {toasts.map(t => (
           <div key={t.id} className={`flex items-center gap-3 pl-4 pr-5 py-3 rounded-lg shadow-lg text-white text-sm font-bold pointer-events-auto
             ${t.type === 'success' ? 'bg-emerald-600' : 'bg-red-600'}`}
@@ -301,12 +331,49 @@ const ManageProviders = () => {
                   <label className={`block text-xs font-bold uppercase tracking-widest mb-2 ${textSecondary}`}>Service Name</label>
                   <input type="text" value={form.name} onChange={e => setForm({...form, name: e.target.value})} className={`w-full px-4 py-3 rounded-xl border font-semibold text-sm outline-none transition-all ${isDark ? 'bg-slate-800 border-slate-700 text-white focus:border-emerald-500' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-emerald-600'}`} />
                 </div>
-                <div>
-                  <label className={`block text-xs font-bold uppercase tracking-widest mb-2 ${textSecondary}`}>Provider Image</label>
-                  <label className={`flex items-center justify-center w-full px-4 py-3 rounded-xl border font-semibold text-sm transition-all cursor-pointer ${isDark ? 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 focus-within:border-emerald-500' : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100 focus-within:border-emerald-600'}`}>
-                    <span className="truncate">{imageFile ? imageFile.name : 'Choose File...'}</span>
-                    <input type="file" ref={fileInputRef} onChange={e => setImageFile(e.target.files[0])} accept="image/*" className="hidden" />
-                  </label>
+                <div className="md:col-span-2">
+                  <label className={`block text-[10px] font-black uppercase tracking-[0.2em] mb-3 ${textSecondary}`}>Service Gallery (Up to 4 Photos - First is background)</label>
+                  <div className="grid grid-cols-4 gap-3">
+                    {[0, 1, 2, 3].map(i => {
+                      const file = imageFiles[i];
+                      const existingGallery = form.gallery_images ? (typeof form.gallery_images === 'string' ? JSON.parse(form.gallery_images) : form.gallery_images) : [];
+                      const existing = existingGallery[i];
+                      
+                      return (
+                        <div key={i} className="relative group">
+                          <label className={`aspect-square rounded-xl border-2 border-dashed flex flex-col items-center justify-center transition-all cursor-pointer overflow-hidden
+                            ${file || existing ? 'border-emerald-500/50 bg-emerald-500/5' : isDark ? 'bg-slate-800 border-slate-700 hover:border-slate-500' : 'bg-slate-50 border-slate-200 hover:border-slate-300'}`}>
+                            
+                            {file ? (
+                              <img src={URL.createObjectURL(file)} alt="preview" className="w-full h-full object-cover" />
+                            ) : existing ? (
+                              <img src={existing.startsWith('/uploads') ? `${BACKEND_URL}${existing}` : existing} alt="existing" className="w-full h-full object-cover opacity-60" />
+                            ) : (
+                              <>
+                                <Building2 className={`w-5 h-5 mb-1 ${textMuted}`} />
+                                <span className={`text-[8px] font-black uppercase tracking-widest ${textMuted}`}>Slot {i+1}</span>
+                              </>
+                            )}
+                            
+                            <input 
+                              type="file" 
+                              accept="image/*" 
+                              className="hidden" 
+                              onChange={e => {
+                                const newFiles = [...imageFiles];
+                                newFiles[i] = e.target.files[0];
+                                setImageFiles(newFiles);
+                              }} 
+                            />
+                            
+                            {i === 0 && !file && !existing && (
+                              <div className="absolute inset-x-0 bottom-0 py-1 bg-emerald-500 text-[8px] text-white font-black uppercase tracking-tighter text-center">Required</div>
+                            )}
+                          </label>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">

@@ -11,8 +11,8 @@ export const getProviderById = async (id) => {
   return res.data;
 };
 
-// Build FormData so we can include an image file if provided
-const buildFormData = (data, imageFile) => {
+// Build FormData so we can include multiple image files if provided
+const buildFormData = (data, imageFiles) => {
   const fd = new FormData();
   if (data.name)               fd.append('name', data.name);
   if (data.category)           fd.append('category', data.category);
@@ -21,7 +21,21 @@ const buildFormData = (data, imageFile) => {
   if (data.base_price !== undefined)  fd.append('base_price', data.base_price);
   if (data.opening_time)       fd.append('opening_time', data.opening_time);
   if (data.closing_time)       fd.append('closing_time', data.closing_time);
-  if (imageFile)               fd.append('image', imageFile);
+  
+  // Append list of existing images to keep (for merging on backend)
+  if (data.existing_gallery) {
+    fd.append('existing_gallery', Array.isArray(data.existing_gallery) ? JSON.stringify(data.existing_gallery) : data.existing_gallery);
+  }
+  
+  // Append all files in the array under the key 'images'
+  if (Array.isArray(imageFiles)) {
+    imageFiles.forEach(file => {
+      if (file instanceof File) fd.append('images', file);
+    });
+  } else if (imageFiles instanceof File) {
+    fd.append('images', imageFiles);
+  }
+  
   return fd;
 };
 

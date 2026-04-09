@@ -52,6 +52,7 @@ async function initDB() {
         category ENUM('Restaurants', 'Futsal', 'Hospitals', 'Salon / Spa') NOT NULL,
         description TEXT,
         image VARCHAR(255),
+        gallery_images JSON DEFAULT NULL,
         address VARCHAR(255),
         base_price DECIMAL(10,2) DEFAULT 0.00,
         opening_time TIME DEFAULT '09:00:00',
@@ -164,6 +165,15 @@ async function initDB() {
       }
       if (!existingBookingCols.includes('paid_amount')) {
         await pool.query("ALTER TABLE bookings ADD COLUMN paid_amount DECIMAL(10,2) DEFAULT 0.00 AFTER transaction_uuid");
+      }
+
+      // Check providers table for gallery_images column
+      const providerCols = await pool.query("SHOW COLUMNS FROM providers");
+      const existingProviderCols = providerCols[0].map(c => c.Field);
+      if (!existingProviderCols.includes('gallery_images')) {
+        await pool.query("ALTER TABLE providers ADD COLUMN gallery_images JSON DEFAULT NULL AFTER image");
+        // Initialize with current image as the first item in gallery
+        await pool.query("UPDATE providers SET gallery_images = JSON_ARRAY(image) WHERE image IS NOT NULL");
       }
     } catch (err) {
       console.log('Migration check skipped or columns already handled:', err.message);

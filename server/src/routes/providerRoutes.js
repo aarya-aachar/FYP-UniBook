@@ -10,7 +10,8 @@ const router = express.Router();
 // ─── Multer Setup (image upload) ─────────────────────────────────────────────
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const uploadDir = path.join(__dirname, '../uploads');
+    // Relative to src/routes, we need to go up two levels to reach the root uploads dir
+    const uploadDir = path.join(__dirname, '../../uploads');
     if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
     cb(null, uploadDir);
   },
@@ -26,6 +27,26 @@ const fileFilter = (req, file, cb) => {
 };
 
 const upload = multer({ storage, fileFilter, limits: { fileSize: 5 * 1024 * 1024 } }); // 5MB limit
+
+const uploadImages = (req, res, next) => {
+  // Use any() to be permissive and prevent "Unexpected field" errors.
+  // We'll manually filter for 'images' in the route handler.
+  upload.any()(req, res, (err) => {
+    if (err instanceof multer.MulterError) {
+      console.error('>>> [MULTER ERROR]:', err);
+      return res.status(400).json({ message: `Upload Error: ${err.message}` });
+    } else if (err) {
+      console.error('>>> [UPLOAD ERROR]:', err);
+      return res.status(400).json({ message: `Server Error: ${err.message}` });
+    }
+
+    // Diagnostic log to see what fields are actually arriving
+    if (req.files && req.files.length > 0) {
+      console.log('>>> [UPLOAD] Fields received:', [...new Set(req.files.map(f => f.fieldname))]);
+    }
+    next();
+  });
+};
 
 // ─── GET all providers ────────────────────────────────────────────────────────
 router.get('/providers', async (req, res) => {
@@ -99,8 +120,8 @@ router.get('/providers/:id', async (req, res) => {
   }
 });
 
-// ─── POST create provider (admin only, with optional image upload) ─────────────
-router.post('/providers', authenticateToken, verifyAdmin, upload.single('image'), async (req, res) => {
+// ─── POST create provider (admin only, upgraded for multi-photo) ───────────
+router.post('/providers', authenticateToken, verifyAdmin, uploadImages, async (req, res) => {
   try {
     const { name, category, description, address, base_price, opening_time, closing_time } = req.body;
 
@@ -108,18 +129,23 @@ router.post('/providers', authenticateToken, verifyAdmin, upload.single('image')
       return res.status(400).json({ message: 'Name, address, and category are required' });
     }
 
-    const imageUrl = req.file
-      ? `/uploads/${req.file.filename}`
-      : (req.body.imageUrl || '/images/default.jpg');
+    // Process gallery images (Filter to ensure we only collect from 'images' field)
+    const galleryPaths = (req.files || [])
+      .filter(f => f.fieldname === 'images')
+      .map(f => `/uploads/${f.filename}`);
+      
+    const primaryImage = galleryPaths.length > 0 ? galleryPaths[0] : '/images/default.jpg';
+    const galleryJson = JSON.stringify(galleryPaths.length > 0 ? galleryPaths : [primaryImage]);
 
     const pool = getPool();
     const [result] = await pool.query(
-      'INSERT INTO providers (name, category, description, image, address, base_price, opening_time, closing_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      'INSERT INTO providers (name, category, description, image, gallery_images, address, base_price, opening_time, closing_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
       [
         name.trim(), 
         category, 
         description || '', 
-        imageUrl, 
+        primaryImage,
+        galleryJson,
         address.trim(), 
         base_price || 0, 
         opening_time || '09:00:00', 
@@ -127,7 +153,7 @@ router.post('/providers', authenticateToken, verifyAdmin, upload.single('image')
       ]
     );
 
-    res.status(201).json({ message: 'Provider created successfully', id: result.insertId, imageUrl });
+    res.status(201).json({ message: 'Provider created successfully', id: result.insertId, imageUrl: primaryImage });
 
     // Notify other admins (fire-and-forget)
     try {
@@ -151,8 +177,8 @@ router.post('/providers', authenticateToken, verifyAdmin, upload.single('image')
   }
 });
 
-// ─── PUT update provider (admin only, with optional image upload) ──────────────
-router.put('/providers/:id', authenticateToken, verifyAdmin, upload.single('image'), async (req, res) => {
+// ─── PUT update provider (admin only, handles multi-photo updates) ────────────
+router.put('/providers/:id', authenticateToken, verifyAdmin, uploadImages, async (req, res) => {
   try {
     const { name, category, description, address, base_price, opening_time, closing_time } = req.body;
     const pool = getPool();
@@ -179,7 +205,43 @@ router.put('/providers/:id', authenticateToken, verifyAdmin, upload.single('imag
     if (base_price !== undefined)  { fields.push('base_price = ?');   values.push(base_price); }
     if (opening_time) { fields.push('opening_time = ?'); values.push(opening_time); }
     if (closing_time) { fields.push('closing_time = ?'); values.push(closing_time); }
-    if (req.file)    { fields.push('image = ?');       values.push(`/uploads/${req.file.filename}`); }
+    
+    let imageUrl = null;
+    if (req.files && req.files.length > 0) {
+      // 1. Get existing gallery items we want to keep
+      let existingToKeep = [];
+      try {
+        if (req.body.existing_gallery) {
+          existingToKeep = JSON.parse(req.body.existing_gallery);
+        }
+      } catch (e) { console.error('Error parsing existing_gallery', e); }
+
+      // 2. Identify newly uploaded files
+      const newFiles = req.files.filter(f => f.fieldname === 'images');
+      const newPaths = newFiles.map(f => `/uploads/${f.filename}`);
+
+      // 3. Merge: If no explicit mapping, just append. 
+      // But for our 4-slot system, we'll favor the order: existing first, then new
+      const mergedGallery = [...existingToKeep, ...newPaths].slice(0, 4);
+
+      if (mergedGallery.length > 0) {
+        imageUrl = mergedGallery[0];
+        fields.push('image = ?');
+        values.push(imageUrl);
+        fields.push('gallery_images = ?');
+        values.push(JSON.stringify(mergedGallery));
+      }
+    } else if (req.body.existing_gallery) {
+      // Case where no new files were uploaded but slots might have been rearranged or removed
+      try {
+        const existingToKeep = JSON.parse(req.body.existing_gallery);
+        if (existingToKeep.length > 0) {
+           imageUrl = existingToKeep[0];
+           fields.push('image = ?'); values.push(imageUrl);
+           fields.push('gallery_images = ?'); values.push(JSON.stringify(existingToKeep));
+        }
+      } catch (e) {}
+    }
 
     if (fields.length === 0) {
       return res.status(400).json({ message: 'No fields to update' });
@@ -195,9 +257,7 @@ router.put('/providers/:id', authenticateToken, verifyAdmin, upload.single('imag
       return res.status(404).json({ message: 'Provider not found' });
     }
 
-    // Return updated image if changed
-    const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
-    res.json({ message: 'Provider updated successfully', imageUrl });
+    res.json({ message: 'Provider updated successfully', imageUrl, version: '2.0-merged' });
   } catch (error) {
     if (error.code === 'ER_DUP_ENTRY') {
       return res.status(400).json({ message: 'Provider name must be unique' });
@@ -212,11 +272,18 @@ router.delete('/providers/:id', authenticateToken, verifyAdmin, async (req, res)
   try {
     const pool = getPool();
 
-    // Clean up uploaded image if exists
-    const [providers] = await pool.query('SELECT image FROM providers WHERE id = ?', [req.params.id]);
-    if (providers.length > 0 && providers[0].image?.startsWith('/uploads/')) {
-      const imgPath = path.join(__dirname, '..', providers[0].image);
-      if (fs.existsSync(imgPath)) fs.unlinkSync(imgPath);
+    // Clean up all uploaded gallery images
+    const [pRows] = await pool.query('SELECT image, gallery_images FROM providers WHERE id = ?', [req.params.id]);
+    if (pRows.length > 0) {
+      const { image, gallery_images } = pRows[0];
+      const allImages = gallery_images ? JSON.parse(gallery_images) : (image ? [image] : []);
+      
+      allImages.forEach(img => {
+        if (img?.startsWith('/uploads/')) {
+          const imgPath = path.join(__dirname, '..', img);
+          if (fs.existsSync(imgPath)) fs.unlinkSync(imgPath);
+        }
+      });
     }
 
     const [result] = await pool.query('DELETE FROM providers WHERE id = ?', [req.params.id]);

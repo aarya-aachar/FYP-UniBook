@@ -24,6 +24,7 @@ const Booking = () => {
   const [bookedSlots, setBookedSlots] = useState([]);
   const [slotsLoading, setSlotsLoading] = useState(false);
   const [showImageModal, setShowImageModal] = useState(false);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
   
   const [duration, setDuration] = useState(30);
   const [reviews, setReviews] = useState([]);
@@ -141,7 +142,12 @@ const Booking = () => {
     );
   }
 
-  const imgSrc = provider?.image ? (provider.image.startsWith('/uploads') ? `${BACKEND_URL}${provider.image}` : provider.image) : null;
+  const gallery = provider?.gallery_images 
+    ? (typeof provider.gallery_images === 'string' ? JSON.parse(provider.gallery_images) : provider.gallery_images)
+    : (provider?.image ? [provider.image] : []);
+
+  const imgSrc = gallery[0] 
+     ? (gallery[0].startsWith('/uploads') ? `${BACKEND_URL}${gallery[0]}` : gallery[0]) : null;
   
   let ProviderIcon = Sparkles;
   if (provider?.category === 'Hospitals') ProviderIcon = Hospital;
@@ -184,10 +190,12 @@ const Booking = () => {
                     <img src={imgSrc} alt={provider?.name} className="w-full h-full object-cover" />
                   </div>
                   <button 
-                    onClick={() => setShowImageModal(true)}
+                    onClick={() => { setActiveImageIndex(0); setShowImageModal(true); }}
                     className="absolute top-4 right-4 px-4 py-2 rounded-xl bg-black/40 backdrop-blur-md border border-white/20 text-white hover:bg-black/60 transition-all z-20 cursor-pointer flex items-center gap-2 group"
                   >
-                    <span className="text-[10px] font-black uppercase tracking-widest">View Photo</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest">
+                       {gallery.length > 1 ? `View All (${gallery.length})` : 'View Photo'}
+                    </span>
                   </button>
                 </>
               )}
@@ -407,18 +415,56 @@ const Booking = () => {
         </div>
       </main>
       
-      {/* Image Modal */}
-      {showImageModal && imgSrc && (
+      {/* Image Modal Carousel */}
+      {showImageModal && gallery.length > 0 && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 animate-in fade-in duration-300">
           <div className="absolute inset-0 bg-slate-950/90 backdrop-blur-xl" onClick={() => setShowImageModal(false)} />
-          <div className="relative max-w-5xl w-full h-full max-h-[80vh] bg-slate-900 rounded-3xl overflow-hidden shadow-2xl border border-white/10 slide-up">
-            <img src={imgSrc} alt="Provider" className="w-full h-full object-contain" />
+          
+          <div className="relative max-w-5xl w-full h-[80vh] bg-slate-900 rounded-3xl overflow-hidden shadow-2xl border border-white/10 slide-up group">
+            <img 
+              src={gallery[activeImageIndex]?.startsWith('/uploads') ? `${BACKEND_URL}${gallery[activeImageIndex]}` : gallery[activeImageIndex]} 
+              alt="Provider Gallery" 
+              className="w-full h-full object-contain" 
+            />
+            
+            {/* Modal Controls */}
             <button 
               onClick={() => setShowImageModal(false)}
-              className="absolute top-6 right-6 p-3 rounded-2xl bg-black/60 text-white hover:bg-red-500 transition-all cursor-pointer border border-white/10"
+              className="absolute top-6 right-6 p-3 rounded-2xl bg-black/60 text-white hover:bg-red-500 transition-all cursor-pointer border border-white/10 z-30"
             >
               <X className="w-6 h-6" />
             </button>
+
+            {gallery.length > 1 && (
+               <>
+                  <div className="absolute inset-y-0 left-0 flex items-center pl-6">
+                     <button 
+                        onClick={(e) => { e.stopPropagation(); setActiveImageIndex(prev => prev === 0 ? gallery.length - 1 : prev - 1); }}
+                        className="p-4 rounded-full bg-black/40 text-white hover:bg-black/60 border border-white/10 backdrop-blur-sm transition-all cursor-pointer"
+                     >
+                        <ArrowLeft className="w-6 h-6" />
+                     </button>
+                  </div>
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-6">
+                     <button 
+                        onClick={(e) => { e.stopPropagation(); setActiveImageIndex(prev => prev === gallery.length - 1 ? 0 : prev + 1); }}
+                        className="p-4 rounded-full bg-black/40 text-white hover:bg-black/60 border border-white/10 backdrop-blur-sm transition-all cursor-pointer scale-x-[-1]"
+                     >
+                        <ArrowLeft className="w-6 h-6" />
+                     </button>
+                  </div>
+                  
+                  {/* Indicators */}
+                  <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex gap-2">
+                     {gallery.map((_, idx) => (
+                        <div 
+                           key={idx} 
+                           className={`h-1.5 rounded-full transition-all duration-300 ${idx === activeImageIndex ? 'w-8 bg-emerald-500' : 'w-2 bg-white/20'}`} 
+                        />
+                     ))}
+                  </div>
+               </>
+            )}
           </div>
         </div>
       )}

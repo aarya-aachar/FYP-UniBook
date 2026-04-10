@@ -149,7 +149,9 @@ const NotificationBell = ({ isDark = false }) => {
                 <button 
                   onClick={() => { 
                     const user = getProfile();
-                    const path = user?.role === 'admin' ? '/dashboard/admin/notifications' : '/notifications';
+                    let path = '/notifications';
+                    if (user?.role === 'admin') path = '/dashboard/admin/notifications';
+                    if (user?.role === 'provider') path = '/provider/notifications';
                     navigate(path); 
                     setOpen(false); 
                   }}

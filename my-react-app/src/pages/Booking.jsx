@@ -5,7 +5,7 @@ import { getProviderById } from "../services/providerService";
 import { getBookedTimes } from "../services/bookingService";
 import { getProviderReviews } from "../services/reviewService";
 import { useUserTheme } from "../context/UserThemeContext";
-import { Hospital, Utensils, Activity, Sparkles, MapPin, Clock, CreditCard, ChevronDown, Calendar, Ban, Star, ArrowLeft, X } from "lucide-react";
+import { Hospital, Utensils, Trophy, Scissors, MapPin, Clock, CreditCard, ChevronDown, Calendar, Ban, Star, ArrowLeft, X } from "lucide-react";
 
 const BACKEND_URL = 'http://localhost:4001';
 
@@ -19,9 +19,9 @@ const Booking = () => {
   const [loading, setLoading] = useState(true);
   
   const [date, setDate] = useState("");
-  const [time, setTime] = useState("");
+  const [selectedTimes, setSelectedTimes] = useState([]);
   
-  const [bookedSlots, setBookedSlots] = useState([]);
+  const [bookedSlots, setBookedSlots] = useState({}); // Now an object: { "HH:MM": count }
   const [slotsLoading, setSlotsLoading] = useState(false);
   const [showImageModal, setShowImageModal] = useState(false);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
@@ -64,9 +64,9 @@ const Booking = () => {
     const fetchSlots = async () => {
       try {
         setSlotsLoading(true);
-        setTime(""); 
+        setSelectedTimes([]); 
         const taken = await getBookedTimes(providerId, date);
-        setBookedSlots(taken || []);
+        setBookedSlots(taken || {});
       } catch (error) {
         console.error("Failed to fetch availability", error);
       } finally {
@@ -97,7 +97,10 @@ const Booking = () => {
   };
 
   const getSlotStatus = (slot) => {
-    if (bookedSlots.includes(slot)) return 'booked';
+    const capacity = provider?.capacity || 1;
+    const currentBooked = bookedSlots[slot] || 0;
+    
+    if (currentBooked >= capacity) return 'booked';
     if (date === today) {
       const now = new Date();
       const currentHour = now.getHours();
@@ -112,17 +115,23 @@ const Booking = () => {
 
   const calculateTotal = () => {
     const base = parseFloat(provider?.base_price || 0);
-    return (base * (duration / 30)).toFixed(2);
+    const slotsCount = selectedTimes.length || 1;
+    return (base * slotsCount).toFixed(2);
   };
-
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!date || !time) {
-      alert("Please select a date and time slot.");
+    if (!date || selectedTimes.length === 0) {
+      alert("Please select a date and at least one time slot.");
       return;
     }
     navigate(`/payment/${providerId}`, {
-      state: { date, time, duration, price: calculateTotal(), providerName: provider?.name }
+      state: { 
+        date, 
+        time: selectedTimes, // Send the array!
+        duration: selectedTimes.length * 30, 
+        price: calculateTotal(), 
+        providerName: provider?.name 
+      }
     });
   };
 
@@ -149,10 +158,10 @@ const Booking = () => {
   const imgSrc = gallery[0] 
      ? (gallery[0].startsWith('/uploads') ? `${BACKEND_URL}${gallery[0]}` : gallery[0]) : null;
   
-  let ProviderIcon = Sparkles;
+  let ProviderIcon = Scissors;
   if (provider?.category === 'Hospitals') ProviderIcon = Hospital;
   if (provider?.category === 'Restaurants') ProviderIcon = Utensils;
-  if (provider?.category === 'Futsal') ProviderIcon = Activity;
+  if (provider?.category === 'Futsal') ProviderIcon = Trophy;
   const timeSlots = generateTimeSlots();
 
   return (
@@ -239,20 +248,22 @@ const Booking = () => {
                 </div>
                 
                 <div className={`mt-8 pt-8 border-t transition-colors ${isDark ? 'border-slate-700' : 'border-slate-200'}`}>
-                   <label className={`block text-xs font-semibold uppercase tracking-wider mb-3 transition-colors ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Service Duration</label>
-                   <div className={`flex border rounded-lg p-1 transition-all ${isDark ? 'bg-slate-900 border-slate-700' : 'bg-slate-100 border-slate-200'}`}>
-                      {[30, 60, 90, 120].map((mins) => (
-                         <button
-                           key={mins}
-                           type="button"
-                           onClick={() => setDuration(mins)}
-                           className={`flex-1 py-2 rounded-md text-sm font-medium transition-all cursor-pointer ${duration === mins ? (isDark ? 'bg-emerald-600 text-white shadow-sm' : 'bg-white text-emerald-600 shadow-sm border border-slate-200/60') : (isDark ? 'text-slate-400 hover:text-slate-200' : 'text-slate-500 hover:text-slate-700')}`}
-                         >
-                           {mins >= 60 ? (mins % 60 === 0 ? `${mins/60}h` : `${Math.floor(mins/60)}h ${mins%60}m`) : `${mins}m`}
-                         </button>
-                      ))}
+                   <div className="flex justify-between items-center mb-4">
+                      <span className={`text-xs font-semibold uppercase tracking-wider transition-colors ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Selection Summary</span>
+                      <span className={`text-xs font-black uppercase text-emerald-500`}>{selectedTimes.length} slots</span>
                    </div>
-                   <div className="mt-6 flex justify-between items-end">
+                   <div className="flex flex-wrap gap-2 mb-6">
+                      {selectedTimes.length > 0 ? (
+                        selectedTimes.sort().map(t => (
+                          <span key={t} className={`px-2 py-1 rounded text-[10px] font-black tracking-widest ${isDark ? 'bg-emerald-500/20 text-emerald-400' : 'bg-emerald-50 text-emerald-600 border border-emerald-100'}`}>
+                            {t}
+                          </span>
+                        ))
+                      ) : (
+                        <span className={`text-[10px] font-medium transition-colors ${isDark ? 'text-slate-500' : 'text-slate-400 italic'}`}>No slots selected</span>
+                      )}
+                   </div>
+                   <div className="flex justify-between items-end">
                       <span className={`font-medium text-sm transition-colors ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Total Amount</span>
                       <span className={`text-2xl font-bold transition-colors ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>Rs. {calculateTotal()}</span>
                    </div>
@@ -297,35 +308,44 @@ const Booking = () => {
                     </div>
                   ) : (
                     <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
-                      {timeSlots.map((slot) => {
-                         const status = getSlotStatus(slot);
-                         const isSelected = time === slot;
-                         
-                         let btnClass = "py-3 rounded-lg text-sm font-semibold border transition-all duration-200 relative overflow-hidden ";
-                         
-                         if (status === 'booked') {
-                           btnClass += isDark ? "bg-slate-800 border-slate-700/50 text-slate-600 cursor-not-allowed" : "bg-slate-100 border-slate-200/50 text-slate-400 cursor-not-allowed";
-                         } else if (status === 'past') {
-                           btnClass += isDark ? "bg-slate-900/50 border-slate-800 text-slate-600 cursor-not-allowed" : "bg-slate-50 border-slate-100/50 text-slate-300 cursor-not-allowed";
-                         } else if (isSelected) {
-                            btnClass += "bg-emerald-600 border-emerald-600 text-white shadow-md shadow-emerald-500/20";
-                         } else {
-                            btnClass += isDark ? "bg-slate-700/50 border-slate-600 text-slate-300 hover:bg-slate-700 hover:border-slate-500 cursor-pointer" : "bg-white border-slate-200 text-slate-700 hover:bg-emerald-50 hover:border-emerald-200 hover:text-emerald-700 cursor-pointer shadow-sm";
-                         }
+                       {timeSlots.map((slot) => {
+                          const status = getSlotStatus(slot);
+                          const isSelected = selectedTimes.includes(slot);
+                          
+                          let btnClass = "py-3 rounded-lg text-sm font-semibold border transition-all duration-200 relative overflow-hidden ";
+                          
+                          if (status === 'booked') {
+                            btnClass += isDark ? "bg-slate-800 border-slate-700/50 text-slate-600 cursor-not-allowed" : "bg-slate-100 border-slate-200/50 text-slate-400 cursor-not-allowed";
+                          } else if (status === 'past') {
+                            btnClass += isDark ? "bg-slate-900/50 border-slate-800 text-slate-600 cursor-not-allowed" : "bg-slate-50 border-slate-100/50 text-slate-300 cursor-not-allowed";
+                          } else if (isSelected) {
+                             btnClass += "bg-emerald-600 border-emerald-600 text-white shadow-md shadow-emerald-500/20";
+                          } else {
+                             btnClass += isDark ? "bg-slate-700/50 border-slate-600 text-slate-300 hover:bg-slate-700 hover:border-slate-500 cursor-pointer" : "bg-white border-slate-200 text-slate-700 hover:bg-emerald-50 hover:border-emerald-200 hover:text-emerald-700 cursor-pointer shadow-sm";
+                          }
 
-                         return (
-                           <button
-                             key={slot}
-                             type="button"
-                             disabled={status !== 'available'}
-                             onClick={() => setTime(slot)}
-                             className={btnClass}
-                           >
-                             {slot}
-                             {status === 'booked' && <span className={`absolute flex items-center hidden justify-center text-[10px] font-bold uppercase`}>Taken</span>}
-                           </button>
-                         );
-                      })}
+                          const toggleSlot = () => {
+                             if (status !== 'available') return;
+                             if (isSelected) {
+                                setSelectedTimes(selectedTimes.filter(t => t !== slot));
+                             } else {
+                                setSelectedTimes([...selectedTimes, slot]);
+                             }
+                          };
+
+                          return (
+                            <button
+                              key={slot}
+                              type="button"
+                              disabled={status !== 'available'}
+                              onClick={toggleSlot}
+                              className={btnClass}
+                            >
+                              {slot}
+                              {status === 'booked' && <span className={`absolute inset-0 flex items-center justify-center text-[8px] font-black uppercase text-red-500 bg-red-500/5`}>Full</span>}
+                            </button>
+                          );
+                       })}
                     </div>
                   )}
                   {date && (
@@ -340,11 +360,11 @@ const Booking = () => {
                 <div className="mt-auto">
                    <button
                      type="submit"
-                     disabled={!date || !time}
+                     disabled={!date || selectedTimes.length === 0}
                      className={`w-full py-4 rounded-xl font-bold text-sm transition-all duration-200 flex items-center justify-center gap-2 shadow-sm
-                       ${(!date || !time) ? (isDark ? 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700' : 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200') : 'bg-emerald-600 text-white hover:bg-emerald-700 cursor-pointer hover:shadow-md'}`}
+                       ${(!date || selectedTimes.length === 0) ? (isDark ? 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700' : 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200') : 'bg-emerald-600 text-white hover:bg-emerald-700 cursor-pointer hover:shadow-md'}`}
                    >
-                     {!date || !time ? 'Pick a slot' : 'Proceed to Checkout'}
+                     {!date || selectedTimes.length === 0 ? 'Pick your slots' : `Confirm Bookings (${selectedTimes.length})`}
                    </button>
                 </div>
 

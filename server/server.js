@@ -11,6 +11,8 @@ const reviewRoutes = require('./src/routes/reviewRoutes');
 const notificationRoutes = require('./src/routes/notificationRoutes');
 const paymentRoutes = require('./src/routes/paymentRoutes');
 const chatRoutes = require('./src/routes/chatRoutes');
+const providerApplicationRoutes = require('./src/routes/providerApplicationRoutes');
+const providerPortalRoutes = require('./src/routes/providerPortalRoutes');
 const { startReminderJob } = require('./src/jobs/reminderJob');
 
 const app = express();
@@ -28,7 +30,23 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // --- GLOBAL DIAGNOSTIC LOGGERS ---
 app.use((req, res, next) => {
-  console.log(`>>> [SERVER] ${req.method} ${req.url} from ${req.ip}`);
+  const noisyEndpoints = [
+    '/api/chat/unread-total',
+    '/api/notifications/unread-count',
+    '/api/notifications',
+    '/api/chat/history',
+    '/api/chat/conversations',
+    '/api/auth/me',
+    '/api/bookings/user',
+    '/api/admin/metrics',
+    '/uploads/'
+  ];
+  
+  const isNoisy = noisyEndpoints.some(endpoint => req.url.startsWith(endpoint));
+  
+  if (!isNoisy) {
+    console.log(`>>> [SERVER] ${req.method} ${req.url} from ${req.ip}`);
+  }
   next();
 });
 
@@ -56,6 +74,8 @@ async function bootstrap() {
     app.use('/api/chat', chatRoutes);
     app.use('/api/reviews', reviewRoutes);
     app.use('/api/notifications', notificationRoutes);
+    app.use('/api', providerApplicationRoutes);
+    app.use('/api', providerPortalRoutes);
 
     // Serve profile photo uploads
     app.use('/uploads/profiles', express.static(path.join(__dirname, 'src', 'routes', 'uploads', 'profiles')));
@@ -72,10 +92,10 @@ async function bootstrap() {
       console.log(`📡 Endpoints prefix: /api`);
       console.log(`==========================================\n`);
 
-      // Heartbeat to detect silent crashes
-      setInterval(() => {
-        console.log(`>>> [SERVER] Heartbeat: Active at ${new Date().toLocaleTimeString()}`);
-      }, 30000);
+      // Heartbeat logs disabled to prevent console flooding
+      // setInterval(() => {
+      //   console.log(`>>> [SERVER] Heartbeat: Active at ${new Date().toLocaleTimeString()}`);
+      // }, 30000);
 
       // Start Background Jobs
       startReminderJob();

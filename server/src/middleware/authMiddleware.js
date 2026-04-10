@@ -28,4 +28,12 @@ function verifyAdmin(req, res, next) {
   }
 }
 
-module.exports = { authenticateToken, verifyAdmin };
+function verifyProvider(req, res, next) {
+  if (req.user && req.user.role?.toLowerCase() === 'provider') {
+    next();
+  } else {
+    return res.status(403).json({ message: 'Provider access required' });
+  }
+}
+
+module.exports = { authenticateToken, verifyAdmin, verifyProvider };

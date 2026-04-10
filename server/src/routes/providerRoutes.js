@@ -54,11 +54,16 @@ router.get('/providers', async (req, res) => {
     const { category } = req.query;
     const pool = getPool();
 
+    // Add check to allow admin to fetch all, while public only gets active
+    const showAll = req.query.all === 'true';
+    const activeFilter = showAll ? '1=1' : 'p.is_active = TRUE';
+
     let query = `
       SELECT p.*, 
              (SELECT COUNT(*) FROM reviews WHERE provider_id = p.id) as review_count,
              (SELECT AVG(rating) FROM reviews WHERE provider_id = p.id) as average_rating
       FROM providers p
+      WHERE ${activeFilter}
       ORDER BY p.created_at DESC
     `;
     const params = [];
@@ -69,7 +74,7 @@ router.get('/providers', async (req, res) => {
                (SELECT COUNT(*) FROM reviews WHERE provider_id = p.id) as review_count,
                (SELECT AVG(rating) FROM reviews WHERE provider_id = p.id) as average_rating
         FROM providers p
-        WHERE p.category = ?
+        WHERE ${activeFilter} AND p.category = ?
         ORDER BY p.created_at DESC
       `;
       params.push(category);
@@ -123,7 +128,7 @@ router.get('/providers/:id', async (req, res) => {
 // ─── POST create provider (admin only, upgraded for multi-photo) ───────────
 router.post('/providers', authenticateToken, verifyAdmin, uploadImages, async (req, res) => {
   try {
-    const { name, category, description, address, base_price, opening_time, closing_time } = req.body;
+    const { name, category, description, address, base_price, opening_time, closing_time, capacity } = req.body;
 
     if (!name || !address || !category) {
       return res.status(400).json({ message: 'Name, address, and category are required' });
@@ -139,7 +144,7 @@ router.post('/providers', authenticateToken, verifyAdmin, uploadImages, async (r
 
     const pool = getPool();
     const [result] = await pool.query(
-      'INSERT INTO providers (name, category, description, image, gallery_images, address, base_price, opening_time, closing_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      'INSERT INTO providers (name, category, description, image, gallery_images, address, base_price, opening_time, closing_time, capacity) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
       [
         name.trim(), 
         category, 
@@ -149,7 +154,8 @@ router.post('/providers', authenticateToken, verifyAdmin, uploadImages, async (r
         address.trim(), 
         base_price || 0, 
         opening_time || '09:00:00', 
-        closing_time || '18:00:00'
+        closing_time || '18:00:00',
+        capacity ? parseInt(capacity) : 1
       ]
     );
 
@@ -180,7 +186,7 @@ router.post('/providers', authenticateToken, verifyAdmin, uploadImages, async (r
 // ─── PUT update provider (admin only, handles multi-photo updates) ────────────
 router.put('/providers/:id', authenticateToken, verifyAdmin, uploadImages, async (req, res) => {
   try {
-    const { name, category, description, address, base_price, opening_time, closing_time } = req.body;
+    const { name, category, description, address, base_price, opening_time, closing_time, capacity } = req.body;
     const pool = getPool();
 
     // Check duplicate name (exclude self)
@@ -205,6 +211,7 @@ router.put('/providers/:id', authenticateToken, verifyAdmin, uploadImages, async
     if (base_price !== undefined)  { fields.push('base_price = ?');   values.push(base_price); }
     if (opening_time) { fields.push('opening_time = ?'); values.push(opening_time); }
     if (closing_time) { fields.push('closing_time = ?'); values.push(closing_time); }
+    if (capacity !== undefined) { fields.push('capacity = ?'); values.push(parseInt(capacity)); }
     
     let imageUrl = null;
     if (req.files && req.files.length > 0) {
@@ -267,34 +274,45 @@ router.put('/providers/:id', authenticateToken, verifyAdmin, uploadImages, async
   }
 });
 
-// ─── DELETE provider (admin only) ─────────────────────────────────────────────
-router.delete('/providers/:id', authenticateToken, verifyAdmin, async (req, res) => {
+// ─── PATCH provider status (Activate / Deactivate - admin only) ─────────
+router.patch('/providers/:id/status', authenticateToken, verifyAdmin, async (req, res) => {
   try {
+    const { is_active } = req.body;
     const pool = getPool();
 
-    // Clean up all uploaded gallery images
-    const [pRows] = await pool.query('SELECT image, gallery_images FROM providers WHERE id = ?', [req.params.id]);
+    // Fetch user_id for role syncing
+    const [pRows] = await pool.query('SELECT user_id FROM providers WHERE id = ?', [req.params.id]);
+    let targetUserId = null;
+
     if (pRows.length > 0) {
-      const { image, gallery_images } = pRows[0];
-      const allImages = gallery_images ? JSON.parse(gallery_images) : (image ? [image] : []);
-      
-      allImages.forEach(img => {
-        if (img?.startsWith('/uploads/')) {
-          const imgPath = path.join(__dirname, '..', img);
-          if (fs.existsSync(imgPath)) fs.unlinkSync(imgPath);
-        }
-      });
-    }
-
-    const [result] = await pool.query('DELETE FROM providers WHERE id = ?', [req.params.id]);
-
-    if (result.affectedRows === 0) {
+      targetUserId = pRows[0].user_id;
+    } else {
       return res.status(404).json({ message: 'Provider not found' });
     }
 
-    res.json({ message: 'Provider deleted successfully' });
+    // Toggle active status
+    const [result] = await pool.query('UPDATE providers SET is_active = ? WHERE id = ?', [is_active ? 1 : 0, req.params.id]);
+    
+    // Sync user role logically and send notification emails
+    if (targetUserId) {
+      const [uRows] = await pool.query('SELECT email, name FROM users WHERE id = ?', [targetUserId]);
+      if (uRows.length > 0) {
+         const user = uRows[0];
+         // If reactivating, give them provider role back. If deactivating, restrict login.
+         await pool.query("UPDATE users SET role = ? WHERE id = ?", [is_active ? 'provider' : 'restricted', targetUserId]);
+         
+         if (!is_active) {
+           const { sendProviderDeleted } = require('../services/emailService');
+           await sendProviderDeleted(user.email, user.name);
+         } else {
+           // We could optionally inform them they are reactivated here
+         }
+      }
+    }
+
+    res.json({ message: `Provider ${is_active ? 'activated' : 'deactivated'} successfully.` });
   } catch (error) {
-    console.error('Delete Provider Error:', error);
+    console.error('Toggle Provider Status Error:', error);
     res.status(500).json({ message: 'Internal Server Error' });
   }
 });

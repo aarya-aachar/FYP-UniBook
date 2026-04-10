@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
 import { useAdminTheme } from '../context/AdminThemeContext';
 import { getAllBookings, updateBookingStatus } from '../services/bookingService';
-import { CheckCircle, Clock, XCircle, CalendarX, Coffee, Activity, Stethoscope, Sparkles, AlertCircle, MapPin, CalendarDays, Key } from 'lucide-react';
+import { CheckCircle, Clock, XCircle, CalendarX, Coffee, Trophy, Stethoscope, Scissors, AlertCircle, MapPin, CalendarDays, Key } from 'lucide-react';
 import AdminTopHeader from '../components/AdminTopHeader';
 
 const ManageBookings = () => {
@@ -28,7 +28,45 @@ const ManageBookings = () => {
     try {
       setLoading(true);
       const data = await getAllBookings();
-      setBookings(data);
+      
+      // Grouping Logic for Admin View
+      const grouped = [];
+      const sorted = [...data].sort((a, b) => {
+        const uDiff = a.user_id - b.user_id;
+        if (uDiff !== 0) return uDiff;
+        const dDiff = new Date(a.booking_date) - new Date(b.booking_date);
+        if (dDiff !== 0) return dDiff;
+        return a.booking_time.localeCompare(b.booking_time);
+      });
+
+      sorted.forEach(booking => {
+        const last = grouped[grouped.length - 1];
+        
+        if (last && 
+            last.user_id === booking.user_id && 
+            last.provider_id === booking.provider_id && 
+            last.booking_date === booking.booking_date && 
+            last.status === booking.status) {
+          
+          const lastTime = new Date(`2000-01-01T${last.times[last.times.length - 1]}`);
+          lastTime.setMinutes(lastTime.getMinutes() + 30);
+          const lastEndTimeStr = lastTime.toTimeString().substring(0, 5);
+          
+          if (lastEndTimeStr === booking.booking_time.substring(0, 5)) {
+            last.times.push(booking.booking_time);
+            last.ids.push(booking.id);
+            return;
+          }
+        }
+        
+        grouped.push({
+          ...booking,
+          times: [booking.booking_time],
+          ids: [booking.id]
+        });
+      });
+
+      setBookings(grouped);
     } catch (err) {
       toast('Failed to load system bookings', 'error');
     } finally {
@@ -36,11 +74,11 @@ const ManageBookings = () => {
     }
   };
 
-  const updateStatus = async (id, status) => {
+  const updateStatus = async (group, status) => {
     try {
-      await updateBookingStatus(id, status);
-      setBookings(bookings.map(b => b.id === id ? { ...b, status } : b));
-      toast(`Booking ${status} successfully!`);
+      await Promise.all(group.ids.map(id => updateBookingStatus(id, status)));
+      setBookings(bookings.map(b => group.ids.includes(b.id) ? { ...b, status } : b));
+      toast(`Session ${status} successfully!`);
     } catch (err) {
       toast('Operation failed', 'error');
     }
@@ -59,9 +97,9 @@ const ManageBookings = () => {
   const getCategoryIcon = (cat) => {
     switch (cat) {
       case 'Restaurants': return Coffee;
-      case 'Futsal': return Activity;
+      case 'Futsal': return Trophy;
       case 'Hospitals': return Stethoscope;
-      case 'Salon / Spa': return Sparkles;
+      case 'Salon / Spa': return Scissors;
       default: return CalendarDays;
     }
   };
@@ -157,7 +195,18 @@ const ManageBookings = () => {
                           <div className="flex flex-col">
                             <span className={`text-[10px] font-bold uppercase tracking-widest mb-1 ${textSecondary}`}>Reservation Block</span>
                             <span className={`font-bold text-sm tracking-tight ${textPrimary}`}>
-                              {new Date(b.booking_date).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })} • {b.booking_time}
+                               {new Date(b.booking_date).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })} • {b.times.length > 1 ? (
+                                 <>
+                                   {b.times[0].substring(0,5)} - {(() => {
+                                      const end = new Date(`2000-01-01T${b.times[b.times.length - 1]}`);
+                                      end.setMinutes(end.getMinutes() + 30);
+                                      return end.toTimeString().substring(0, 5);
+                                   })()}
+                                   <span className="ml-1.5 text-[9px] font-black text-emerald-500 bg-emerald-500/5 px-1 rounded border border-emerald-500/10">
+                                      {b.times.length * 0.5}h
+                                   </span>
+                                 </>
+                               ) : b.booking_time.substring(0,5)}
                             </span>
                           </div>
                         </div>

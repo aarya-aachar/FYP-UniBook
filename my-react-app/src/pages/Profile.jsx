@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import UserNavbar from "../components/UserNavbar";
 import { fetchFullProfile, updateProfile, uploadProfilePhoto } from "../services/authService";
 import { useUserTheme } from "../context/UserThemeContext";
-import { CheckCircle, XCircle, ShieldCheck, User, Sparkles, Sun, Moon, Activity, Fingerprint, Camera } from "lucide-react";
+import { CheckCircle, XCircle, ShieldCheck, User, Palette, Sun, Moon, Zap, Fingerprint, Camera } from "lucide-react";
 
 const Profile = () => {
   const { userTheme, toggleUserTheme, setUserTheme } = useUserTheme();
@@ -282,7 +282,7 @@ const Profile = () => {
                {/* 3. Theme Preferences: Professional Full Width Integration */}
                <div className={`rounded-2xl p-6 transition-all duration-300 col-span-1 lg:col-span-2 shadow-sm glass-card`}>
                   <div className={`flex items-center gap-3 border-b pb-4 mb-6 transition-colors ${isDark ? 'border-slate-800' : 'border-slate-100'}`}>
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${isDark ? 'bg-slate-800 text-teal-400' : 'bg-teal-50 text-teal-600'}`}><Sparkles className="w-4 h-4" /></div>
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${isDark ? 'bg-slate-800 text-teal-400' : 'bg-teal-50 text-teal-600'}`}><Palette className="w-4 h-4" /></div>
                     <h3 className={`text-base font-semibold transition-colors ${textPrimary}`}>App Theme</h3>
                   </div>
                   

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import UserNavbar from "../components/UserNavbar";
 import { getPastUserBookings, submitReview, updateReview } from "../services/bookingService";
 import { useUserTheme } from "../context/UserThemeContext";
-import { FileText, CheckCircle, XCircle, Calendar, Clock, Utensils, Activity, Hospital, Sparkles, Star, Edit, Plus, MessageSquare } from 'lucide-react';
+import { FileText, CheckCircle, XCircle, Calendar, Clock, Utensils, Trophy, Hospital, Scissors, Star, Edit, Plus, MessageSquare } from 'lucide-react';
 
 const UserReports = () => {
   const { userTheme } = useUserTheme();
@@ -36,7 +36,47 @@ const UserReports = () => {
     try {
       setLoading(true);
       const data = await getPastUserBookings();
-      setReports(data || []);
+      
+      // Grouping Logic for Consecutive Slots
+      const grouped = [];
+      const sorted = [...(data || [])].sort((a, b) => {
+        const dateDiff = new Date(a.booking_date) - new Date(b.booking_date);
+        if (dateDiff !== 0) return dateDiff;
+        return a.booking_time.localeCompare(b.booking_time);
+      });
+
+      sorted.forEach(booking => {
+        const last = grouped[grouped.length - 1];
+        
+        if (last && 
+            last.provider_id === booking.provider_id && 
+            last.booking_date === booking.booking_date) {
+          
+          const lastTime = new Date(`2000-01-01T${last.times[last.times.length - 1]}`);
+          lastTime.setMinutes(lastTime.getMinutes() + 30);
+          const lastEndTimeStr = lastTime.toTimeString().substring(0, 5);
+          
+          if (lastEndTimeStr === booking.booking_time.substring(0, 5)) {
+            last.times.push(booking.booking_time);
+            last.ids.push(booking.id);
+            // Prioritize keeping a review_id if any slot in the group has one
+            if (booking.review_id && !last.review_id) {
+               last.review_id = booking.review_id;
+               last.rating = booking.rating;
+               last.comment = booking.comment;
+            }
+            return;
+          }
+        }
+        
+        grouped.push({
+          ...booking,
+          times: [booking.booking_time],
+          ids: [booking.id]
+        });
+      });
+
+      setReports(grouped);
     } catch (err) {
       console.error(err);
       toast('Failed to load reports', 'error');
@@ -87,9 +127,10 @@ const UserReports = () => {
   const getCategoryIcon = (category) => {
     switch(category) {
       case 'Restaurants': return <Utensils className="w-6 h-6" />;
-      case 'Futsal': return <Activity className="w-6 h-6" />;
+      case 'Futsal': return <Trophy className="w-6 h-6" />;
       case 'Hospitals': return <Hospital className="w-6 h-6" />;
-      default: return <Sparkles className="w-6 h-6" />;
+      case 'Salon / Spa': return <Scissors className="w-6 h-6" />;
+      default: return <FileText className="w-6 h-6" />;
     }
   }
 
@@ -164,7 +205,21 @@ const UserReports = () => {
                     <h3 className={`text-xl font-bold truncate transition-colors group-hover:text-emerald-600 ${isDark ? 'text-white' : 'text-slate-900'}`}>{b.provider_name}</h3>
                     <div className={`flex flex-wrap items-center gap-x-6 gap-y-2 mt-2 mb-4 text-sm transition-colors ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
                       <div className="flex items-center gap-2"><Calendar className="w-4 h-4 opacity-60" /> {new Date(b.booking_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</div>
-                      <div className="flex items-center gap-2"><Clock className="w-4 h-4 opacity-60" /> {b.booking_time.substring(0,5)}</div>
+                      <div className="flex items-center gap-2">
+                        <Clock className="w-4 h-4 opacity-60" /> 
+                        {b.times.length > 1 ? (
+                          <>
+                             {b.times[0].substring(0,5)} - {(() => {
+                               const end = new Date(`2000-01-01T${b.times[b.times.length - 1]}`);
+                               end.setMinutes(end.getMinutes() + 30);
+                               return end.toTimeString().substring(0, 5);
+                             })()}
+                             <span className="ml-2 text-[10px] font-bold text-emerald-500 uppercase">{b.times.length * 0.5}h Block</span>
+                          </>
+                        ) : (
+                          b.booking_time.substring(0,5)
+                        )}
+                      </div>
                     </div>
 
                     {hasReviewed && (

@@ -14,9 +14,10 @@ router.get('/conversations', authenticateToken, async (req, res) => {
       return res.status(403).json({ message: 'Access denied. Admins only.' });
     }
 
+    const { role = 'user' } = req.query;
     const pool = getPool();
+    
     // Get unique users who have sent or received messages where the other party was an admin
-    // For simplicity: get all users who aren't admins themselves but are in the messages table
     const [users] = await pool.query(`
       SELECT DISTINCT u.id, u.name, u.email, u.profile_photo,
       (SELECT message FROM messages 
@@ -31,9 +32,9 @@ router.get('/conversations', authenticateToken, async (req, res) => {
        AND is_read = 0) as unread_count
       FROM users u
       JOIN messages m ON (u.id = m.sender_id OR u.id = m.receiver_id)
-      WHERE u.role = 'user'
+      WHERE u.role = ?
       ORDER BY last_message_time DESC
-    `, [req.user.id]);
+    `, [role]);
 
     res.json(users);
   } catch (error) {
@@ -49,6 +50,7 @@ router.get('/conversations', authenticateToken, async (req, res) => {
 router.get('/unread-total', authenticateToken, async (req, res) => {
   try {
     const pool = getPool();
+    let query, params = [];
     if (req.user.role === 'admin') {
       // For admins, count all messages sent by 'user' (is_admin_sender = 0)
       // that have reached ANY admin and are still unread.
@@ -133,8 +135,8 @@ router.post('/send', authenticateToken, async (req, res) => {
 
     let targetReceiverId = receiverId;
 
-    // If a standard user is sending a message without a specific receiver, find the first admin
-    if (req.user.role === 'user' && !targetReceiverId) {
+    // If a non-admin is sending a message without a specific receiver, find the first admin
+    if (req.user.role !== 'admin' && !targetReceiverId) {
       const [admins] = await pool.query('SELECT id FROM users WHERE role = "admin" LIMIT 1');
       if (admins.length === 0) {
         return res.status(404).json({ message: 'No administrators available to receive messages.' });

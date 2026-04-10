@@ -35,7 +35,7 @@ async function initDB() {
         name VARCHAR(100) NOT NULL,
         email VARCHAR(100) UNIQUE NOT NULL,
         password VARCHAR(255) NOT NULL,
-        role ENUM('user', 'admin') DEFAULT 'user',
+        role ENUM('user', 'admin', 'provider') DEFAULT 'user',
         profile_photo LONGTEXT,
         age INT,
         gender VARCHAR(20),
@@ -48,6 +48,7 @@ async function initDB() {
     const createProviders = `
       CREATE TABLE IF NOT EXISTS providers (
         id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT DEFAULT NULL,
         name VARCHAR(255) UNIQUE NOT NULL,
         category ENUM('Restaurants', 'Futsal', 'Hospitals', 'Salon / Spa') NOT NULL,
         description TEXT,
@@ -57,6 +58,30 @@ async function initDB() {
         base_price DECIMAL(10,2) DEFAULT 0.00,
         opening_time TIME DEFAULT '09:00:00',
         closing_time TIME DEFAULT '18:00:00',
+        capacity INT DEFAULT 1,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+      )
+    `;
+
+    const createProviderApplications = `
+      CREATE TABLE IF NOT EXISTS provider_applications (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        email VARCHAR(100) UNIQUE NOT NULL,
+        password_hash VARCHAR(255) NOT NULL,
+        pan_number VARCHAR(50) NOT NULL,
+        service_type ENUM('Restaurants', 'Futsal', 'Hospitals', 'Salon / Spa') NOT NULL,
+        address VARCHAR(255),
+        description TEXT,
+        base_price DECIMAL(10,2) DEFAULT 0.00,
+        opening_time TIME DEFAULT '09:00:00',
+        closing_time TIME DEFAULT '18:00:00',
+        capacity INT DEFAULT 1,
+        document_path VARCHAR(500),
+        image_path VARCHAR(500),
+        status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
+        rejection_reason TEXT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `;
@@ -137,6 +162,7 @@ async function initDB() {
 
     await pool.query(createUsers);
     await pool.query(createProviders);
+    await pool.query(createProviderApplications);
     await pool.query(createServices);
     await pool.query(createBookings);
     await pool.query(createReviews);
@@ -182,14 +208,25 @@ async function initDB() {
         await pool.query("ALTER TABLE bookings ADD COLUMN paid_amount DECIMAL(10,2) DEFAULT 0.00 AFTER transaction_uuid");
       }
 
-      // Check providers table for gallery_images column
+      // Check providers table for gallery_images, capacity, and user_id columns
       const providerCols = await pool.query("SHOW COLUMNS FROM providers");
       const existingProviderCols = providerCols[0].map(c => c.Field);
       if (!existingProviderCols.includes('gallery_images')) {
         await pool.query("ALTER TABLE providers ADD COLUMN gallery_images JSON DEFAULT NULL AFTER image");
-        // Initialize with current image as the first item in gallery
         await pool.query("UPDATE providers SET gallery_images = JSON_ARRAY(image) WHERE image IS NOT NULL");
       }
+      if (!existingProviderCols.includes('capacity')) {
+        await pool.query("ALTER TABLE providers ADD COLUMN capacity INT DEFAULT 1 AFTER closing_time");
+      }
+      if (!existingProviderCols.includes('user_id')) {
+        await pool.query("ALTER TABLE providers ADD COLUMN user_id INT DEFAULT NULL AFTER id");
+        await pool.query("ALTER TABLE providers ADD CONSTRAINT fk_provider_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL");
+      }
+
+      // Expand users role ENUM to include provider
+      try {
+        await pool.query("ALTER TABLE users MODIFY COLUMN role ENUM('user', 'admin', 'provider') DEFAULT 'user'");
+      } catch(e) { /* already updated */ }
     } catch (err) {
       console.log('Migration check skipped or columns already handled:', err.message);
     }
@@ -209,17 +246,7 @@ async function initDB() {
       `);
     }
 
-    // Seed second admin if not exists
-    const bcrypt = require('bcrypt');
-    const [existingAdmin2] = await pool.query("SELECT id FROM users WHERE email = 'admin2@unibook.com'");
-    if (existingAdmin2.length === 0) {
-      const hashedPw = await bcrypt.hash('Admin@456', 10);
-      await pool.query(
-        "INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)",
-        ['Admin Two', 'admin2@unibook.com', hashedPw, 'admin']
-      );
-      console.log('Seeded second admin: admin2@unibook.com / Admin@456');
-    }
+    // Seed admins logic (removed admin2)
 
   } catch (error) {
     console.error('Database connection failed:', error);

@@ -17,7 +17,8 @@ const PaymentSuccess = () => {
       setCountdown((prev) => {
         if (prev <= 1) {
           clearInterval(timer);
-          navigate('/my-appointments');
+          // Optional: We can choose to stay on this page or keep auto-redirect
+          // navigate('/my-appointments'); 
           return 0;
         }
         return prev - 1;
@@ -81,7 +82,7 @@ const PaymentSuccess = () => {
                 onClick={() => navigate('/my-appointments')}
                 className={`flex items-center gap-2 group text-sm font-black uppercase tracking-[0.2em] transition-all
                   ${isDark ? 'text-emerald-400 hover:text-emerald-300' : 'text-emerald-600 hover:text-emerald-700'}`}>
-                Go to bookings now <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                click here to view your bookings <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </button>
             </div>
           </div>

@@ -3,7 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import UserNavbar from '../components/UserNavbar';
 import { getUserBookings, updateBookingStatus } from '../services/bookingService';
 import { useUserTheme } from '../context/UserThemeContext';
-import { CheckCircle, Clock, XCircle, HelpCircle, Calendar, Utensils, Activity, Hospital, Sparkles, Plus, CalendarX } from 'lucide-react';
+import { CheckCircle, Clock, XCircle, HelpCircle, Calendar, Utensils, Trophy, Hospital, Scissors, Plus, CalendarX } from 'lucide-react';
 
 const ViewAppointments = () => {
   const { userTheme } = useUserTheme();
@@ -28,15 +28,44 @@ const ViewAppointments = () => {
     try {
       setLoading(true);
       const data = await getUserBookings();
-      data.sort((a, b) => {
-        const dateA = new Date(a.booking_date);
-        const dateB = new Date(b.booking_date);
-        if (dateA.getTime() !== dateB.getTime()) {
-          return dateA - dateB;
-        }
+      
+      // Grouping Logic for Consecutive Slots
+      const grouped = [];
+      const sorted = [...data].sort((a, b) => {
+        const dateDiff = new Date(a.booking_date) - new Date(b.booking_date);
+        if (dateDiff !== 0) return dateDiff;
         return a.booking_time.localeCompare(b.booking_time);
       });
-      setAppointments(data);
+
+      sorted.forEach(booking => {
+        const last = grouped[grouped.length - 1];
+        
+        if (last && 
+            last.provider_id === booking.provider_id && 
+            last.booking_date === booking.booking_date && 
+            last.status === booking.status) {
+          
+          // Check if consecutive (last.endTime === booking.startTime)
+          // For 30 min slots, we can just compare string times or use Date objects
+          const lastTime = new Date(`2000-01-01T${last.times[last.times.length - 1]}`);
+          lastTime.setMinutes(lastTime.getMinutes() + 30);
+          const lastEndTimeStr = lastTime.toTimeString().substring(0, 5);
+          
+          if (lastEndTimeStr === booking.booking_time.substring(0, 5)) {
+            last.times.push(booking.booking_time);
+            last.ids.push(booking.id);
+            return;
+          }
+        }
+        
+        grouped.push({
+          ...booking,
+          times: [booking.booking_time],
+          ids: [booking.id]
+        });
+      });
+
+      setAppointments(grouped);
     } catch (err) {
       console.error(err);
       toast('Failed to load appointments', 'error');
@@ -45,12 +74,13 @@ const ViewAppointments = () => {
     }
   };
 
-  const cancelAppointment = async (id) => {
-    if(!window.confirm("Are you sure you want to cancel this booking?")) return;
+  const cancelAppointment = async (group) => {
+    if(!window.confirm(`Are you sure you want to cancel this ${group.times.length > 1 ? 'multi-slot ' : ''}booking?`)) return;
     try {
-      await updateBookingStatus(id, 'cancelled');
-      setAppointments(prev => prev.map(a => a.id === id ? { ...a, status: 'cancelled' } : a));
-      toast('Booking cancelled successfully');
+      // Cancel all IDs in the group
+      await Promise.all(group.ids.map(id => updateBookingStatus(id, 'cancelled')));
+      setAppointments(prev => prev.map(a => group.ids.includes(a.id) ? { ...a, status: 'cancelled' } : a));
+      toast('Booking(s) cancelled successfully');
     } catch (err) {
       toast("Failed to cancel booking.", 'error');
     }
@@ -81,9 +111,10 @@ const ViewAppointments = () => {
   const getCategoryIcon = (category) => {
     switch(category) {
       case 'Restaurants': return <Utensils className="w-6 h-6" />;
-      case 'Futsal': return <Activity className="w-6 h-6" />;
+      case 'Futsal': return <Trophy className="w-6 h-6" />;
       case 'Hospitals': return <Hospital className="w-6 h-6" />;
-      default: return <Sparkles className="w-6 h-6" />;
+      case 'Salon / Spa': return <Scissors className="w-6 h-6" />;
+      default: return <HelpCircle className="w-6 h-6" />;
     }
   }
 
@@ -165,7 +196,20 @@ const ViewAppointments = () => {
                       </div>
                       <div className="flex items-center gap-2">
                         <Clock className="w-4 h-4 opacity-60" /> 
-                        {a.booking_time.substring(0,5)}
+                        {a.times.length > 1 ? (
+                          <>
+                             {a.times[0].substring(0,5)} - {(() => {
+                               const end = new Date(`2000-01-01T${a.times[a.times.length - 1]}`);
+                               end.setMinutes(end.getMinutes() + 30);
+                               return end.toTimeString().substring(0, 5);
+                             })()}
+                             <span className="ml-1 text-[10px] font-black uppercase tracking-tighter bg-emerald-500/10 text-emerald-500 px-1.5 py-0.5 rounded">
+                               {a.times.length * 0.5}h Session
+                             </span>
+                          </>
+                        ) : (
+                          a.booking_time.substring(0,5)
+                        )}
                       </div>
                     </div>
                   </div>
@@ -173,10 +217,10 @@ const ViewAppointments = () => {
 
                 {a.status?.toLowerCase() === 'pending' && (
                   <div className={`flex items-center gap-3 w-full md:w-auto mt-4 md:mt-0 pt-4 md:pt-0 border-t md:border-none transition-colors ${isDark ? 'border-slate-700' : 'border-slate-100'}`}>
-                    <button onClick={() => cancelAppointment(a.id)} 
+                    <button onClick={() => cancelAppointment(a)} 
                       className={`flex-1 md:flex-none px-4 py-2 rounded-lg border transition-all font-medium text-sm text-center cursor-pointer shadow-sm
                         ${isDark ? 'bg-red-500/10 text-red-400 border-red-500/20 hover:bg-red-500/20' : 'bg-white text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300'}`}>
-                      Cancel Booking
+                      Cancel Entire Session
                     </button>
                   </div>
                 )}

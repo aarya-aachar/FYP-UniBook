@@ -4,7 +4,8 @@ import UserNavbar from "../components/UserNavbar";
 import { getUserBookings } from "../services/bookingService";
 import { getProfile } from "../services/authService";
 import { useUserTheme } from "../context/UserThemeContext";
-import { Utensils, Activity, Hospital, Sparkles, Calendar, Clock, Ticket, User, ArrowRight } from "lucide-react";
+import { Utensils, Trophy, Hospital, Scissors, Calendar, Clock, Ticket, User, ArrowRight, Search } from "lucide-react";
+import AIChatBot from "../components/AIChatBot";
 
 const UserDashboard = () => {
   const { userTheme } = useUserTheme();
@@ -44,9 +45,9 @@ const UserDashboard = () => {
 
   const categories = [
     { name: 'Restaurants', icon: Utensils, color: 'text-emerald-500' },
-    { name: 'Futsal', icon: Activity, color: 'text-teal-500' },
+    { name: 'Futsal', icon: Trophy, color: 'text-teal-500' },
     { name: 'Hospitals', icon: Hospital, color: 'text-emerald-600' },
-    { name: 'Salon / Spa', icon: Sparkles, color: 'text-teal-600' },
+    { name: 'Salon / Spa', icon: Scissors, color: 'text-teal-600' },
   ];
 
   return (
@@ -135,7 +136,7 @@ const UserDashboard = () => {
 
             <div className="col-span-12 lg:col-span-4 grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 gap-4">
                {[
-                  { label: 'Find Services', sub: 'Explore categories', icon: Sparkles, path: '/services' },
+                  { label: 'Find Services', sub: 'Explore categories', icon: Search, path: '/services' },
                   { label: 'My Bookings', sub: 'View your plans', icon: Ticket, path: '/my-appointments' },
                   { label: 'Profile Settings', sub: 'Edit your profile', icon: User, path: '/profile' }
                ].map((item, i) => {
@@ -179,6 +180,9 @@ const UserDashboard = () => {
           </div>
         </div>
       </main>
+
+      {/* AI Chat Assistant */}
+      <AIChatBot isDark={isDark} />
     </div>
   );
 };

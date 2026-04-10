@@ -2,7 +2,7 @@ import { useNavigate, Link } from "react-router-dom";
 import UserNavbar from "../components/UserNavbar";
 import { useEffect } from "react";
 import { useUserTheme } from "../context/UserThemeContext";
-import { Utensils, Activity, Hospital, Sparkles, ArrowRight } from "lucide-react";
+import { Utensils, Trophy, Hospital, Scissors, ArrowRight } from "lucide-react";
 
 const services = [
   {
@@ -16,7 +16,7 @@ const services = [
   {
     name: "Futsal",
     description: "Book professional courts and enjoy the competitive edge with your team.",
-    icon: Activity,
+    icon: Trophy,
     color: "text-emerald-500",
     bgHover: "hover:bg-emerald-50",
     darkBgHover: "hover:bg-emerald-500/10"
@@ -32,7 +32,7 @@ const services = [
   {
     name: "Salon / Spa",
     description: "Relax and pamper yourself with premium wellness and beauty services.",
-    icon: Sparkles,
+    icon: Scissors,
     color: "text-emerald-500",
     bgHover: "hover:bg-emerald-50",
     darkBgHover: "hover:bg-emerald-500/10"

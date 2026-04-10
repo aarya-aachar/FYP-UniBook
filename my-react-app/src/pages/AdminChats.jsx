@@ -5,9 +5,10 @@ import AdminTopHeader from '../components/AdminTopHeader';
 import { useAdminTheme } from '../context/AdminThemeContext';
 import { getConversations, getChatHistory, sendMessage } from '../services/chatService';
 
-const AdminChats = () => {
+const AdminChats = ({ roleFilter = 'user' }) => {
   const { adminTheme } = useAdminTheme();
   const isDark = adminTheme === 'dark';
+  const isProvider = roleFilter === 'provider';
   
   const [conversations, setConversations] = useState([]);
   const [activeUser, setActiveUser] = useState(null);
@@ -26,7 +27,7 @@ const AdminChats = () => {
 
   const fetchConversations = async () => {
     try {
-      const data = await getConversations();
+      const data = await getConversations(roleFilter);
       setConversations(data);
     } catch (err) {
       console.error('Fetch Conversations Error:', err);
@@ -53,10 +54,13 @@ const AdminChats = () => {
 
   useEffect(() => {
     fetchConversations();
+    // Reset active user if filter changes
+    setActiveUser(null);
+    setMessages([]);
     // Poll for new messages/conversations every 5 seconds
     const interval = setInterval(fetchConversations, 5000);
     return () => clearInterval(interval);
-  }, []);
+  }, [roleFilter]);
 
   useEffect(() => {
     if (activeUser) {
@@ -119,23 +123,27 @@ const AdminChats = () => {
   return (
     <div className={`flex min-h-screen ${bgApp}`}>
       <Sidebar />
-      <div className="flex-1 px-8 py-10 max-w-7xl mx-auto w-full overflow-hidden flex flex-col h-screen">
+      <div className="flex-1 px-8 py-10 max-w-7xl mx-auto w-full overflow-hidden flex flex-col">
         <AdminTopHeader 
-          title="Direct Messages" 
-          subtitle="Manage secure communications and direct inquiries with your registered clients." 
+          title={isProvider ? "Provider Communications" : "Client Inquiries"} 
+          subtitle={isProvider 
+            ? "Manage support and technical coordination with your registered service providers." 
+            : "Manage secure communications and direct inquiries with your registered clients."}
         />
         
-        <div className="flex-1 flex overflow-hidden gap-6 min-h-0 -mt-10">
+        <div className="flex-1 flex overflow-hidden gap-6 min-h-[calc(100vh-250px)]">
           
           {/* User List Sidebar */}
           <div className={`w-80 flex flex-col rounded-3xl border overflow-hidden ${bgCard}`}>
              <div className="p-5 border-b">
-                <h2 className={`text-lg font-black mb-4 tracking-tight ${textPrimary}`}>Recent Inquiries</h2>
+                <h2 className={`text-lg font-black mb-4 tracking-tight ${textPrimary}`}>
+                  {isProvider ? "Active Providers" : "Recent Inquiries"}
+                </h2>
                 <div className="relative">
                    <Search className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${textSecondary}`} />
                    <input 
                      type="text" 
-                     placeholder="Search clients..."
+                     placeholder={isProvider ? "Search providers..." : "Search clients..."}
                      value={searchTerm}
                      onChange={(e) => setSearchTerm(e.target.value)}
                      className={`w-full pl-10 pr-4 py-2.5 rounded-xl border text-xs font-semibold outline-none transition-all
@@ -146,7 +154,7 @@ const AdminChats = () => {
              
              <div className="flex-1 overflow-y-auto p-2 space-y-1">
                 {loadingList ? (
-                  <div className="p-10 flex justify-center text-emerald-500"><div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin"></div></div>
+                   <div className="p-10 flex justify-center text-emerald-500"><div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin"></div></div>
                 ) : filteredConversations.length === 0 ? (
                   <div className="p-10 text-center opacity-30">
                     <MessageCircle className="w-8 h-8 mx-auto mb-2" />

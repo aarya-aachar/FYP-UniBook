@@ -28,6 +28,14 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import ChatWithAdmin from "./pages/ChatWithAdmin";
 import AdminChats from "./pages/AdminChats";
+import ProviderRegister from './pages/ProviderRegister';
+import ProviderChat from './pages/ProviderChat';
+import ProviderWaiting from './pages/ProviderWaiting';
+import ProviderDashboard from './pages/ProviderDashboard';
+import ProviderBookings from './pages/ProviderBookings';
+import ProviderProfile from './pages/ProviderProfile';
+import ProviderNotifications from './pages/ProviderNotifications';
+import ProviderServiceSettings from './pages/ProviderServiceSettings';
 
 function App() {
   return (
@@ -51,7 +59,8 @@ function App() {
             <Route path="/dashboard/admin/bookings" element={<ProtectedRoute requiredRole="admin"><ManageBookings /></ProtectedRoute>} />
             <Route path="/dashboard/admin/reports" element={<ProtectedRoute requiredRole="admin"><Reports /></ProtectedRoute>} />
             <Route path="/dashboard/admin/notifications" element={<ProtectedRoute requiredRole="admin"><AdminNotifications /></ProtectedRoute>} />
-            <Route path="/dashboard/admin/chats" element={<ProtectedRoute requiredRole="admin"><AdminChats /></ProtectedRoute>} />
+            <Route path="/dashboard/admin/chats/users" element={<ProtectedRoute requiredRole="admin"><AdminChats roleFilter="user" /></ProtectedRoute>} />
+            <Route path="/dashboard/admin/chats/providers" element={<ProtectedRoute requiredRole="admin"><AdminChats roleFilter="provider" /></ProtectedRoute>} />
             <Route path="/dashboard/admin/profile" element={<ProtectedRoute requiredRole="admin"><AdminProfile /></ProtectedRoute>} />
             <Route path="/about" element={<ProtectedRoute><About /></ProtectedRoute>} />
             <Route path="/contact" element={<ProtectedRoute><Contact /></ProtectedRoute>} />
@@ -60,8 +69,20 @@ function App() {
             <Route path="/payment/:providerId" element={<ProtectedRoute requiredRole="user"><Payment /></ProtectedRoute>} />
             <Route path="/my-reports" element={<ProtectedRoute requiredRole="user"><UserReports /></ProtectedRoute>} />
             <Route path="/my-appointments" element={<ProtectedRoute requiredRole="user"><ViewAppointments /></ProtectedRoute>} />
-            <Route path="/payment-success" element={<ProtectedRoute requiredRole="user"><PaymentSuccess /></ProtectedRoute>} />
+            <Route path="/payment-success" element={<PaymentSuccess />} />
             <Route path="/chat" element={<ProtectedRoute requiredRole="user"><ChatWithAdmin /></ProtectedRoute>} />
+
+            {/* Provider Public Routes */}
+            <Route path="/provider/register" element={<ProviderRegister />} />
+            <Route path="/provider/waiting" element={<ProviderWaiting />} />
+
+            {/* Provider Protected Routes */}
+            <Route path="/provider/dashboard" element={<ProtectedRoute requiredRole="provider"><ProviderDashboard /></ProtectedRoute>} />
+            <Route path="/provider/bookings" element={<ProtectedRoute requiredRole="provider"><ProviderBookings /></ProtectedRoute>} />
+            <Route path="/provider/profile" element={<ProtectedRoute requiredRole="provider"><ProviderProfile /></ProtectedRoute>} />
+            <Route path="/provider/settings" element={<ProtectedRoute requiredRole="provider"><ProviderServiceSettings /></ProtectedRoute>} />
+            <Route path="/provider/notifications" element={<ProtectedRoute requiredRole="provider"><ProviderNotifications /></ProtectedRoute>} />
+            <Route path="/provider/chat" element={<ProtectedRoute requiredRole="provider"><ProviderChat /></ProtectedRoute>} />
           </Routes>
         </UserThemeProvider>
       </AdminThemeProvider>

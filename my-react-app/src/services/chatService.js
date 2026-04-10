@@ -17,10 +17,10 @@ export const sendMessage = async (receiverId, message) => {
 };
 
 /**
- * (Admin Only) Fetch all active conversations
+ * (Admin Only) Fetch active conversations, optionally filtered by role
  */
-export const getConversations = async () => {
-  const res = await api.get('/chat/conversations');
+export const getConversations = async (role = 'user') => {
+  const res = await api.get(`/chat/conversations?role=${role}`);
   return res.data;
 };
 /**

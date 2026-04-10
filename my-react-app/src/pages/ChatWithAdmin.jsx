@@ -45,10 +45,10 @@ const ChatWithAdmin = () => {
   useEffect(() => {
     fetchHistory(true);
     
-    // Polling every 4 seconds
+    // Polling every 12 seconds
     pollingRef.current = setInterval(() => {
       fetchHistory(false);
-    }, 4000);
+    }, 12000);
 
     return () => {
       if (pollingRef.current) clearInterval(pollingRef.current);

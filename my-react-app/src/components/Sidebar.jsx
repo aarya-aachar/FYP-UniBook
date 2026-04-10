@@ -62,7 +62,8 @@ const Sidebar = () => {
     { path: '/dashboard/admin/providers', label: 'Providers', icon: Building2 },
     { path: '/dashboard/admin/users', label: 'Client List', icon: Users },
     { path: '/dashboard/admin/bookings', label: 'Bookings', icon: Calendar },
-    { path: '/dashboard/admin/chats', label: 'Chats', icon: Users },
+    { path: '/dashboard/admin/chats/users', label: 'Client Chats', icon: User },
+    { path: '/dashboard/admin/chats/providers', label: 'Provider Chats', icon: Building2 },
     { path: '/dashboard/admin/reports', label: 'Export Logs', icon: ClipboardList },
     { path: '/dashboard/admin/profile', label: 'Settings', icon: Settings },
   ];
@@ -108,7 +109,7 @@ const Sidebar = () => {
                     <Icon className={`w-4 h-4 ${isActive ? (isDark ? 'text-emerald-400' : 'text-emerald-600') : ''}`} strokeWidth={isActive ? 2.5 : 2} />
                     <span>{item.label}</span>
                   </div>
-                  {item.label === 'Chats' && unreadChatCount > 0 && (
+                  {(item.label === 'Client Chats' || item.label === 'Provider Chats') && unreadChatCount > 0 && (
                     <span className="flex items-center justify-center min-w-[18px] h-4.5 px-1 rounded-full bg-rose-500 text-[9px] font-black text-white border-2 border-white dark:border-slate-800 animate-in zoom-in">
                       {unreadChatCount}
                     </span>

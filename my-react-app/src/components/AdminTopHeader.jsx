@@ -29,7 +29,7 @@ const AdminTopHeader = ({ title, subtitle, showTimestamp = false, children }) =>
   });
 
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 mb-10 border-b border-slate-200 dark:border-slate-800 pb-8 animate-in fade-in slide-in-from-top-4 duration-500">
+    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 mb-8 border-b border-slate-200 dark:border-slate-800 pb-6 animate-in fade-in slide-in-from-top-4 duration-500">
       <div className="flex-1">
         <h1 className={`text-3xl font-black tracking-tight mb-1 transition-colors ${isDark ? 'text-white' : 'text-slate-900'}`}>
           {title}

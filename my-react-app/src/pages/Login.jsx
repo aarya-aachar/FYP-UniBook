@@ -26,6 +26,8 @@ const Login = () => {
 
       if (userRole === 'admin') {
         window.location.assign('/dashboard/admin');
+      } else if (userRole === 'provider') {
+        navigate('/provider/dashboard');
       } else {
         navigate('/dashboard');
       }

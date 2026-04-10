@@ -1,7 +1,9 @@
 import api from './api';
 
-export const getProviders = async (category = null) => {
-  const url = category ? `/providers?category=${encodeURIComponent(category)}` : '/providers';
+export const getProviders = async (category = null, all = false) => {
+  let url = '/providers?';
+  if (category) url += `category=${encodeURIComponent(category)}&`;
+  if (all) url += `all=true`;
   const res = await api.get(url);
   return res.data;
 };
@@ -21,6 +23,7 @@ const buildFormData = (data, imageFiles) => {
   if (data.base_price !== undefined)  fd.append('base_price', data.base_price);
   if (data.opening_time)       fd.append('opening_time', data.opening_time);
   if (data.closing_time)       fd.append('closing_time', data.closing_time);
+  if (data.capacity !== undefined) fd.append('capacity', data.capacity);
   
   // Append list of existing images to keep (for merging on backend)
   if (data.existing_gallery) {
@@ -67,11 +70,11 @@ export const updateProvider = async (id, data, imageFile) => {
   }
 };
 
-export const deleteProvider = async (id) => {
+export const toggleProviderStatus = async (id, is_active) => {
   try {
-    const res = await api.delete(`/providers/${id}`);
+    const res = await api.patch(`/providers/${id}/status`, { is_active });
     return res.data;
   } catch (error) {
-    throw new Error(error.response?.data?.message || 'Failed to delete provider');
+    throw new Error(error.response?.data?.message || 'Failed to toggle provider status');
   }
 };

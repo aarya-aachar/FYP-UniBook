@@ -185,6 +185,11 @@ router.post('/auth/login', async (req, res) => {
     }
 
     const user = users[0];
+
+    if (!user.is_active || user.role === 'restricted') {
+      return res.status(403).json({ message: 'Your account has been restricted or deactivated. Please contact support.' });
+    }
+
     const validPassword = await bcrypt.compare(password, user.password);
     
     if (!validPassword) {

@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import UserNavbar from "../components/UserNavbar";
 import { getProviders } from "../services/providerService";
 import { useUserTheme } from "../context/UserThemeContext";
-import { Utensils, Activity, Hospital, Sparkles, MapPin, Star, Building, ArrowLeft } from "lucide-react";
+import { Utensils, Trophy, Hospital, Scissors, MapPin, Star, Building, ArrowLeft } from "lucide-react";
 
 const BACKEND_URL = 'http://localhost:4001';
 
@@ -15,7 +15,7 @@ const CAT_CONFIG = {
     bgDark: 'bg-emerald-500/10'
   },
   'Futsal': { 
-    icon: Activity, 
+    icon: Trophy, 
     color: 'text-teal-500',
     bgLight: 'bg-teal-50',
     bgDark: 'bg-teal-500/10'
@@ -27,7 +27,7 @@ const CAT_CONFIG = {
     bgDark: 'bg-emerald-600/10'
   },
   'Salon / Spa': { 
-    icon: Sparkles, 
+    icon: Scissors, 
     color: 'text-teal-600',
     bgLight: 'bg-teal-50',
     bgDark: 'bg-teal-600/10'

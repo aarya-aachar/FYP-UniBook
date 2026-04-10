@@ -28,6 +28,7 @@ const UserNavbar = () => {
   const [user, setUser] = useState(getProfile());
 
   useEffect(() => {
+    // Initial fetch on mount if user exists
     if (user) {
       fetchFullProfile().then(data => setUser(data)).catch(() => {});
       
@@ -36,9 +37,8 @@ const UserNavbar = () => {
       };
       
       updateChatCount();
-      const interval = setInterval(updateChatCount, 5000); // Faster polling (5s)
+      const interval = setInterval(updateChatCount, 30000); // Optimized polling (30s)
 
-      // Listen for instant sync event
       window.addEventListener('chat-read', updateChatCount);
 
       return () => {
@@ -46,7 +46,7 @@ const UserNavbar = () => {
         window.removeEventListener('chat-read', updateChatCount);
       };
     }
-  }, [user]);
+  }, []); // Run once on mount — empty deps prevents infinite re-render loop
 
   const proceedLogout = () => {
     logout();

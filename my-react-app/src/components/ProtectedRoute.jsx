@@ -23,9 +23,8 @@ const ProtectedRoute = ({ children, requiredRole }) => {
 
     if (currentRole !== targetRole) {
       // Security violation: user attempting to access wrong role page
-      // Purge session completely and explicitly kick out to login
-      console.warn(`[RBAC] Security hit: User role '${currentRole}' attempted access to route requiring '${targetRole}'. Session purged.`);
-      logout();
+      console.warn(`[RBAC] Security hit: User role '${currentRole}' attempted access to route requiring '${targetRole}'.`);
+      // We redirect to login but DON'T call logout() immediately to allow recovery if it was a transient state
       return <Navigate to="/login" replace />;
     }
   }

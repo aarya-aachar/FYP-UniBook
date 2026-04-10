@@ -44,6 +44,7 @@ const Payment = () => {
       const response = await api.post('/payment/initiate', {
         amount: price,
         booking_id: booking.id
+        // frontend_url no longer needed — backend uses path-based callbacks
       });
       
       const params = response.data;
@@ -107,7 +108,9 @@ const Payment = () => {
               <div className={`rounded-xl p-5 mb-6 border transition-all ${isDark ? 'bg-slate-900/50 border-slate-700' : 'bg-slate-50 border-slate-200 md:shadow-inner'}`}>
                  <p className={`text-xs font-semibold uppercase tracking-wider mb-3 transition-colors ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Booking Details</p>
                  <h3 className={`font-bold text-xl mb-1 transition-colors ${isDark ? 'text-white' : 'text-slate-900'}`}>{providerName || `Service Provider`}</h3>
-                 <p className={`text-sm mb-5 transition-colors ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>{date} • {time}</p>
+                 <p className={`text-sm mb-5 transition-colors ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
+                    {date} • {Array.isArray(time) ? time.sort().join(', ') : time}
+                 </p>
                  
                  <div className={`flex items-end justify-between pt-4 border-t transition-colors ${isDark ? 'border-slate-700' : 'border-slate-200'}`}>
                     <span className={`font-semibold uppercase tracking-wider text-xs transition-colors ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Total Amount</span>

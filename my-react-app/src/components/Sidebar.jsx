@@ -16,6 +16,7 @@ import {
   Bell,
   AlertCircle
 } from 'lucide-react';
+import { getUnreadChatCount } from '../services/chatService';
 import NotificationBell from './NotificationBell';
 
 const Sidebar = () => {
@@ -26,19 +27,28 @@ const Sidebar = () => {
   const isDark = adminTheme === 'dark';
   const [adminUser, setAdminUser] = useState(getProfile());
   const [unreadCount, setUnreadCount] = useState(0);
+  const [unreadChatCount, setUnreadChatCount] = useState(0);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   useEffect(() => {
     fetchFullProfile().then(data => setAdminUser(data)).catch(() => {});
     
-    // Initial fetch and poll for unread notifications
-    const updateCount = () => {
+    // Initial fetch and poll for unread notifications and chats
+    const updateCounts = () => {
       getUnreadCount().then(count => setUnreadCount(count)).catch(() => {});
+      getUnreadChatCount().then(count => setUnreadChatCount(count)).catch(() => {});
     };
     
-    updateCount();
-    const interval = setInterval(updateCount, 30000); // 30s polling
-    return () => clearInterval(interval);
+    updateCounts();
+    const interval = setInterval(updateCounts, 5000); // Faster polling (5s)
+
+    // Listen for instant sync event
+    window.addEventListener('chat-read', updateCounts);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('chat-read', updateCounts);
+    };
   }, []);
 
   const proceedLogout = () => {
@@ -52,6 +62,7 @@ const Sidebar = () => {
     { path: '/dashboard/admin/providers', label: 'Providers', icon: Building2 },
     { path: '/dashboard/admin/users', label: 'Client List', icon: Users },
     { path: '/dashboard/admin/bookings', label: 'Bookings', icon: Calendar },
+    { path: '/dashboard/admin/chats', label: 'Chats', icon: Users },
     { path: '/dashboard/admin/reports', label: 'Export Logs', icon: ClipboardList },
     { path: '/dashboard/admin/profile', label: 'Settings', icon: Settings },
   ];
@@ -97,6 +108,11 @@ const Sidebar = () => {
                     <Icon className={`w-4 h-4 ${isActive ? (isDark ? 'text-emerald-400' : 'text-emerald-600') : ''}`} strokeWidth={isActive ? 2.5 : 2} />
                     <span>{item.label}</span>
                   </div>
+                  {item.label === 'Chats' && unreadChatCount > 0 && (
+                    <span className="flex items-center justify-center min-w-[18px] h-4.5 px-1 rounded-full bg-rose-500 text-[9px] font-black text-white border-2 border-white dark:border-slate-800 animate-in zoom-in">
+                      {unreadChatCount}
+                    </span>
+                  )}
                 </Link>
               );
             })}

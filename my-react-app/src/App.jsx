@@ -26,6 +26,8 @@ import AdminProfile from "./pages/AdminProfile";
 import UserNotifications from "./pages/UserNotifications";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PaymentSuccess from "./pages/PaymentSuccess";
+import ChatWithAdmin from "./pages/ChatWithAdmin";
+import AdminChats from "./pages/AdminChats";
 
 function App() {
   return (
@@ -49,6 +51,7 @@ function App() {
             <Route path="/dashboard/admin/bookings" element={<ProtectedRoute requiredRole="admin"><ManageBookings /></ProtectedRoute>} />
             <Route path="/dashboard/admin/reports" element={<ProtectedRoute requiredRole="admin"><Reports /></ProtectedRoute>} />
             <Route path="/dashboard/admin/notifications" element={<ProtectedRoute requiredRole="admin"><AdminNotifications /></ProtectedRoute>} />
+            <Route path="/dashboard/admin/chats" element={<ProtectedRoute requiredRole="admin"><AdminChats /></ProtectedRoute>} />
             <Route path="/dashboard/admin/profile" element={<ProtectedRoute requiredRole="admin"><AdminProfile /></ProtectedRoute>} />
             <Route path="/about" element={<ProtectedRoute><About /></ProtectedRoute>} />
             <Route path="/contact" element={<ProtectedRoute><Contact /></ProtectedRoute>} />
@@ -58,6 +61,7 @@ function App() {
             <Route path="/my-reports" element={<ProtectedRoute requiredRole="user"><UserReports /></ProtectedRoute>} />
             <Route path="/my-appointments" element={<ProtectedRoute requiredRole="user"><ViewAppointments /></ProtectedRoute>} />
             <Route path="/payment-success" element={<ProtectedRoute requiredRole="user"><PaymentSuccess /></ProtectedRoute>} />
+            <Route path="/chat" element={<ProtectedRoute requiredRole="user"><ChatWithAdmin /></ProtectedRoute>} />
           </Routes>
         </UserThemeProvider>
       </AdminThemeProvider>

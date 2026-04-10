@@ -121,12 +121,27 @@ async function initDB() {
       )
     `;
 
+    const createMessages = `
+      CREATE TABLE IF NOT EXISTS messages (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        sender_id INT NOT NULL,
+        receiver_id INT NOT NULL,
+        message TEXT NOT NULL,
+        is_admin_sender TINYINT(1) DEFAULT 0,
+        is_read TINYINT(1) DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE,
+        FOREIGN KEY (receiver_id) REFERENCES users(id) ON DELETE CASCADE
+      )
+    `;
+
     await pool.query(createUsers);
     await pool.query(createProviders);
     await pool.query(createServices);
     await pool.query(createBookings);
     await pool.query(createReviews);
     await pool.query(createNotifications);
+    await pool.query(createMessages);
 
     // One-time column check for existing systems
     try {

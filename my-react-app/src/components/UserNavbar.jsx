@@ -14,6 +14,7 @@ import {
   Phone,
   LayoutDashboard
 } from "lucide-react";
+import { getUnreadChatCount } from '../services/chatService';
 import NotificationBell from './NotificationBell';
 
 const UserNavbar = () => {
@@ -23,13 +24,29 @@ const UserNavbar = () => {
   const location = useLocation();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [unreadChatCount, setUnreadChatCount] = useState(0);
   const [user, setUser] = useState(getProfile());
 
   useEffect(() => {
     if (user) {
       fetchFullProfile().then(data => setUser(data)).catch(() => {});
+      
+      const updateChatCount = () => {
+        getUnreadChatCount().then(count => setUnreadChatCount(count)).catch(() => {});
+      };
+      
+      updateChatCount();
+      const interval = setInterval(updateChatCount, 5000); // Faster polling (5s)
+
+      // Listen for instant sync event
+      window.addEventListener('chat-read', updateChatCount);
+
+      return () => {
+        clearInterval(interval);
+        window.removeEventListener('chat-read', updateChatCount);
+      };
     }
-  }, []);
+  }, [user]);
 
   const proceedLogout = () => {
     logout();
@@ -53,6 +70,7 @@ const UserNavbar = () => {
         { path: '/services', label: 'Find Services', icon: Search },
         { path: '/my-appointments', label: 'My Bookings', icon: Calendar },
         { path: '/my-reports', label: 'My Reviews', icon: Star },
+        { path: '/chat', label: 'Chat with Admin', icon: Phone },
       ];
     }
   }
@@ -80,13 +98,18 @@ const UserNavbar = () => {
                 <Link 
                   key={`${item.path}-${item.label}`} 
                   to={item.path} 
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 font-semibold whitespace-nowrap cursor-pointer text-xs
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 font-semibold whitespace-nowrap cursor-pointer text-xs relative
                     ${isActive 
                       ? (isDark ? 'bg-slate-900 text-emerald-400' : 'bg-slate-50 text-emerald-600')
                       : (isDark ? 'text-slate-400 hover:text-white hover:bg-slate-900' : 'text-slate-600 hover:text-slate-950 hover:bg-slate-50')}`}
                 >
                   <Icon className={`w-3.5 h-3.5 ${isActive ? 'opacity-100' : 'opacity-70'}`} />
                   <span className="hidden lg:block">{item.label}</span>
+                  {item.label === 'Chat with Admin' && unreadChatCount > 0 && (
+                     <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[14px] h-3.5 px-1 rounded-full bg-rose-500 text-[8px] font-black text-white border border-white dark:border-slate-950 animate-bounce">
+                        {unreadChatCount}
+                     </span>
+                  )}
                 </Link>
               );
             })}

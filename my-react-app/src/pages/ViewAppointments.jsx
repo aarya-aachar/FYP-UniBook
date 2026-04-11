@@ -123,7 +123,7 @@ const ViewAppointments = () => {
       
       <UserNavbar />
 
-      <main className="flex-1 overflow-y-auto relative transition-all duration-500">
+      <main className="flex-1 overflow-y-auto px-6 md:px-10 py-12 relative transition-all duration-500">
 
         <style>{`
           @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
@@ -142,22 +142,20 @@ const ViewAppointments = () => {
           ))}
         </div>
 
-        {/* Dynamic Full-Width Header */}
-        <div className={`px-6 md:px-10 py-12 mb-10 border-b relative transition-all duration-500 ${isDark ? 'bg-[#020617] border-slate-800' : 'bg-white border-slate-200 shadow-sm'}`}>
-          <div className="max-w-7xl mx-auto w-full flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-            <div className="glass-header">
-              <h1 className={`text-4xl font-black mb-2 tracking-tight transition-colors ${isDark ? 'text-white' : 'text-slate-900'}`}>My Appointments</h1>
-              <p className={`text-base font-medium transition-colors ${isDark ? 'text-slate-300' : 'text-slate-600'} max-w-2xl`}>Check and manage all your active and past appointments.</p>
+        <div className="max-w-7xl mx-auto w-full slide-up pt-16 relative z-10">
+          <div className="mb-10">
+            <div className="glass-header flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+              <div className="relative z-10">
+                <h1 className={`text-4xl font-black mb-2 tracking-tight transition-colors ${isDark ? 'text-white' : 'text-slate-900'}`}>My Appointments</h1>
+                <p className={`text-base font-medium transition-colors ${isDark ? 'text-slate-300' : 'text-slate-600'} max-w-2xl`}>Check and manage all your active and past appointments.</p>
+              </div>
+              <Link to="/services" 
+                className={`flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg text-white font-medium text-sm transition-all w-max shadow-sm cursor-pointer ${isDark ? 'bg-emerald-600 hover:bg-emerald-500 shadow-emerald-500/10' : 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-500/10'}`}>
+                <Plus className="w-4 h-4" /> New Booking
+              </Link>
             </div>
-            
-            <Link to="/services" 
-              className={`flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-white font-black text-xs uppercase tracking-widest transition-all shadow-lg active:scale-95 shrink-0 ${isDark ? 'bg-emerald-600 hover:bg-emerald-500 shadow-emerald-500/20' : 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-500/20'}`}>
-              <Plus className="w-4 h-4" /> New Booking
-            </Link>
           </div>
-        </div>
 
-        <div className="max-w-7xl mx-auto w-full px-6 md:px-10 slide-up pt-4 relative z-10">
           <div className="space-y-4 pb-12">
             {loading ? (
                <div className="flex flex-col gap-4">

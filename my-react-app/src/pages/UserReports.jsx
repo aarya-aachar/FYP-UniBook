@@ -164,14 +164,16 @@ const UserReports = () => {
         <div className="max-w-7xl mx-auto w-full slide-up pt-16 relative z-10">
           
           <div className="mb-10">
-            <div className="glass-header">
-              <h1 className={`text-4xl font-bold mb-2 tracking-tight transition-colors ${isDark ? 'text-white' : 'text-slate-900'}`}>My Reviews</h1>
-              <p className={`text-base font-medium transition-colors ${isDark ? 'text-slate-300' : 'text-slate-600'} max-w-2xl`}>See the feedback you've shared for your past bookings.</p>
+            <div className="glass-header flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+              <div className="relative z-10">
+                <h1 className={`text-4xl font-black mb-2 tracking-tight transition-colors ${isDark ? 'text-white' : 'text-slate-900'}`}>My Reviews</h1>
+                <p className={`text-base font-medium transition-colors ${isDark ? 'text-slate-300' : 'text-slate-600'} max-w-2xl`}>See the feedback you've shared for your past bookings.</p>
+              </div>
+              <button onClick={() => navigate('/services')} 
+                className={`flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg text-white font-medium text-sm transition-all w-max shadow-sm cursor-pointer ${isDark ? 'bg-emerald-600 hover:bg-emerald-500 shadow-emerald-500/10' : 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-500/10'}`}>
+                <Plus className="w-4 h-4" /> New Booking
+              </button>
             </div>
-            <button onClick={() => navigate('/services')} 
-              className={`flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg text-white font-medium text-sm transition-all w-max shadow-sm cursor-pointer mt-6 ${isDark ? 'bg-emerald-600 hover:bg-emerald-500' : 'bg-emerald-600 hover:bg-emerald-700'}`}>
-              <Plus className="w-4 h-4" /> New Booking
-            </button>
           </div>
 
           <div className="space-y-6 pb-12">

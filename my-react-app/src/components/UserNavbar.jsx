@@ -122,12 +122,9 @@ const UserNavbar = () => {
                 <NotificationBell isDark={isDark} />
                 <button
                   onClick={() => setDropdownOpen(!dropdownOpen)}
-                  className={`flex items-center gap-3 pl-3 pr-1 py-1 rounded-full border transition-all cursor-pointer bg-transparent
+                  className={`flex items-center gap-3 p-1 rounded-full border transition-all cursor-pointer bg-transparent
                     ${isDark ? 'border-slate-800 hover:border-slate-700' : 'border-slate-100 hover:border-slate-200'}`}
                 >
-                  <span className={`text-[10px] font-black uppercase tracking-widest hidden md:block ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
-                    Account
-                  </span>
                   <div className="w-8 h-8 rounded-full border border-slate-200 overflow-hidden">
                     {user.profile_photo ? (
                       <img src={`http://localhost:4001${user.profile_photo}`} alt="User Avatar" className="w-full h-full object-cover" />

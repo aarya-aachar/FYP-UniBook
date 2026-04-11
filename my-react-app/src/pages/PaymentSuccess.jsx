@@ -2,31 +2,15 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import UserNavbar from '../components/UserNavbar';
 import { useUserTheme } from '../context/UserThemeContext';
-import { CheckCircle, ArrowRight, PartyPopper } from 'lucide-react';
+import { CheckCircle, ArrowRight } from 'lucide-react';
 
 const PaymentSuccess = () => {
   const { userTheme } = useUserTheme();
   const isDark = userTheme === 'dark';
   const navigate = useNavigate();
-  const [countdown, setCountdown] = useState(3);
-
   useEffect(() => {
     document.title = "Payment Successful | UniBook";
-    
-    const timer = setInterval(() => {
-      setCountdown((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          // Optional: We can choose to stay on this page or keep auto-redirect
-          // navigate('/my-appointments'); 
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [navigate]);
+  }, []);
 
   return (
     <div className={`flex flex-col min-h-screen transition-all duration-500 font-inter user-panel-bg ${isDark ? 'dark' : 'light'}`}>
@@ -53,7 +37,7 @@ const PaymentSuccess = () => {
           
           <div className={`w-28 h-28 rounded-[2.5rem] flex items-center justify-center mx-auto mb-8 shadow-2xl relative transition-all
             ${isDark ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/20' : 'bg-emerald-50 text-emerald-600 border border-emerald-100 shadow-emerald-500/10'}`}>
-            <PartyPopper className="absolute -top-4 -right-4 w-10 h-10 text-amber-500 animate-bounce" />
+
             <svg className="w-14 h-14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                <path className="check-path" strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
             </svg>
@@ -71,13 +55,6 @@ const PaymentSuccess = () => {
             </p>
 
             <div className={`flex flex-col items-center gap-6 pt-8 border-t transition-colors ${isDark ? 'border-slate-800' : 'border-slate-100'}`}>
-              <div className="flex items-center gap-4">
-                 <div className={`w-12 h-12 rounded-full border-4 border-t-emerald-500 animate-spin ${isDark ? 'border-slate-800' : 'border-slate-100'}`} />
-                 <span className={`text-sm font-black uppercase tracking-widest ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
-                    Redirecting in <span className="text-emerald-500">{countdown}s</span>
-                 </span>
-              </div>
-
               <button 
                 onClick={() => navigate('/my-appointments')}
                 className={`flex items-center gap-2 group text-sm font-black uppercase tracking-[0.2em] transition-all

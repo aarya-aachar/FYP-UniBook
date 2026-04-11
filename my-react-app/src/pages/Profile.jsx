@@ -179,21 +179,9 @@ const Profile = () => {
 
                 <div className="flex-1 text-center md:text-left space-y-3 mt-2">
                   <div className="flex flex-col md:flex-row md:items-center justify-center md:justify-start gap-3">
-                     <h2 className={`text-2xl font-bold tracking-tight transition-colors ${textPrimary}`}>{form.name}</h2>
-                     <span className={`px-3 py-1 rounded inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider w-max mx-auto md:mx-0 border w-max
-                       ${isDark ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-emerald-50 border-emerald-100 text-emerald-600'}`}>
-                          <Fingerprint className="w-3.5 h-3.5" /> Verified User
-                     </span>
-                  </div>
-                  
-                  <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
-                     <div className={`px-4 py-2 rounded-lg border transition-all flex items-center gap-2 ${isDark ? 'bg-slate-900/50 border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
-                        <div className={`w-1.5 h-1.5 rounded-full animate-pulse ${isDark ? 'bg-emerald-400' : 'bg-emerald-600'}`} />
-                        <span className={`font-semibold text-xs transition-colors ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>Active Session</span>
-                     </div>
-                     <div className={`px-4 py-2 rounded-lg border transition-all flex items-center gap-2 ${isDark ? 'bg-slate-900/50 border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
-                        <ShieldCheck className={`w-4 h-4 ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`} />
-                        <span className={`font-semibold text-xs transition-colors ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>Secure Account</span>
+                     <div>
+                       <h2 className={`text-2xl font-bold tracking-tight transition-colors ${textPrimary}`}>{form.name}</h2>
+                       <p className={`text-sm font-medium mt-1 transition-colors ${textSecondary}`}>{form.email}</p>
                      </div>
                   </div>
                </div>
@@ -214,8 +202,8 @@ const Profile = () => {
                   <div className="grid gap-5">
                      {[
                        { label: 'Full Name', name: 'name', type: 'text' },
-                       { label: 'Email Address', name: 'email', type: 'email' },
-                       { label: 'Age', name: 'age', type: 'number' },
+                       { label: 'Email Address', name: 'email', type: 'email', readOnly: true },
+                       { label: 'Age', name: 'age', type: 'number', readOnly: true },
                      ].map((field) => (
                        <div key={field.name} className="space-y-1.5">
                          <label className={`block text-xs font-semibold uppercase tracking-wider ml-1 transition-colors ${textSecondary}`}>{field.label}</label>
@@ -224,7 +212,8 @@ const Profile = () => {
                            name={field.name}
                            value={form[field.name]}
                            onChange={handleChange}
-                           className={`w-full px-4 py-3 rounded-lg border font-medium transition-all outline-none text-sm ${inputBase}`}
+                           disabled={field.readOnly}
+                           className={`w-full px-4 py-3 rounded-lg border font-medium transition-all text-sm ${inputBase} ${field.readOnly ? 'opacity-60 cursor-not-allowed' : 'outline-none'}`}
                          />
                        </div>
                      ))}

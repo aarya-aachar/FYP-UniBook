@@ -82,13 +82,11 @@ const AdminDashboard = () => {
         <Sidebar />
 
         <div className="flex-1 px-8 py-10 max-w-7xl mx-auto w-full overflow-hidden text-slate-900 dark:text-white">
-          <div className="flex justify-between items-center mb-8">
-            <AdminTopHeader 
-              title="Dashboard Overview" 
-              subtitle="Monitor system metrics and platform health." 
-              showTimestamp={true}
-            />
-          </div>
+          <AdminTopHeader 
+            title="Dashboard Overview" 
+            subtitle="Monitor system metrics and platform health." 
+            showTimestamp={true}
+          />
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
             {statCards.map((card, i) => (

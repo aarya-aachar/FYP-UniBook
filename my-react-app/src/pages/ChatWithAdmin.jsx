@@ -111,7 +111,7 @@ const ChatWithAdmin = () => {
            </div>
         </div>
 
-        <div className="max-w-4xl mx-auto w-full h-[calc(100vh-350px)] flex flex-col mb-10">
+        <div className="max-w-7xl mx-auto w-full h-[calc(100vh-350px)] flex flex-col mb-10">
           
           {/* Chat Header */}
           <div className={`p-6 rounded-t-3xl border-b flex items-center justify-between glass-card`}>

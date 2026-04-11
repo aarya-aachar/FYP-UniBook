@@ -180,7 +180,7 @@ const Reports = () => {
 
       {printType && (
         <div style={{ position: 'absolute', top: '-10000px', left: '-10000px' }}>
-          <div id="report-to-print" style={{ padding: '40px', width: '1050px', fontFamily: 'Inter, system-ui, sans-serif', color: '#0f172a' }}>
+          <div id="report-to-print" style={{ padding: '30px', width: '960px', fontFamily: 'Inter, system-ui, sans-serif', color: '#0f172a', boxSizing: 'border-box' }}>
              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: '2px solid #e2e8f0', paddingBottom: '30px', marginBottom: '40px' }}>
                <div>
                   <div style={{ display: 'flex', itemsCenter: 'center', gap: '10px', marginBottom: '15px' }}>
@@ -200,7 +200,7 @@ const Reports = () => {
                  <thead>
                    <tr style={{ background: '#f1f5f9' }}>
                      {printData.length > 0 && Object.keys(printData[0]).map(h => (
-                       <th key={h} style={{ borderBottom: '1px solid #e2e8f0', borderRight: '1px solid #e2e8f0', padding: '12px 10px', textAlign: 'left', textTransform: 'uppercase', fontWeight: '800', color: '#475569', letterSpacing: '0.02em whitespace-nowrap' }}>{h.replace(/_/g, ' ')}</th>
+                       <th key={h} style={{ borderBottom: '1px solid #e2e8f0', borderRight: '1px solid #e2e8f0', padding: '10px 8px', textAlign: 'left', textTransform: 'uppercase', fontWeight: '800', color: '#475569', letterSpacing: '0.02em', whiteSpace: 'normal', wordBreak: 'break-word' }}>{h.replace(/_/g, ' ')}</th>
                      ))}
                    </tr>
                  </thead>
@@ -215,7 +215,7 @@ const Reports = () => {
                            val = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
                          }
                          return (
-                           <td key={idx} style={{ borderBottom: '1px solid #e2e8f0', borderRight: '1px solid #e2e8f0', padding: '10px', color: '#1e293b', fontWeight: '600' }}>{String(val || '')}</td>
+                           <td key={idx} style={{ borderBottom: '1px solid #e2e8f0', borderRight: '1px solid #e2e8f0', padding: '8px', color: '#1e293b', fontWeight: '600', fontSize: '9px', whiteSpace: 'normal', wordBreak: 'break-word' }}>{String(val || '')}</td>
                          );
                        })}
                      </tr>

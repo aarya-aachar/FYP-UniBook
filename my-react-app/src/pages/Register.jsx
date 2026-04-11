@@ -265,14 +265,14 @@ const Register = () => {
                 <label className="text-[10px] font-black text-slate-500 ml-1 uppercase tracking-[0.2em]">Full Name *</label>
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-5 flex items-center text-slate-500 group-focus-within:text-emerald-500 transition-colors"><User className="w-4 h-4" /></div>
-                  <input type="text" placeholder="John Doe" value={form.name} onChange={e => setForm({...form, name: e.target.value})} className="w-full pl-12 pr-6 py-3.5 rounded-2xl bg-white/5 border border-white/10 focus:border-emerald-500 focus:bg-emerald-500/5 focus:outline-none transition-all placeholder:text-slate-600 text-white font-medium text-sm" />
+                  <input type="text" value={form.name} onChange={e => setForm({...form, name: e.target.value})} className="w-full pl-12 pr-6 py-3.5 rounded-2xl bg-white/5 border border-white/10 focus:border-emerald-500 focus:bg-emerald-500/5 focus:outline-none transition-all placeholder:text-slate-600 text-white font-medium text-sm" />
                 </div>
               </div>
               <div className="space-y-2">
                 <label className="text-[10px] font-black text-slate-500 ml-1 uppercase tracking-[0.2em]">Email Address *</label>
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-5 flex items-center text-slate-500 group-focus-within:text-emerald-500 transition-colors"><Mail className="w-4 h-4" /></div>
-                  <input type="email" placeholder="john@example.com" value={form.email} onChange={e => setForm({...form, email: e.target.value})} className="w-full pl-12 pr-6 py-3.5 rounded-2xl bg-white/5 border border-white/10 focus:border-emerald-500 focus:bg-emerald-500/5 focus:outline-none transition-all placeholder:text-slate-600 text-white font-medium text-sm" />
+                  <input type="email" value={form.email} onChange={e => setForm({...form, email: e.target.value})} className="w-full pl-12 pr-6 py-3.5 rounded-2xl bg-white/5 border border-white/10 focus:border-emerald-500 focus:bg-emerald-500/5 focus:outline-none transition-all placeholder:text-slate-600 text-white font-medium text-sm" />
                 </div>
               </div>
             </div>
@@ -282,7 +282,7 @@ const Register = () => {
                 <label className="text-[10px] font-black text-slate-500 ml-1 uppercase tracking-[0.2em]">Age (18+) *</label>
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-5 flex items-center text-slate-500 group-focus-within:text-emerald-500 transition-colors"><CalendarIcon className="w-4 h-4" /></div>
-                  <input type="number" placeholder="25" value={form.age} onChange={e => setForm({...form, age: e.target.value})} className="w-full pl-12 pr-6 py-3.5 rounded-2xl bg-white/5 border border-white/10 focus:border-emerald-500 focus:bg-emerald-500/5 focus:outline-none transition-all placeholder:text-slate-600 text-white font-medium text-sm" />
+                  <input type="number" value={form.age} onChange={e => setForm({...form, age: e.target.value})} className="w-full pl-12 pr-6 py-3.5 rounded-2xl bg-white/5 border border-white/10 focus:border-emerald-500 focus:bg-emerald-500/5 focus:outline-none transition-all placeholder:text-slate-600 text-white font-medium text-sm" />
                 </div>
               </div>
               <div className="space-y-2">
@@ -301,7 +301,7 @@ const Register = () => {
                 <label className="text-[10px] font-black text-slate-500 ml-1 uppercase tracking-[0.2em]">Phone No</label>
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-5 flex items-center text-slate-500 group-focus-within:text-emerald-500 transition-colors"><Phone className="w-4 h-4" /></div>
-                  <input type="tel" placeholder="98XXXXXXXX" value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} className="w-full pl-12 pr-6 py-3.5 rounded-2xl bg-white/5 border border-white/10 focus:border-emerald-500 focus:bg-emerald-500/5 focus:outline-none transition-all placeholder:text-slate-600 text-white font-medium text-sm" />
+                  <input type="tel" value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} className="w-full pl-12 pr-6 py-3.5 rounded-2xl bg-white/5 border border-white/10 focus:border-emerald-500 focus:bg-emerald-500/5 focus:outline-none transition-all placeholder:text-slate-600 text-white font-medium text-sm" />
                 </div>
               </div>
             </div>
@@ -311,14 +311,14 @@ const Register = () => {
                 <label className="text-[10px] font-black text-slate-500 ml-1 uppercase tracking-[0.2em]">Password *</label>
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-5 flex items-center text-slate-500 group-focus-within:text-emerald-500 transition-colors"><Lock className="w-4 h-4" /></div>
-                  <input type="password" placeholder="••••••••" value={form.password} onChange={e => setForm({...form, password: e.target.value})} className="w-full pl-12 pr-6 py-3.5 rounded-2xl bg-white/5 border border-white/10 focus:border-emerald-500 focus:bg-emerald-500/5 focus:outline-none transition-all placeholder:text-slate-600 text-white font-medium text-sm" />
+                  <input type="password" value={form.password} onChange={e => setForm({...form, password: e.target.value})} className="w-full pl-12 pr-6 py-3.5 rounded-2xl bg-white/5 border border-white/10 focus:border-emerald-500 focus:bg-emerald-500/5 focus:outline-none transition-all placeholder:text-slate-600 text-white font-medium text-sm" />
                 </div>
               </div>
               <div className="space-y-2">
                 <label className="text-[10px] font-black text-slate-500 ml-1 uppercase tracking-[0.2em]">Confirm *</label>
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-5 flex items-center text-slate-500 group-focus-within:text-emerald-500 transition-colors"><Lock className="w-4 h-4" /></div>
-                  <input type="password" placeholder="••••••••" value={form.confirm} onChange={e => setForm({...form, confirm: e.target.value})} className="w-full pl-12 pr-6 py-3.5 rounded-2xl bg-white/5 border border-white/10 focus:border-emerald-500 focus:bg-emerald-500/5 focus:outline-none transition-all placeholder:text-slate-600 text-white font-medium text-sm" />
+                  <input type="password" value={form.confirm} onChange={e => setForm({...form, confirm: e.target.value})} className="w-full pl-12 pr-6 py-3.5 rounded-2xl bg-white/5 border border-white/10 focus:border-emerald-500 focus:bg-emerald-500/5 focus:outline-none transition-all placeholder:text-slate-600 text-white font-medium text-sm" />
                 </div>
               </div>
             </div>

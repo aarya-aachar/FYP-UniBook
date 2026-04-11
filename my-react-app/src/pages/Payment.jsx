@@ -43,8 +43,8 @@ const Payment = () => {
       // 2. Call backend to get signed parameters
       const response = await api.post('/payment/initiate', {
         amount: price,
-        booking_id: booking.id
-        // frontend_url no longer needed — backend uses path-based callbacks
+        booking_id: booking.id,
+        booking_ids: booking.ids
       });
       
       const params = response.data;

@@ -5,6 +5,7 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Profile from './pages/Profile';
+import ForgotPassword from './pages/ForgotPassword';
 import Services from './pages/Services';
 import ServiceProviders from './pages/ServiceProviders';
 import ServiceDetails from './pages/ServiceDetails';
@@ -33,6 +34,7 @@ import ProviderChat from './pages/ProviderChat';
 import ProviderWaiting from './pages/ProviderWaiting';
 import ProviderDashboard from './pages/ProviderDashboard';
 import ProviderBookings from './pages/ProviderBookings';
+import ProviderAvailability from './pages/ProviderAvailability';
 import ProviderProfile from './pages/ProviderProfile';
 import ProviderNotifications from './pages/ProviderNotifications';
 import ProviderServiceSettings from './pages/ProviderServiceSettings';
@@ -46,6 +48,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/profile" element={<ProtectedRoute requiredRole="user"><Profile /></ProtectedRoute>} />
             <Route path="/services" element={<ProtectedRoute><Services /></ProtectedRoute>} />
             <Route path="/services/:serviceName" element={<ProtectedRoute><ServiceProviders /></ProtectedRoute>} />
@@ -79,6 +82,7 @@ function App() {
             {/* Provider Protected Routes */}
             <Route path="/provider/dashboard" element={<ProtectedRoute requiredRole="provider"><ProviderDashboard /></ProtectedRoute>} />
             <Route path="/provider/bookings" element={<ProtectedRoute requiredRole="provider"><ProviderBookings /></ProtectedRoute>} />
+            <Route path="/provider/availability" element={<ProtectedRoute requiredRole="provider"><ProviderAvailability /></ProtectedRoute>} />
             <Route path="/provider/profile" element={<ProtectedRoute requiredRole="provider"><ProviderProfile /></ProtectedRoute>} />
             <Route path="/provider/settings" element={<ProtectedRoute requiredRole="provider"><ProviderServiceSettings /></ProtectedRoute>} />
             <Route path="/provider/notifications" element={<ProtectedRoute requiredRole="provider"><ProviderNotifications /></ProtectedRoute>} />

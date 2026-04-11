@@ -18,7 +18,8 @@ const STEPS = ['Choose Type', 'Business Details', 'Account Setup'];
 
 const ProviderRegister = () => {
   const navigate = useNavigate();
-  const [step, setStep] = useState(0);
+  const [step, setStep] = useState(0); // 0, 1, 2 = business forms; 'otp' = verification; 'success' = done
+  const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -45,8 +46,7 @@ const ProviderRegister = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    if (!form.email || !form.password) { setError('Email and password are required.'); return; }
-    if (form.password !== form.confirmPassword) { setError('Passwords do not match.'); return; }
+    if (!form.password || form.password !== form.confirmPassword) { setError('Passwords must match.'); return; }
     if (!form.pan_number) { setError('PAN number is required.'); return; }
 
     try {
@@ -54,18 +54,30 @@ const ProviderRegister = () => {
       const data = new FormData();
       Object.entries(form).forEach(([key, val]) => {
         if (val !== null && val !== undefined && key !== 'confirmPassword') {
-          if (key === 'document' || key === 'image') {
-            if (val) data.append(key, val);
-          } else {
-            data.append(key, val);
-          }
+          data.append(key, val);
         }
       });
 
       await api.post('/provider/apply', data, { headers: { 'Content-Type': 'multipart/form-data' } });
-      navigate('/provider/waiting');
+      setStep('otp');
     } catch (err) {
       setError(err.response?.data?.message || 'Submission failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyOtp = async (e) => {
+    e.preventDefault();
+    const code = otp.join('');
+    if (code.length !== 6) return setError('Please enter the 6-digit code.');
+    
+    try {
+      setLoading(true);
+      await api.post('/provider/apply/verify', { email: form.email, otp: code });
+      navigate('/provider/waiting');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Verification failed.');
     } finally {
       setLoading(false);
     }
@@ -231,10 +243,39 @@ const ProviderRegister = () => {
                   </button>
                   <button type="submit" disabled={loading}
                     className={`flex-1 py-3 rounded-xl bg-emerald-600 text-white font-bold text-sm hover:bg-emerald-700 transition-all flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20 ${loading ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}>
-                    {loading ? 'Submitting...' : 'Submit Application'} {!loading && <ArrowRight className="w-4 h-4" />}
+                    {loading ? 'Sending Code...' : 'Submit Application'} {!loading && <ArrowRight className="w-4 h-4" />}
                   </button>
                 </div>
               </form>
+            )}
+
+            {/* OTP Verification Step */}
+            {step === 'otp' && (
+              <div className="p-8 md:p-10 text-center">
+                <CheckCircle className="w-16 h-16 text-emerald-500 mx-auto mb-6" />
+                <h2 className="text-3xl font-extrabold text-slate-950 mb-2">Verify Your Email</h2>
+                <p className="text-slate-500 mb-8 font-medium">We've sent a 6-digit code to <span className="text-emerald-600 font-bold">{form.email}</span></p>
+                
+                <form onSubmit={handleVerifyOtp} className="space-y-6">
+                  <div className="flex justify-center gap-2 mb-6">
+                    {otp.map((digit, i) => (
+                      <input key={i} type="text" maxLength={1} value={digit}
+                        onChange={e => {
+                          const newOtp = [...otp];
+                          newOtp[i] = e.target.value.slice(-1);
+                          setOtp(newOtp);
+                          if (e.target.value && e.target.nextSibling) e.target.nextSibling.focus();
+                        }}
+                        className="w-10 h-12 text-center text-lg font-bold border-2 border-slate-200 rounded-xl focus:border-emerald-500 focus:outline-none" />
+                    ))}
+                  </div>
+                  {error && <p className="text-sm text-red-600 mb-4 bg-red-50 p-3 rounded-xl border border-red-100">{error}</p>}
+                  <button type="submit" disabled={loading} className="w-full py-3.5 rounded-xl bg-slate-950 text-white font-bold hover:bg-emerald-600 transition-all shadow-xl shadow-slate-950/20">
+                    {loading ? 'Verifying...' : 'Verify & Submit'}
+                  </button>
+                  <button type="button" onClick={() => setStep(2)} className="text-xs font-bold text-slate-400 uppercase tracking-widest hover:text-slate-900 transition-colors">Start over</button>
+                </form>
+              </div>
             )}
 
             {/* Navigation for steps 0 and 1 */}

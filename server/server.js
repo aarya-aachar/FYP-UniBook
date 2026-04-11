@@ -17,7 +17,7 @@ const { startReminderJob } = require('./src/jobs/reminderJob');
 
 const app = express();
 
-const PORT = process.env.PORT || 4001;
+const PORT = 4001;
 
 // Loosen CORS for development cross-network access
 app.use(cors({ origin: true, credentials: true }));
@@ -56,16 +56,17 @@ app.get('/api/ping', (req, res) => {
 });
 
 // Main init logic
-async function bootstrap() {
+async function startServer() {
   try {
-    console.log('>>> [BOOTSTRAP] Connecting to database...');
+    console.log('>>> [STARTUP] Connecting to database...');
     await initDB();
-    console.log('>>> [BOOTSTRAP] Table initialization complete');
+    console.log('>>> [STARTUP] Table initialization complete');
 
     // Basic health test
     app.get('/', (req, res) => res.send('UniBook API is up and running!'));
 
-    // Load API routes
+    // Load API routes (PRIORITY FIRST)
+    app.use('/api', providerPortalRoutes);
     app.use('/api', authRoutes);
     app.use('/api', providerRoutes);
     app.use('/api', bookingRoutes);
@@ -75,7 +76,6 @@ async function bootstrap() {
     app.use('/api/reviews', reviewRoutes);
     app.use('/api/notifications', notificationRoutes);
     app.use('/api', providerApplicationRoutes);
-    app.use('/api', providerPortalRoutes);
 
     // Serve profile photo uploads
     app.use('/uploads/profiles', express.static(path.join(__dirname, 'src', 'routes', 'uploads', 'profiles')));
@@ -102,10 +102,10 @@ async function bootstrap() {
       console.log('>>> [JOBS] Reminder engine started.');
     });
   } catch (error) {
-    console.error('❌ FATAL SERVER CRASH DURING BOOTSTRAP:');
+    console.error('❌ FATAL SERVER CRASH DURING STARTUP:');
     console.error(error);
     process.exit(1);
   }
 }
 
-bootstrap();
+startServer();

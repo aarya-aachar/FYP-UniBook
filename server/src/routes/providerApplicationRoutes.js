@@ -6,6 +6,7 @@ const fs = require('fs');
 const { getPool } = require('../config/db');
 const { authenticateToken, verifyAdmin } = require('../middleware/authMiddleware');
 const { sendProviderApproved, sendProviderRejected, sendProviderApplicationReceived } = require('../services/emailService');
+const { createOTP, verifyOTP, sendOTPEmail } = require('../services/otpService');
 
 const router = express.Router();
 
@@ -34,52 +35,59 @@ router.post('/provider/apply', upload.fields([
     const { name, email, password, pan_number, service_type, address, description, base_price, opening_time, closing_time, capacity } = req.body;
 
     if (!name || !email || !password || !pan_number || !service_type) {
-      return res.status(400).json({ message: 'Name, email, password, PAN number, and service type are required.' });
+      return res.status(400).json({ message: 'Missing required fields.' });
     }
 
     const pool = getPool();
 
-    // Check if email already used in users or pending applications
+    // Check availability
     const [existingUsers] = await pool.query('SELECT id FROM users WHERE email = ?', [email]);
-    if (existingUsers.length > 0) {
-      return res.status(409).json({ message: 'An account with this email already exists.' });
-    }
+    if (existingUsers.length > 0) return res.status(409).json({ message: 'Email already registered.' });
 
-    const [existingApps] = await pool.query(
-      "SELECT id, status FROM provider_applications WHERE email = ?", [email]
-    );
-    if (existingApps.length > 0) {
-      const app = existingApps[0];
-      if (app.status === 'pending') {
-        return res.status(409).json({ message: 'An application with this email is already pending review.' });
-      }
-      if (app.status === 'approved') {
-        return res.status(409).json({ message: 'This email is already approved. Please login.' });
-      }
-      // If rejected, allow re-apply by deleting old record
-      await pool.query('DELETE FROM provider_applications WHERE email = ?', [email]);
-    }
+    // Store in OTP memory
+    const document_path = req.files?.document?.[0]?.filename ? `/uploads/provider-docs/${req.files.document[0].filename}` : null;
+    const image_path = req.files?.image?.[0]?.filename ? `/uploads/provider-docs/${req.files.image[0].filename}` : null;
 
-    const password_hash = await bcrypt.hash(password, 10);
-    const document_path = req.files?.document?.[0]?.filename
-      ? `/uploads/provider-docs/${req.files.document[0].filename}` : null;
-    const image_path = req.files?.image?.[0]?.filename
-      ? `/uploads/provider-docs/${req.files.image[0].filename}` : null;
+    const applicationData = {
+      name, email, password, pan_number, service_type, address, description, 
+      base_price, opening_time, closing_time, capacity, document_path, image_path
+    };
+
+    const otp = createOTP(email, applicationData);
+    await sendOTPEmail(email, otp, 'Verify your Business Application');
+
+    res.json({ message: 'Verification code sent to email.' });
+  } catch (err) {
+    console.error('>>> [PROVIDER SEND OTP ERROR]', err);
+    res.status(500).json({ message: 'Failed to send verification code.' });
+  }
+});
+
+/**
+ * Finalize registration after OTP verification
+ */
+router.post('/provider/apply/verify', async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+    const { valid, data, message } = verifyOTP(email, otp);
+
+    if (!valid) return res.status(400).json({ message });
+
+    const pool = getPool();
+    const password_hash = await bcrypt.hash(data.password, 10);
 
     await pool.query(
       `INSERT INTO provider_applications 
        (name, email, password_hash, pan_number, service_type, address, description, base_price, opening_time, closing_time, capacity, document_path, image_path, status)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')`,
-      [name, email, password_hash, pan_number, service_type, address || '', description || '', base_price || 0, opening_time || '09:00', closing_time || '18:00', capacity || 1, document_path, image_path]
+      [data.name, data.email, password_hash, data.pan_number, data.service_type, data.address || '', data.description || '', data.base_price || 0, data.opening_time || '09:00', data.closing_time || '18:00', data.capacity || 1, data.document_path, data.image_path]
     );
 
-    // Send the confirmation email indicating that the logic is under review
-    await sendProviderApplicationReceived(email, name);
-
-    res.status(201).json({ message: 'Application submitted successfully. You will be notified via email.' });
+    await sendProviderApplicationReceived(data.email, data.name);
+    res.status(201).json({ message: 'Application submitted successfully.' });
   } catch (err) {
-    console.error('>>> [PROVIDER APPLY ERROR]', err);
-    res.status(500).json({ message: err.message || 'Server error during application submission.' });
+    console.error('>>> [PROVIDER VERIFY ERROR]', err);
+    res.status(500).json({ message: 'Final verification failed.' });
   }
 });
 

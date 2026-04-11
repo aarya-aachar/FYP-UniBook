@@ -86,6 +86,11 @@ router.get('/history/:otherId', authenticateToken, async (req, res) => {
     let messages;
     if (req.user.role === 'admin') {
       // Admin looking at User 'otherId'
+      // Safety: If otherId is 'admin', it's an invalid self-chat request for an admin user
+      if (otherId === 'admin' || isNaN(parseInt(otherId))) {
+        return res.json([]);
+      }
+      
       [messages] = await pool.query(`
         SELECT * FROM messages 
         WHERE (sender_id = ? AND receiver_id IN (SELECT id FROM users WHERE role = 'admin')) 

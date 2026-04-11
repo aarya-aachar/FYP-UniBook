@@ -1,10 +1,11 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   LayoutDashboard, Calendar, User, LogOut, 
-  Utensils, Trophy, Stethoscope, Scissors, Menu, X, Settings, MessageSquareQuote
+  Utensils, Trophy, Stethoscope, Scissors, Menu, X, Settings, MessageSquareQuote, BarChart2
 } from 'lucide-react';
 import { logout, getProfile } from '../services/authService';
+import api from '../services/api';
 
 const CATEGORY_ICONS = {
   'Restaurants': Utensils,
@@ -16,6 +17,7 @@ const CATEGORY_ICONS = {
 const NAV_ITEMS = [
   { path: '/provider/dashboard',      label: 'Dashboard',        icon: LayoutDashboard },
   { path: '/provider/bookings',        label: 'Bookings',         icon: Calendar },
+  { path: '/provider/availability',    label: 'Availability',     icon: BarChart2 },
   { path: '/provider/settings',        label: 'Service Settings', icon: Settings },
   { path: '/provider/chat',            label: 'Admin Support',     icon: MessageSquareQuote },
   { path: '/provider/profile',         label: 'My Profile',       icon: User },
@@ -27,13 +29,29 @@ const ProviderSidebar = ({ isDark = false }) => {
   const user = getProfile();
   const [collapsed, setCollapsed] = useState(false);
   const [showLogout, setShowLogout] = useState(false);
+  const [category, setCategory] = useState(user?.category || null);
+  const [displayName, setDisplayName] = useState(user?.name || 'Provider');
+
+  useEffect(() => {
+    // Fetch real provider profile to get the category (not available in JWT)
+    api.get('/provider/profile')
+      .then(res => setCategory(res.data?.category || null))
+      .catch(() => {});
+
+    // Listen for name updates from the profile page
+    const handleProfileUpdate = (e) => {
+      if (e.detail?.name) setDisplayName(e.detail.name);
+    };
+    window.addEventListener('profileUpdated', handleProfileUpdate);
+    return () => window.removeEventListener('profileUpdated', handleProfileUpdate);
+  }, []);
 
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
 
-  const CategoryIcon = CATEGORY_ICONS[user?.category] || LayoutDashboard;
+  const CategoryIcon = CATEGORY_ICONS[category] || LayoutDashboard;
 
   return (
     <>
@@ -63,8 +81,8 @@ const ProviderSidebar = ({ isDark = false }) => {
                 <CategoryIcon className="w-4 h-4 text-white" />
               </div>
               <div className="min-w-0">
-                <p className={`text-[10px] font-black uppercase tracking-widest ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>Provider</p>
-                <p className={`text-sm font-bold truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>{user?.name || 'Provider'}</p>
+                <p className={`text-[10px] font-black uppercase tracking-widest ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>{category || 'Provider'}</p>
+                <p className={`text-sm font-bold truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>{displayName}</p>
               </div>
             </div>
           </div>

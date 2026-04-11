@@ -4,12 +4,18 @@ import { useAdminTheme } from '../context/AdminThemeContext';
 import api from '../services/api';
 import { 
   Calendar, CheckCircle2, Clock, TrendingUp,
-  User, ArrowRight
+  User, ArrowRight, DollarSign
 } from 'lucide-react';
+import { formatMultiSlotRange } from '../utils/dateUtils';
 import { useNavigate } from 'react-router-dom';
 import AdminTopHeader from '../components/AdminTopHeader';
 
 const formatDate = (d) => new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+const formatCurrency = (val) => {
+  if (val === undefined || val === null || isNaN(val)) return 'Rs. 0';
+  return `Rs. ${Number(val).toLocaleString()}`;
+};
 
 const StatCard = ({ title, value, icon: Icon, color, bg, border, isDark }) => (
   <div className={`rounded-2xl border p-6 flex items-center gap-5 ${bg} ${border} transition-all hover:shadow-md`}>
@@ -32,10 +38,23 @@ const ProviderDashboard = () => {
 
   useEffect(() => {
     document.title = 'Provider Dashboard | UniBook';
-    api.get('/provider/dashboard')
-      .then(res => setData(res.data))
-      .catch(err => console.error(err))
-      .finally(() => setLoading(false));
+    
+    const fetchDashboard = () => {
+      setLoading(true);
+      // Cache-busting with timestamp
+      api.get(`/provider/dashboard?t=${Date.now()}`)
+        .then(res => {
+          console.log('>>> [FRONTEND] Dashboard Data Received:', res.data);
+          setData(res.data);
+        })
+        .catch(err => console.error('>>> [FRONTEND ERROR]', err))
+        .finally(() => setLoading(false));
+    };
+
+    fetchDashboard();
+    // Auto-refresh every 5 minutes
+    const interval = setInterval(fetchDashboard, 5 * 60 * 1000);
+    return () => clearInterval(interval);
   }, []);
 
   const textPrimary   = isDark ? 'text-white' : 'text-slate-900';
@@ -64,7 +83,7 @@ const ProviderDashboard = () => {
               <StatCard isDark={isDark} title="Total Bookings"   value={data?.stats?.total}    icon={Calendar}      color="bg-emerald-500/10 text-emerald-600" bg={isDark ? 'bg-slate-900' : 'bg-white'} border={isDark ? 'border-slate-800' : 'border-slate-200'} />
               <StatCard isDark={isDark} title="Upcoming"         value={data?.stats?.upcoming}  icon={TrendingUp}    color="bg-blue-500/10 text-blue-600"     bg={isDark ? 'bg-slate-900' : 'bg-white'} border={isDark ? 'border-slate-800' : 'border-slate-200'} />
               <StatCard isDark={isDark} title="Completed"        value={data?.stats?.completed} icon={CheckCircle2}  color="bg-teal-500/10 text-teal-600"     bg={isDark ? 'bg-slate-900' : 'bg-white'} border={isDark ? 'border-slate-800' : 'border-slate-200'} />
-              <StatCard isDark={isDark} title="Pending"          value={data?.stats?.pending}   icon={Clock}         color="bg-amber-500/10 text-amber-600"   bg={isDark ? 'bg-slate-900' : 'bg-white'} border={isDark ? 'border-slate-800' : 'border-slate-200'} />
+              <StatCard isDark={isDark} title="Total Revenue"   value={formatCurrency(data?.stats?.revenue)}   icon={DollarSign}    color="bg-emerald-600/10 text-emerald-600"   bg={isDark ? 'bg-slate-900' : 'bg-white'} border={isDark ? 'border-slate-800' : 'border-slate-200'} />
             </div>
 
             {/* Recent Bookings */}
@@ -83,22 +102,18 @@ const ProviderDashboard = () => {
                 </div>
               ) : (
                 <div className="divide-y divide-slate-100 dark:divide-slate-800">
-                  {data?.recentBookings?.map(b => (
-                    <div key={b.id} className={`flex items-center justify-between px-8 py-4 transition-all ${isDark ? 'hover:bg-slate-800/40' : 'hover:bg-slate-50/60'}`}>
+                  {(data?.recentBookings || []).map((b, idx) => (
+                    <div key={idx} className={`flex items-center justify-between px-8 py-4 transition-all ${isDark ? 'hover:bg-slate-800/40' : 'hover:bg-slate-50/60'}`}>
                       <div className="flex items-center gap-4">
                         <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${isDark ? 'bg-slate-800 text-slate-300' : 'bg-slate-100 text-slate-600'}`}>
                           <User className="w-4 h-4" />
                         </div>
                         <div>
                           <p className={`text-sm font-bold ${textPrimary}`}>{b.user_name}</p>
-                          <p className={`text-xs font-medium ${textSecondary}`}>{formatDate(b.booking_date)} • {String(b.booking_time).substring(0, 5)}</p>
+                          <p className={`text-xs font-medium ${textSecondary}`}>{formatDate(b.booking_date)} • {formatMultiSlotRange(b.times, 60)}</p>
                         </div>
                       </div>
-                      <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full ${
-                        b.status === 'confirmed' ? 'bg-emerald-100 text-emerald-700' :
-                        b.status === 'pending'   ? 'bg-amber-100 text-amber-700' :
-                        'bg-rose-100 text-rose-700'
-                      }`}>{b.status}</span>
+                      <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full bg-emerald-100 text-emerald-700`}>confirmed</span>
                     </div>
                   ))}
                 </div>

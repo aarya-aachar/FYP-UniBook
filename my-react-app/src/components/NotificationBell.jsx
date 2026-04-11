@@ -76,9 +76,13 @@ const NotificationBell = ({ isDark = false }) => {
     let target = '';
 
     if (n.type.startsWith('booking_') || n.type === 'new_booking') {
-      target = user?.role === 'admin' ? '/dashboard/admin/bookings' : '/my-appointments';
+      if (user?.role === 'admin') target = '/dashboard/admin/bookings';
+      else if (user?.role === 'provider') target = '/provider/bookings';
+      else target = '/my-appointments';
     } else if (n.type === 'photo_updated' || n.type === 'profile_updated') {
-      target = user?.role === 'admin' ? '/dashboard/admin/profile' : '/profile';
+      if (user?.role === 'admin') target = '/dashboard/admin/profile';
+      else if (user?.role === 'provider') target = '/provider/profile';
+      else target = '/profile';
     } else if (n.type === 'provider_added' && user?.role === 'admin') {
       target = '/dashboard/admin/providers';
     }

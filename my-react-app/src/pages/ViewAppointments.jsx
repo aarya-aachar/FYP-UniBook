@@ -4,11 +4,13 @@ import UserNavbar from '../components/UserNavbar';
 import { getUserBookings, updateBookingStatus } from '../services/bookingService';
 import { useUserTheme } from '../context/UserThemeContext';
 import { CheckCircle, Clock, XCircle, HelpCircle, Calendar, Utensils, Trophy, Hospital, Scissors, Plus, CalendarX } from 'lucide-react';
+import { formatMultiSlotRange } from '../utils/dateUtils';
 
 const ViewAppointments = () => {
   const { userTheme } = useUserTheme();
   const isDark = userTheme === 'dark';
   const [appointments, setAppointments] = useState([]);
+  const [filter, setFilter] = useState('all');
   const [loading, setLoading] = useState(true);
   const [toasts, setToasts] = useState([]);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -45,10 +47,8 @@ const ViewAppointments = () => {
             last.booking_date === booking.booking_date && 
             last.status === booking.status) {
           
-          // Check if consecutive (last.endTime === booking.startTime)
-          // For 30 min slots, we can just compare string times or use Date objects
           const lastTime = new Date(`2000-01-01T${last.times[last.times.length - 1]}`);
-          lastTime.setMinutes(lastTime.getMinutes() + 30);
+          lastTime.setMinutes(lastTime.getMinutes() + 60); // Use 60 now
           const lastEndTimeStr = lastTime.toTimeString().substring(0, 5);
           
           if (lastEndTimeStr === booking.booking_time.substring(0, 5)) {
@@ -75,7 +75,7 @@ const ViewAppointments = () => {
   };
 
   const cancelAppointment = async (group) => {
-    if(!window.confirm(`Are you sure you want to cancel this ${group.times.length > 1 ? 'multi-slot ' : ''}booking?`)) return;
+    if(!window.confirm(`Are you sure you want to cancel this session?`)) return;
     try {
       // Cancel all IDs in the group
       await Promise.all(group.ids.map(id => updateBookingStatus(id, 'cancelled')));
@@ -123,7 +123,7 @@ const ViewAppointments = () => {
       
       <UserNavbar />
 
-      <main className="flex-1 overflow-y-auto px-6 md:px-10 py-12 relative transition-all duration-500">
+      <main className="flex-1 overflow-y-auto relative transition-all duration-500">
 
         <style>{`
           @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
@@ -142,19 +142,22 @@ const ViewAppointments = () => {
           ))}
         </div>
 
-        <div className="max-w-7xl mx-auto w-full slide-up pt-16 relative z-10">
-          
-          <div className="mb-10">
+        {/* Dynamic Full-Width Header */}
+        <div className={`px-6 md:px-10 py-12 mb-10 border-b relative transition-all duration-500 ${isDark ? 'bg-[#020617] border-slate-800' : 'bg-white border-slate-200 shadow-sm'}`}>
+          <div className="max-w-7xl mx-auto w-full flex flex-col sm:flex-row sm:items-center justify-between gap-6">
             <div className="glass-header">
-              <h1 className={`text-4xl font-bold mb-2 tracking-tight transition-colors ${isDark ? 'text-white' : 'text-slate-900'}`}>My Appointments</h1>
+              <h1 className={`text-4xl font-black mb-2 tracking-tight transition-colors ${isDark ? 'text-white' : 'text-slate-900'}`}>My Appointments</h1>
               <p className={`text-base font-medium transition-colors ${isDark ? 'text-slate-300' : 'text-slate-600'} max-w-2xl`}>Check and manage all your active and past appointments.</p>
             </div>
+            
             <Link to="/services" 
-              className={`flex items-center gap-2 px-6 py-2.5 rounded-lg text-white font-medium text-sm transition-all w-max shadow-sm cursor-pointer mt-6 ${isDark ? 'bg-emerald-600 hover:bg-emerald-500' : 'bg-emerald-600 hover:bg-emerald-700'}`}>
+              className={`flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-white font-black text-xs uppercase tracking-widest transition-all shadow-lg active:scale-95 shrink-0 ${isDark ? 'bg-emerald-600 hover:bg-emerald-500 shadow-emerald-500/20' : 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-500/20'}`}>
               <Plus className="w-4 h-4" /> New Booking
             </Link>
           </div>
+        </div>
 
+        <div className="max-w-7xl mx-auto w-full px-6 md:px-10 slide-up pt-4 relative z-10">
           <div className="space-y-4 pb-12">
             {loading ? (
                <div className="flex flex-col gap-4">
@@ -162,15 +165,17 @@ const ViewAppointments = () => {
                    <div key={i} className={`h-28 rounded-2xl animate-pulse border transition-all ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-slate-100 border-slate-200'}`} />
                  ))}
                </div>
-            ) : appointments.length === 0 ? (
+             ) : appointments.filter(a => a.status === 'confirmed').length === 0 ? (
                <div className={`text-center py-20 rounded-2xl border border-dashed transition-all ${isDark ? 'bg-slate-800/50 border-slate-600' : 'bg-slate-50 border-slate-300'}`}>
                  <div className={`w-16 h-16 rounded-xl flex items-center justify-center mx-auto mb-4 transition-all ${isDark ? 'bg-slate-700 text-slate-500' : 'bg-slate-200 text-slate-400'}`}>
                     <CalendarX className="w-8 h-8" />
                  </div>
-                 <h3 className={`text-xl font-semibold transition-colors ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>No bookings found</h3>
-                 <p className={`mt-1 text-sm transition-colors ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>Make a new booking to get started.</p>
+                 <h3 className={`text-xl font-semibold transition-colors ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>No confirmed appointments</h3>
+                 <p className={`mt-1 text-sm transition-colors ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>
+                   Make a new booking to get started.
+                 </p>
                </div>
-            ) : appointments.map((a, i) => {
+            ) : appointments.filter(a => a.status === 'confirmed').map((a, i) => {
               const cfg = getStatusConfig(a.status);
               return (
               <div key={a.id} 
@@ -195,35 +200,14 @@ const ViewAppointments = () => {
                         {new Date(a.booking_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
                       </div>
                       <div className="flex items-center gap-2">
-                        <Clock className="w-4 h-4 opacity-60" /> 
-                        {a.times.length > 1 ? (
-                          <>
-                             {a.times[0].substring(0,5)} - {(() => {
-                               const end = new Date(`2000-01-01T${a.times[a.times.length - 1]}`);
-                               end.setMinutes(end.getMinutes() + 30);
-                               return end.toTimeString().substring(0, 5);
-                             })()}
-                             <span className="ml-1 text-[10px] font-black uppercase tracking-tighter bg-emerald-500/10 text-emerald-500 px-1.5 py-0.5 rounded">
-                               {a.times.length * 0.5}h Session
-                             </span>
-                          </>
-                        ) : (
-                          a.booking_time.substring(0,5)
-                        )}
+                        <Clock className="w-4 h-4 opacity-70" /> 
+                        <span className={`font-bold transition-colors ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>
+                           {formatMultiSlotRange(a.times, 60)}
+                        </span>
                       </div>
                     </div>
                   </div>
                 </div>
-
-                {a.status?.toLowerCase() === 'pending' && (
-                  <div className={`flex items-center gap-3 w-full md:w-auto mt-4 md:mt-0 pt-4 md:pt-0 border-t md:border-none transition-colors ${isDark ? 'border-slate-700' : 'border-slate-100'}`}>
-                    <button onClick={() => cancelAppointment(a)} 
-                      className={`flex-1 md:flex-none px-4 py-2 rounded-lg border transition-all font-medium text-sm text-center cursor-pointer shadow-sm
-                        ${isDark ? 'bg-red-500/10 text-red-400 border-red-500/20 hover:bg-red-500/20' : 'bg-white text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300'}`}>
-                      Cancel Entire Session
-                    </button>
-                  </div>
-                )}
               </div>
             )})}
           </div>

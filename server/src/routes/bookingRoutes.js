@@ -11,7 +11,7 @@ router.get('/bookings/provider/:provider_id/date/:date', authenticateToken, asyn
     const pool = getPool();
 
     const [bookings] = await pool.query(
-      "SELECT booking_time, COUNT(*) as count FROM bookings WHERE provider_id = ? AND booking_date = ? AND status != 'cancelled' GROUP BY booking_time",
+      "SELECT booking_time, COUNT(*) as count FROM bookings WHERE provider_id = ? AND booking_date = ? AND status = 'confirmed' GROUP BY booking_time",
       [provider_id, date]
     );
 
@@ -47,7 +47,7 @@ router.post('/bookings', authenticateToken, async (req, res) => {
 
     // 3. Validate Availability for ALL slots
     const [existing] = await pool.query(
-      "SELECT booking_time, COUNT(*) as count FROM bookings WHERE provider_id = ? AND booking_date = ? AND status != 'cancelled' AND booking_time IN (?) GROUP BY booking_time",
+      "SELECT booking_time, COUNT(*) as count FROM bookings WHERE provider_id = ? AND booking_date = ? AND status = 'confirmed' AND booking_time IN (?) GROUP BY booking_time",
       [provider_id, booking_date, times]
     );
 
@@ -74,40 +74,43 @@ router.post('/bookings', authenticateToken, async (req, res) => {
     const mainBookingId = bookingIds[0];
 
     // --- NOTIFICATIONS ---
-    try {
-      const providerName = provider.name;
-      const dateStr = new Date(booking_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-      const timeStr = times.map(t => t.substring(0, 5)).join(', ');
-      const userName = req.user.name || 'A Customer';
+    if (bookingStatus === 'confirmed') {
+      try {
+        const providerName = provider.name;
+        const dateStr = new Date(booking_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        const timeStr = times.map(t => t.substring(0, 5)).join(', ');
+        const userName = req.user.name || 'A Customer';
 
-      // 1. Notify User
-      await pool.query(
-        'INSERT INTO notifications (user_id, type, title, message, metadata, booking_id) VALUES (?, ?, ?, ?, ?, ?)',
-        [user_id, 'booking_confirmed', 'Booking Confirmed!', `Your booking for ${providerName} on ${dateStr} at ${timeStr} has been confirmed.`, JSON.stringify({ booking_id: mainBookingId }), mainBookingId]
-      );
-
-      // 2. Notify Admins
-      const [admins] = await pool.query("SELECT id FROM users WHERE role = 'admin'");
-      for (const admin of admins) {
+        // 1. Notify User
         await pool.query(
           'INSERT INTO notifications (user_id, type, title, message, metadata, booking_id) VALUES (?, ?, ?, ?, ?, ?)',
-          [admin.id, 'new_booking', 'New Booking', `${userName} booked ${providerName} on ${dateStr} at ${timeStr}.`, JSON.stringify({ booking_id: mainBookingId }), mainBookingId]
+          [user_id, 'booking_confirmed', 'Booking Confirmed!', `Your booking for ${providerName} on ${dateStr} at ${timeStr} has been confirmed.`, JSON.stringify({ booking_id: mainBookingId }), mainBookingId]
         );
-      }
 
-      // 3. Notify the Service Provider (if they have a portal account)
-      const [providerUser] = await pool.query("SELECT user_id FROM providers WHERE id = ?", [provider_id]);
-      if (providerUser.length > 0 && providerUser[0].user_id) {
-        await pool.query(
-          'INSERT INTO notifications (user_id, type, title, message, metadata, booking_id) VALUES (?, ?, ?, ?, ?, ?)',
-          [providerUser[0].user_id, 'new_booking', '📅 New Booking Received!', `${userName} booked your service on ${dateStr} at ${timeStr}.`, JSON.stringify({ booking_id: mainBookingId }), mainBookingId]
-        );
+        // 2. Notify Admins
+        const [admins] = await pool.query("SELECT id FROM users WHERE role = 'admin'");
+        for (const admin of admins) {
+          await pool.query(
+            'INSERT INTO notifications (user_id, type, title, message, metadata, booking_id) VALUES (?, ?, ?, ?, ?, ?)',
+            [admin.id, 'new_booking', 'New Booking', `${userName} booked ${providerName} on ${dateStr} at ${timeStr}.`, JSON.stringify({ booking_id: mainBookingId }), mainBookingId]
+          );
+        }
+
+        // 3. Notify the Service Provider (if they have a portal account)
+        const [providerUser] = await pool.query("SELECT user_id FROM providers WHERE id = ?", [provider_id]);
+        if (providerUser.length > 0 && providerUser[0].user_id) {
+          await pool.query(
+            'INSERT INTO notifications (user_id, type, title, message, metadata, booking_id) VALUES (?, ?, ?, ?, ?, ?)',
+            [providerUser[0].user_id, 'new_booking', '📅 New Booking Received!', `${userName} booked your service on ${dateStr} at ${timeStr}.`, JSON.stringify({ booking_id: mainBookingId }), mainBookingId]
+          );
+        }
+      } catch (notifErr) {
+        console.error('>>> [NOTIF ERROR]', notifErr.message);
       }
-    } catch (notifErr) {
-      console.error('>>> [NOTIF ERROR]', notifErr.message);
     }
 
-    res.status(201).json({ message: 'Booking confirmed successfully', id: mainBookingId, ids: bookingIds });
+    const payloadMsg = bookingStatus === 'pending' ? 'Booking initialized for payment' : 'Booking confirmed successfully';
+    res.status(201).json({ message: payloadMsg, id: mainBookingId, ids: bookingIds });
   } catch (error) {
     console.error('Create Booking Error:', error);
     res.status(500).json({ message: 'Internal Server Error' });
@@ -121,7 +124,7 @@ router.get('/bookings/user', authenticateToken, async (req, res) => {
     const pool = getPool();
 
     const query = `
-      SELECT b.*, p.name as provider_name, p.category, s.name as service_name
+      SELECT b.id, b.provider_id, b.user_id, DATE_FORMAT(b.booking_date, '%Y-%m-%d') as booking_date, b.booking_time, b.status, b.paid_amount, b.service_id, b.created_at, p.name as provider_name, p.category, s.name as service_name
       FROM bookings b
       JOIN providers p ON b.provider_id = p.id
       LEFT JOIN services s ON b.service_id = s.id
@@ -146,7 +149,7 @@ router.get('/bookings/user/reports', authenticateToken, async (req, res) => {
     const pool = getPool();
 
     const query = `
-      SELECT b.*, p.name as provider_name, p.category, s.name as service_name,
+      SELECT b.id, b.provider_id, b.user_id, DATE_FORMAT(b.booking_date, '%Y-%m-%d') as booking_date, b.booking_time, b.status, b.paid_amount, b.service_id, b.created_at, p.name as provider_name, p.category, s.name as service_name,
              r.rating, r.comment, r.id as review_id
       FROM bookings b
       JOIN providers p ON b.provider_id = p.id
@@ -172,7 +175,7 @@ router.get('/bookings/admin', authenticateToken, verifyAdmin, async (req, res) =
     const pool = getPool();
 
     const query = `
-      SELECT b.*, u.name as user_name, u.email as user_email, p.name as provider_name, p.category, s.name as service_name
+      SELECT b.id, b.provider_id, b.user_id, DATE_FORMAT(b.booking_date, '%Y-%m-%d') as booking_date, b.booking_time, b.status, b.paid_amount, b.service_id, b.created_at, u.name as user_name, u.email as user_email, p.name as provider_name, p.category, s.name as service_name
       FROM bookings b
       JOIN users u ON b.user_id = u.id
       JOIN providers p ON b.provider_id = p.id

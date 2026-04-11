@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import Sidebar from '../components/Sidebar';
 import { useAdminTheme } from '../context/AdminThemeContext';
 import { getUsers, updateUserStatus, updateUserRole } from '../services/adminService';
-import { Search, ShieldAlert, ShieldCheck, Ban, CheckCircle, UserX, UserCheck, Filter, AlertCircle } from 'lucide-react';
+import { Search, ShieldAlert, ShieldCheck, Ban, CheckCircle, UserX, UserCheck, Filter, AlertCircle, Building2 } from 'lucide-react';
 import AdminTopHeader from '../components/AdminTopHeader';
 
 const ROLE_CONFIG = {
@@ -19,6 +19,13 @@ const ROLE_CONFIG = {
     badgeLight: 'bg-teal-50 text-teal-700 border-teal-100 font-bold',
     label: 'Client',
     icon: ShieldAlert
+  },
+  provider: {
+    color: 'bg-indigo-600',
+    badge: 'bg-indigo-500/20 text-indigo-400 border-indigo-500/30',
+    badgeLight: 'bg-indigo-50 text-indigo-700 border-indigo-100 font-bold',
+    label: 'Provider',
+    icon: Building2
   }
 };
 
@@ -105,14 +112,14 @@ const ManageUsers = () => {
         <AdminTopHeader 
           title="User Accounts" 
           subtitle={`Manage system access and privileges for ${users.length} registered accounts.`} 
+          metrics={
+            <div className={`flex items-center gap-3 px-4 py-2 rounded-lg border transition-all ${isDark ? 'bg-slate-800/50 border-slate-700' : 'bg-white border-slate-200'}`}>
+               <div className={`w-2 h-2 rounded-full ${isDark ? 'bg-emerald-400' : 'bg-emerald-500'} animate-pulse`} />
+               <span className={`text-xs font-bold uppercase tracking-wider ${textSecondary}`}>Active Members:</span>
+               <span className={`font-bold text-sm ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>{users.filter(u => u.is_active).length}</span>
+            </div>
+          }
         />
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 mb-8 -mt-10">
-           <div className={`flex items-center gap-3 px-4 py-2 rounded-lg border transition-all ${isDark ? 'bg-slate-800/50 border-slate-700' : 'bg-white border-slate-200'}`}>
-              <div className={`w-2 h-2 rounded-full ${isDark ? 'bg-emerald-400' : 'bg-emerald-500'} animate-pulse`} />
-              <span className={`text-xs font-bold uppercase tracking-wider ${textSecondary}`}>Active Members:</span>
-              <span className={`font-bold text-sm ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>{users.filter(u => u.is_active).length}</span>
-           </div>
-        </div>
 
         {/* Data Table Controls */}
         <div className={`p-4 rounded-t-xl border-b-0 transition-all ${cardBase} flex flex-col md:flex-row gap-4 mb-0`} style={{ animation: 'fadeIn 0.6s ease-out' }}>
@@ -142,6 +149,7 @@ const ManageUsers = () => {
               <option value="All">All Roles</option>
               <option value="admin">Administrators</option>
               <option value="user">Clients</option>
+              <option value="provider">Providers</option>
             </select>
           </div>
         </div>

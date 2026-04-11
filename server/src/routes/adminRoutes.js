@@ -8,55 +8,55 @@ router.get('/admin/metrics', authenticateToken, verifyAdmin, async (req, res) =>
   try {
     const pool = getPool();
     
-    // 1. Total Counts
-    const [[{ usersCount }]] = await pool.query('SELECT COUNT(*) as usersCount FROM users');
-    const [[{ providersCount }]] = await pool.query('SELECT COUNT(*) as providersCount FROM providers');
-    const [[{ bookingsCount }]] = await pool.query('SELECT COUNT(*) as bookingsCount FROM bookings');
+    // 1. Fetch raw confirming data for totals
+    const [users] = await pool.query('SELECT id FROM users');
+    const [providers] = await pool.query('SELECT id, category FROM providers');
+    const [rawBookings] = await pool.query(`
+      SELECT paid_amount, created_at, 
+             DATE_FORMAT(booking_date, '%Y-%m-%d') as booking_date
+      FROM bookings 
+      WHERE status = 'confirmed'
+    `);
+
+    // 2. Aggregate Final Totals
+    const totals = {
+      users: users.length,
+      providers: providers.length,
+      revenue: Math.round(rawBookings.reduce((sum, b) => sum + parseFloat(b.paid_amount || 0), 0) * 100) / 100
+    };
+
+    // 3. Chart & Trends (Last 14 days)
+    const trendsMap = {};
+    const fourteenDaysAgo = new Date();
+    fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
     
-    // 2. LIVE Revenue Calculation
-    const [[{ totalRevenue }]] = await pool.query(`
-      SELECT COALESCE(SUM(p.base_price), 0) as totalRevenue 
-      FROM bookings b 
-      LEFT JOIN providers p ON b.provider_id = p.id 
-      WHERE b.status = 'confirmed'
-    `);
+    rawBookings.forEach(b => {
+      const bDate = new Date(b.created_at);
+      if (bDate >= fourteenDaysAgo) {
+        const key = bDate.toISOString().split('T')[0].slice(5);
+        trendsMap[key] = (trendsMap[key] || 0) + parseFloat(b.paid_amount || 0);
+      }
+    });
 
-    // 3. Revenue Trends (last 14 days)
-    const [revenueTrends] = await pool.query(`
-      SELECT DATE_FORMAT(created_at, '%m-%d') as name, COALESCE(SUM(revenue_total), 0) as value 
-      FROM (
-        SELECT b.created_at, p.base_price as revenue_total 
-        FROM bookings b 
-        LEFT JOIN providers p ON b.provider_id = p.id 
-        WHERE b.status = 'confirmed' AND b.created_at >= DATE_SUB(NOW(), INTERVAL 14 DAY)
-      ) as daily 
-      GROUP BY DATE_FORMAT(created_at, '%m-%d') 
-      ORDER BY name ASC
-    `);
+    const breakdownMap = {};
+    providers.forEach(p => { breakdownMap[p.category] = (breakdownMap[p.category] || 0) + 1; });
 
-    // 4. Recent Activity (last 5 bookings)
-    const [recentActivity] = await pool.query(`
+    // 4. Recent Activity (Latest 5 bookings)
+    const [recentRaw] = await pool.query(`
       SELECT b.id, u.name as user, p.name as provider, b.status, b.created_at 
       FROM bookings b 
       LEFT JOIN users u ON b.user_id = u.id 
       LEFT JOIN providers p ON b.provider_id = p.id 
+      WHERE b.status = 'confirmed'
       ORDER BY b.created_at DESC 
       LIMIT 5
     `);
 
-    // 5. Provider breakdown for chart
-    const [breakdown] = await pool.query('SELECT category as name, COUNT(*) as value FROM providers GROUP BY category');
-
     res.json({
-      totals: {
-        users: usersCount,
-        providers: providersCount,
-        bookings: bookingsCount,
-        revenue: parseFloat(totalRevenue || 0)
-      },
-      chartData: breakdown,
-      revenueTrends: revenueTrends,
-      recentActivity: recentActivity
+      totals,
+      chartData: Object.entries(breakdownMap).map(([name, value]) => ({ name, value })),
+      revenueTrends: Object.entries(trendsMap).map(([name, value]) => ({ name, value })).sort((a,b) => a.name.localeCompare(b.name)),
+      recentActivity: recentRaw
     });
   } catch (error) {
     console.error('Admin Metrics Error:', error);
@@ -127,16 +127,16 @@ router.get('/admin/reports/full', authenticateToken, verifyAdmin, async (req, re
     
     // 1. Total Revenue
     const [[{ total_revenue }]] = await pool.query(`
-      SELECT COALESCE(SUM(p.base_price), 0) as total_revenue 
-      FROM bookings b 
-      LEFT JOIN providers p ON b.provider_id = p.id 
-      WHERE b.status = 'confirmed'
+      SELECT COALESCE(SUM(paid_amount), 0) as total_revenue 
+      FROM bookings 
+      WHERE status = 'confirmed'
     `);
 
     // 2. Booking Trends
     const [trends] = await pool.query(`
       SELECT DATE_FORMAT(created_at, '%Y-%m-%d') as dr_date, COUNT(*) as count 
       FROM bookings 
+      WHERE status = 'confirmed'
       GROUP BY DATE_FORMAT(created_at, '%Y-%m-%d') 
       ORDER BY dr_date ASC 
       LIMIT 30
@@ -144,7 +144,7 @@ router.get('/admin/reports/full', authenticateToken, verifyAdmin, async (req, re
 
     // 3. Revenue by Category
     const [categories] = await pool.query(`
-      SELECT p.category as name, COALESCE(SUM(p.base_price), 0) as value 
+      SELECT p.category as name, COALESCE(SUM(b.paid_amount), 0) as value 
       FROM bookings b 
       LEFT JOIN providers p ON b.provider_id = p.id 
       WHERE b.status = 'confirmed' AND p.category IS NOT NULL
@@ -153,7 +153,7 @@ router.get('/admin/reports/full', authenticateToken, verifyAdmin, async (req, re
 
     // 4. Top Performers
     const [performers] = await pool.query(`
-      SELECT p.name, p.category, COUNT(*) as bookings, COALESCE(SUM(p.base_price), 0) as revenue 
+      SELECT p.name, p.category, COUNT(*) as bookings, COALESCE(SUM(b.paid_amount), 0) as revenue 
       FROM bookings b 
       LEFT JOIN providers p ON b.provider_id = p.id 
       WHERE b.status = 'confirmed' AND p.id IS NOT NULL
@@ -164,13 +164,12 @@ router.get('/admin/reports/full', authenticateToken, verifyAdmin, async (req, re
 
     // 5. Overall Stats
     const [[{ confirmedCount }]] = await pool.query("SELECT COUNT(*) as count FROM bookings WHERE status = 'confirmed'");
-    const [[{ totalBookings }]] = await pool.query("SELECT COUNT(*) as count FROM bookings");
-    const health = totalBookings > 0 ? (confirmedCount / totalBookings) * 100 : 100;
+    const health = 100; // Since we only track confirmed now, health is baseline 100% visible active system
 
     res.json({
       summary: {
         total_revenue: parseFloat(total_revenue || 0),
-        total_bookings: totalBookings,
+        total_bookings: confirmedCount,
         health_score: Math.round(health),
         active_providers: performers.length
       },
@@ -208,6 +207,7 @@ router.get('/admin/reports/bookings/export', authenticateToken, verifyAdmin, asy
       FROM bookings b
       LEFT JOIN users u ON b.user_id = u.id
       LEFT JOIN providers p ON b.provider_id = p.id
+      WHERE b.status = 'confirmed'
       ORDER BY b.created_at DESC
     `);
     res.json(bookings);

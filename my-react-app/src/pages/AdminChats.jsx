@@ -113,7 +113,7 @@ const AdminChats = ({ roleFilter = 'user' }) => {
   const textPrimary = isDark ? "text-white" : "text-slate-900";
   const textSecondary = isDark ? "text-slate-400" : "text-slate-500";
   const bgCard = isDark ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200 shadow-sm";
-  const bgApp = isDark ? "bg-[#0f172a]" : "bg-slate-50";
+  const bgApp = isDark ? "bg-[#020617]" : "bg-slate-50";
 
   const filteredConversations = conversations.filter(c => 
     c.name.toLowerCase().includes(searchTerm.toLowerCase()) || 

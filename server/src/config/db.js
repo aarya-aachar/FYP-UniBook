@@ -107,7 +107,7 @@ async function initDB() {
         booking_time TIME NOT NULL,
         status ENUM('pending', 'confirmed', 'cancelled') DEFAULT 'pending',
         payment_status ENUM('pending', 'paid', 'failed') DEFAULT 'pending',
-        transaction_uuid VARCHAR(255) UNIQUE DEFAULT NULL,
+        transaction_uuid VARCHAR(255) DEFAULT NULL,
         paid_amount DECIMAL(10,2) DEFAULT 0.00,
         notes TEXT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

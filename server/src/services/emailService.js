@@ -126,9 +126,70 @@ const sendProviderDeleted = (email, name) => sendEmail(
   `
 );
 
+const sendBookingReminder = (email, name, providerName, time, date) => sendEmail(
+  email,
+  '⏰ Reminder: Your UniBook Appointment is in 1 Hour!',
+  `
+  <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; background: #f8fafc; border-radius: 12px;">
+    <div style="background: #0f172a; padding: 24px; border-radius: 8px; text-align: center; margin-bottom: 24px;">
+      <h1 style="color: #10b981; margin: 0; font-size: 24px;">Appointment Reminder</h1>
+    </div>
+    <h2 style="color: #1e293b;">Hello, ${name}!</h2>
+    <p style="color: #475569; font-size: 16px; line-height: 1.6;">
+      This is a friendly reminder that you have an appointment today at <strong>${providerName}</strong>.
+    </p>
+    <div style="background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin: 24px 0;">
+      <div style="margin-bottom: 12px;">
+        <span style="color: #94a3b8; font-size: 12px; font-weight: bold; text-transform: uppercase;">Service Provider</span>
+        <div style="color: #1e293b; font-weight: bold; font-size: 18px;">${providerName}</div>
+      </div>
+      <div style="display: flex; gap: 24px;">
+        <div>
+          <span style="color: #94a3b8; font-size: 12px; font-weight: bold; text-transform: uppercase;">Date</span>
+          <div style="color: #1e293b; font-weight: bold;">${date}</div>
+        </div>
+        <div style="margin-left: 40px;">
+          <span style="color: #94a3b8; font-size: 12px; font-weight: bold; text-transform: uppercase;">Time</span>
+          <div style="color: #10b981; font-weight: bold; font-size: 20px;">${time}</div>
+        </div>
+      </div>
+    </div>
+    <p style="color: #475569; font-size: 14px; text-align: center;">
+      Please aim to arrive 5-10 minutes before your scheduled time. We look forward to seeing you!
+    </p>
+    <p style="color: #94a3b8; font-size: 11px; text-align: center; margin-top: 32px;">
+      Manage your bookings at: <a href="http://localhost:3000/dashboard" style="color: #10b981; text-decoration: none;">UniBook Dashboard</a>
+    </p>
+  </div>
+  `
+);
+
+const sendPasswordResetAlert = (email, name) => sendEmail(
+  email,
+  '🔐 Security Alert: Your Password was Reset',
+  `
+  <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; background: #f8fafc; border-radius: 12px;">
+    <h2 style="color: #1e293b;">Hello, ${name},</h2>
+    <p style="color: #475569; font-size: 16px; line-height: 1.6;">
+      Your UniBook account password was recently successfully reset.
+    </p>
+    <p style="color: #475569; font-size: 16px; line-height: 1.6;">
+      <strong>If this was not you:</strong> Please contact our support team immediately as your account security may be at risk.
+    </p>
+    <div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid #e2e8f0; text-align: center;">
+      <p style="color: #94a3b8; font-size: 11px;">
+        This is an automated security notification.
+      </p>
+    </div>
+  </div>
+  `
+);
+
 module.exports = { 
   sendProviderApproved, 
   sendProviderRejected, 
   sendProviderApplicationReceived, 
-  sendProviderDeleted 
+  sendProviderDeleted,
+  sendBookingReminder,
+  sendPasswordResetAlert
 };

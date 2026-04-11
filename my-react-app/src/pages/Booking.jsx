@@ -7,6 +7,8 @@ import { getProviderReviews } from "../services/reviewService";
 import { useUserTheme } from "../context/UserThemeContext";
 import { Hospital, Utensils, Trophy, Scissors, MapPin, Clock, CreditCard, ChevronDown, Calendar, Ban, Star, ArrowLeft, X } from "lucide-react";
 
+import { formatTime, formatMultiSlotRange } from "../utils/dateUtils";
+
 const BACKEND_URL = 'http://localhost:4001';
 
 const Booking = () => {
@@ -26,7 +28,7 @@ const Booking = () => {
   const [showImageModal, setShowImageModal] = useState(false);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   
-  const [duration, setDuration] = useState(30);
+  const [duration, setDuration] = useState(60); // Default to 1 hour
   const [reviews, setReviews] = useState([]);
   const [showReviews, setShowReviews] = useState(false);
 
@@ -43,11 +45,8 @@ const Booking = () => {
         setProvider(data);
         setReviews(reviewData || []);
         
-        if (data?.category === 'Futsal' || data?.category === 'Salon / Spa') {
-           setDuration(60);
-        } else {
-           setDuration(30);
-        }
+        // Always 1 hour now by default
+        setDuration(60);
       } catch (err) {
         console.error("Failed to fetch provider details", err);
       } finally {
@@ -91,7 +90,7 @@ const Booking = () => {
       const hours = String(current.getHours()).padStart(2, '0');
       const minutes = String(current.getMinutes()).padStart(2, '0');
       slots.push(`${hours}:${minutes}`);
-      current.setMinutes(current.getMinutes() + 30);
+      current.setMinutes(current.getMinutes() + 60); // 1-hour intervals
     }
     return slots;
   };
@@ -128,7 +127,7 @@ const Booking = () => {
       state: { 
         date, 
         time: selectedTimes, // Send the array!
-        duration: selectedTimes.length * 30, 
+        duration: selectedTimes.length * 60, 
         price: calculateTotal(), 
         providerName: provider?.name 
       }
@@ -237,37 +236,38 @@ const Booking = () => {
                      <MapPin className="w-5 h-5 opacity-70 mt-0.5 shrink-0" />
                      {provider?.address || 'Location Unspecified'}
                   </p>
-                  <p className="flex items-center gap-2.5">
-                     <Clock className="w-5 h-5 opacity-70 shrink-0" />
-                     {(provider?.opening_time || '09:00:00').substring(0,5)} - {(provider?.closing_time || '18:00:00').substring(0,5)}
-                  </p>
-                  <p className="flex items-center gap-2.5">
-                     <CreditCard className="w-5 h-5 opacity-70 shrink-0" />
-                     Rs. {provider?.base_price || '0.00'} <span className={`text-xs ml-1 ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>/ 30 mins</span>
-                  </p>
-                </div>
-                
-                <div className={`mt-8 pt-8 border-t transition-colors ${isDark ? 'border-slate-700' : 'border-slate-200'}`}>
-                   <div className="flex justify-between items-center mb-4">
-                      <span className={`text-xs font-semibold uppercase tracking-wider transition-colors ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Selection Summary</span>
-                      <span className={`text-xs font-black uppercase text-emerald-500`}>{selectedTimes.length} slots</span>
-                   </div>
-                   <div className="flex flex-wrap gap-2 mb-6">
-                      {selectedTimes.length > 0 ? (
-                        selectedTimes.sort().map(t => (
-                          <span key={t} className={`px-2 py-1 rounded text-[10px] font-black tracking-widest ${isDark ? 'bg-emerald-500/20 text-emerald-400' : 'bg-emerald-50 text-emerald-600 border border-emerald-100'}`}>
-                            {t}
-                          </span>
-                        ))
+                    <p className="flex items-center gap-2.5">
+                       <Clock className="w-5 h-5 opacity-70 shrink-0" />
+                       {formatTime(provider?.opening_time || '09:00:00')} - {formatTime(provider?.closing_time || '18:00:00')}
+                    </p>
+                    <p className="flex items-center gap-2.5">
+                       <CreditCard className="w-5 h-5 opacity-70 shrink-0" />
+                       Rs. {provider?.base_price || '0.00'} <span className={`text-xs ml-1 ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>/ hour</span>
+                    </p>
+                 </div>
+                 
+                 <div className={`mt-8 pt-8 border-t transition-colors ${isDark ? 'border-slate-700' : 'border-slate-200'}`}>
+                    <div className="flex justify-between items-center mb-4">
+                       <span className={`text-xs font-semibold uppercase tracking-wider transition-colors ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Selection Summary</span>
+                       <span className={`text-xs font-black uppercase text-emerald-500`}>{selectedTimes.length} slots</span>
+                    </div>
+                    <div className="flex flex-col gap-2 mb-6">
+                       {selectedTimes.length > 0 ? (
+                          <div className={`px-3 py-2.5 rounded-xl border flex flex-col gap-1 ${isDark ? 'bg-emerald-500/5 border-emerald-500/20 text-emerald-400' : 'bg-emerald-50 border-emerald-100 text-emerald-600'}`}>
+                            <span className="text-[10px] uppercase font-black tracking-widest opacity-60">Reserved Time Range</span>
+                            <span className="text-sm font-bold tracking-tight">
+                               {formatMultiSlotRange(selectedTimes, 60)}
+                            </span>
+                          </div>
                       ) : (
                         <span className={`text-[10px] font-medium transition-colors ${isDark ? 'text-slate-500' : 'text-slate-400 italic'}`}>No slots selected</span>
                       )}
-                   </div>
-                   <div className="flex justify-between items-end">
-                      <span className={`font-medium text-sm transition-colors ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Total Amount</span>
-                      <span className={`text-2xl font-bold transition-colors ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>Rs. {calculateTotal()}</span>
-                   </div>
-                </div>
+                    </div>
+                    <div className="flex justify-between items-end">
+                       <span className={`font-medium text-sm transition-colors ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Total Amount</span>
+                       <span className={`text-2xl font-bold transition-colors ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>Rs. {calculateTotal()}</span>
+                    </div>
+                 </div>
               </div>
             </div>
 
@@ -307,12 +307,12 @@ const Booking = () => {
                        No slots available for this provider.
                     </div>
                   ) : (
-                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                        {timeSlots.map((slot) => {
                           const status = getSlotStatus(slot);
                           const isSelected = selectedTimes.includes(slot);
                           
-                          let btnClass = "py-3 rounded-lg text-sm font-semibold border transition-all duration-200 relative overflow-hidden ";
+                          let btnClass = "py-3 rounded-lg text-xs font-bold border transition-all duration-200 relative overflow-hidden ";
                           
                           if (status === 'booked') {
                             btnClass += isDark ? "bg-slate-800 border-slate-700/50 text-slate-600 cursor-not-allowed" : "bg-slate-100 border-slate-200/50 text-slate-400 cursor-not-allowed";
@@ -341,7 +341,7 @@ const Booking = () => {
                               onClick={toggleSlot}
                               className={btnClass}
                             >
-                              {slot}
+                              {formatTime(slot)}
                               {status === 'booked' && <span className={`absolute inset-0 flex items-center justify-center text-[8px] font-black uppercase text-red-500 bg-red-500/5`}>Full</span>}
                             </button>
                           );

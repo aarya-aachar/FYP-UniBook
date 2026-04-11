@@ -17,7 +17,7 @@ import {
 import Sidebar from "../components/Sidebar";
 import AdminTopHeader from "../components/AdminTopHeader";
 import { useAdminTheme } from "../context/AdminThemeContext";
-import { getAdminMetrics } from "../services/adminService";
+import api from "../services/api";
 
 const COLORS = ["#10B981", "#0D9488", "#14B8A6", "#059669", "#34D399"];
 
@@ -33,36 +33,33 @@ const AdminDashboard = () => {
   });
   const [loading, setLoading] = useState(true);
 
+  const fetchMetrics = () => {
+    setLoading(true);
+    // Bypassing cache with timestamp
+    api.get(`/admin/metrics?t=${Date.now()}`)
+      .then(res => setMetrics(res.data))
+      .catch(err => console.error(">>> [ADMIN DASHBOARD ERROR]", err))
+      .finally(() => setLoading(false));
+  };
+
   useEffect(() => {
     document.title = "Admin Dashboard | UniBook";
-
-    const fetchMetrics = async () => {
-      try {
-        setLoading(true);
-        const data = await getAdminMetrics();
-        setMetrics(data);
-      } catch (err) {
-        console.error("Failed to load metrics", err);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchMetrics();
+    // Refresh every 5 minutes automatically
+    const interval = setInterval(fetchMetrics, 5 * 60 * 1000);
+    return () => clearInterval(interval);
   }, []);
 
   const formatCurrency = (val) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'NPR',
-      minimumFractionDigits: 0
-    }).format(val).replace('NPR', 'Rs.');
+    if (val === undefined || val === null) return 'Rs. 0';
+    return `Rs. ${Number(val).toLocaleString()}`;
   };
 
+  const formatNumber = (val) => (val === undefined || val === null) ? '0' : Number(val).toLocaleString();
 
   const statCards = [
-    { label: 'Total Users', value: metrics.totals.users, icon: <Users className="w-5 h-5"/>, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
-    { label: 'Service Providers', value: metrics.totals.providers, icon: <Building2 className="w-5 h-5"/>, color: 'text-teal-500', bg: 'bg-teal-500/10' },
-    { label: 'Active Bookings', value: metrics.totals.bookings, icon: <CalendarCheck className="w-5 h-5"/>, color: 'text-amber-500', bg: 'bg-amber-500/10' },
+    { label: 'Total Users', value: metrics.totals.users || '0', icon: <Users className="w-5 h-5"/>, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
+    { label: 'Service Providers', value: metrics.totals.providers || '0', icon: <Building2 className="w-5 h-5"/>, color: 'text-teal-500', bg: 'bg-teal-500/10' },
     { label: 'Total Revenue', value: formatCurrency(metrics.totals.revenue), icon: <DollarSign className="w-5 h-5"/>, color: 'text-emerald-600', bg: 'bg-emerald-600/10' },
   ];
 
@@ -84,14 +81,16 @@ const AdminDashboard = () => {
         style={{ backgroundColor: isDark ? '#020617' : '#f1f5f9' }}>
         <Sidebar />
 
-        <div className="flex-1 px-8 py-10 max-w-7xl mx-auto w-full overflow-hidden">
-        <AdminTopHeader 
-          title="Dashboard Overview" 
-          subtitle="Monitor system metrics and platform health." 
-          showTimestamp={true}
-        />
+        <div className="flex-1 px-8 py-10 max-w-7xl mx-auto w-full overflow-hidden text-slate-900 dark:text-white">
+          <div className="flex justify-between items-center mb-8">
+            <AdminTopHeader 
+              title="Dashboard Overview" 
+              subtitle="Monitor system metrics and platform health." 
+              showTimestamp={true}
+            />
+          </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
             {statCards.map((card, i) => (
               <div key={i}
                 className={`rounded-xl p-5 transition-all duration-200 hover:border-slate-300 dark:hover:border-slate-600 ${cardBase}`}

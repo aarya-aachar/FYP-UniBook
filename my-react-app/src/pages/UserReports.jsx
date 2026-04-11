@@ -40,9 +40,9 @@ const UserReports = () => {
       // Grouping Logic for Consecutive Slots
       const grouped = [];
       const sorted = [...(data || [])].sort((a, b) => {
-        const dateDiff = new Date(a.booking_date) - new Date(b.booking_date);
+        const dateDiff = new Date(b.booking_date) - new Date(a.booking_date);
         if (dateDiff !== 0) return dateDiff;
-        return a.booking_time.localeCompare(b.booking_time);
+        return b.booking_time.localeCompare(a.booking_time);
       });
 
       sorted.forEach(booking => {

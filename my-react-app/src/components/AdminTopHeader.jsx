@@ -3,7 +3,7 @@ import NotificationBell from './NotificationBell';
 import { useAdminTheme } from '../context/AdminThemeContext';
 import { useState, useEffect } from 'react';
 
-const AdminTopHeader = ({ title, subtitle, showTimestamp = false, children }) => {
+const AdminTopHeader = ({ title, subtitle, showTimestamp = false, metrics, children }) => {
   const { adminTheme } = useAdminTheme();
   const isDark = adminTheme === 'dark';
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -42,6 +42,13 @@ const AdminTopHeader = ({ title, subtitle, showTimestamp = false, children }) =>
       </div>
       
       <div className="flex items-center gap-4 ml-auto">
+        {/* Metric Badges (e.g., Total Bookings) - Placed left of bell */}
+        {metrics && (
+          <div className="flex items-center gap-2">
+            {metrics}
+          </div>
+        )}
+
         {/* Page specific action (e.g., Add Provider button) */}
         {children}
 

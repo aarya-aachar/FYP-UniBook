@@ -121,7 +121,7 @@ const AdminChats = ({ roleFilter = 'user' }) => {
   );
 
   return (
-    <div className={`flex min-h-screen ${bgApp}`}>
+    <div className={`flex h-screen overflow-hidden ${bgApp}`}>
       <Sidebar />
       <div className="flex-1 px-8 py-10 max-w-7xl mx-auto w-full overflow-hidden flex flex-col">
         <AdminTopHeader 
@@ -131,7 +131,7 @@ const AdminChats = ({ roleFilter = 'user' }) => {
             : "Manage secure communications and direct inquiries with your registered clients."}
         />
         
-        <div className="flex-1 flex overflow-hidden gap-6 min-h-[calc(100vh-250px)]">
+        <div className="flex-1 flex overflow-hidden gap-6 min-h-0">
           
           {/* User List Sidebar */}
           <div className={`w-80 flex flex-col rounded-3xl border overflow-hidden ${bgCard}`}>

@@ -94,10 +94,10 @@ const ProviderChat = () => {
   const bgApp = isDark ? "bg-[#020617]" : "bg-slate-50";
 
   return (
-    <div className="flex min-h-screen font-inter transition-colors duration-300" style={{ backgroundColor: isDark ? '#020617' : '#f1f5f9' }}>
+    <div className="flex h-screen overflow-hidden font-inter transition-colors duration-300" style={{ backgroundColor: isDark ? '#020617' : '#f1f5f9' }}>
       <ProviderSidebar isDark={isDark} />
       
-      <div className="flex-1 px-8 py-10 max-w-7xl mx-auto w-full overflow-hidden flex flex-col h-[calc(100vh)]">
+      <div className="flex-1 px-8 py-10 max-w-7xl mx-auto w-full overflow-hidden flex flex-col min-h-0">
         <AdminTopHeader 
             title="Admin Support"
             subtitle="Connect directly with the UniBook administration for technical assistance or account queries."

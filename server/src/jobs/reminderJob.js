@@ -30,8 +30,8 @@ function startReminderJob() {
 
           // 3. Check if reminder already exists for this booking (Simplified Check)
           const [exists] = await pool.query(
-            "SELECT id FROM notifications WHERE type = 'booking_reminder' AND metadata LIKE ?",
-            [`%${bookingIdStr}%`]
+            "SELECT id FROM notifications WHERE type = 'booking_reminder' AND metadata->>'$.booking_id' = ?",
+            [bookingIdStr]
           );
 
           if (exists.length === 0) {

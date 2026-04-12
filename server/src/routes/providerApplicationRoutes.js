@@ -44,6 +44,17 @@ router.post('/provider/apply', upload.fields([
     const [existingUsers] = await pool.query('SELECT id FROM users WHERE email = ?', [email]);
     if (existingUsers.length > 0) return res.status(409).json({ message: 'Email already registered.' });
 
+    const [existingApps] = await pool.query('SELECT status FROM provider_applications WHERE email = ?', [email]);
+    if (existingApps.length > 0) {
+      if (existingApps[0].status === 'pending') {
+        return res.status(409).json({ message: 'An application with this email is already under review.' });
+      }
+      if (existingApps[0].status === 'approved') {
+        return res.status(409).json({ message: 'This email is already associated with an approved provider.' });
+      }
+      // If status is 'rejected', we silently allow them to proceed and re-apply!
+    }
+
     // Store in OTP memory
     const document_path = req.files?.document?.[0]?.filename ? `/uploads/provider-docs/${req.files.document[0].filename}` : null;
     const image_path = req.files?.image?.[0]?.filename ? `/uploads/provider-docs/${req.files.image[0].filename}` : null;
@@ -75,6 +86,9 @@ router.post('/provider/apply/verify', async (req, res) => {
 
     const pool = getPool();
     const password_hash = await bcrypt.hash(data.password, 10);
+
+    // Safely remove any previously rejected application so the UNIQUE email constraint doesn't fail
+    await pool.query('DELETE FROM provider_applications WHERE email = ? AND status = ?', [data.email, 'rejected']);
 
     await pool.query(
       `INSERT INTO provider_applications 

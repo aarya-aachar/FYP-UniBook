@@ -98,10 +98,10 @@ const ChatWithAdmin = () => {
   const bgApp = isDark ? "bg-[#0f172a]" : "bg-slate-50";
 
   return (
-    <div className={`flex flex-col min-h-screen transition-all duration-500 font-inter user-panel-bg ${isDark ? 'dark' : 'light'}`}>
+    <div className={`flex flex-col h-screen overflow-hidden transition-all duration-500 font-inter user-panel-bg ${isDark ? 'dark' : 'light'}`}>
       <UserNavbar />
       
-      <main className="flex-1 overflow-y-auto px-6 md:px-10 py-12 relative transition-all duration-500 pt-28">
+      <main className="flex-1 flex flex-col min-h-0 px-6 md:px-10 pb-6 relative transition-all duration-500 pt-28">
         
         {/* Page Title with Glass Effect */}
         <div className="max-w-7xl mx-auto w-full mb-10 slide-up">
@@ -111,7 +111,7 @@ const ChatWithAdmin = () => {
            </div>
         </div>
 
-        <div className="max-w-7xl mx-auto w-full h-[calc(100vh-350px)] flex flex-col mb-10">
+        <div className="max-w-7xl mx-auto w-full flex-1 flex flex-col min-h-0">
           
           {/* Chat Header */}
           <div className={`p-6 rounded-t-3xl border-b flex items-center justify-between glass-card`}>

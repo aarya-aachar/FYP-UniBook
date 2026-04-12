@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import UserNavbar from "../components/UserNavbar";
 import { createBooking } from "../services/bookingService";
 import { useUserTheme } from "../context/UserThemeContext";
-import { Lock, ShieldCheck, Check, Building, QrCode, CreditCard } from "lucide-react";
+import { Lock, ShieldCheck, Check, Building, QrCode, CreditCard, Info } from "lucide-react";
 import api from "../services/api";
 
 const Payment = () => {
@@ -133,6 +133,16 @@ const Payment = () => {
                        </div>
                        
                        {error && <p className={`text-xs font-medium mb-6 w-full text-center px-4 py-3 rounded-xl border transition-all ${isDark ? 'text-red-400 bg-red-500/10 border-red-500/20' : 'text-red-600 bg-red-50 border-red-100'}`}>{error}</p>}
+                       
+                       <div className={`w-full p-4 mb-6 rounded-xl border text-left flex gap-3 transition-all ${isDark ? 'bg-amber-500/10 border-amber-500/20 text-amber-500' : 'bg-amber-50 border-amber-200 text-amber-800'}`}>
+                          <Info className="w-5 h-5 shrink-0 mt-0.5" />
+                          <div className="text-xs leading-relaxed">
+                            <p className="font-bold mb-1">Non-Refundable Policy</p>
+                            <p className="font-medium opacity-90">
+                              Please note that there is a strict no-refund policy. Once you book by making a payment, there will be no cancellation. However, appointments can be rebooked to the next day. To request a rebooking, you must contact the admin through the support chat.
+                            </p>
+                          </div>
+                       </div>
                        
                        <button 
                          onClick={handleEsewaPayment} 

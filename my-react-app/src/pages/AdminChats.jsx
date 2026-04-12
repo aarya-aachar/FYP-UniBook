@@ -20,6 +20,7 @@ const AdminChats = ({ roleFilter = 'user' }) => {
   
   const messagesEndRef = useRef(null);
   const pollingRef = useRef(null);
+  const prevMessagesLength = useRef(0);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -77,7 +78,12 @@ const AdminChats = ({ roleFilter = 'user' }) => {
   }, [activeUser]);
 
   useEffect(() => {
-    scrollToBottom();
+    if (messages.length > prevMessagesLength.current) {
+      scrollToBottom();
+    } else if (messages.length === 0) {
+      prevMessagesLength.current = 0;
+    }
+    prevMessagesLength.current = messages.length;
   }, [messages]);
 
   const handleSend = async (e) => {

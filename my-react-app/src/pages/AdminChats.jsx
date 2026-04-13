@@ -183,7 +183,7 @@ const AdminChats = ({ roleFilter = 'user' }) => {
                            ) : <User className="w-5 h-5" />}
                         </div>
                         {c.unread_count > 0 && (
-                          <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 text-[8px] font-black text-white flex items-center justify-center border-2 border-white dark:border-slate-900 transition-all group-hover:scale-110">
+                          <span className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-emerald-500 text-[9px] font-black text-white flex flex-shrink-0 items-center justify-center border-2 border-white dark:border-slate-900 transition-all group-hover:scale-110">
                             {c.unread_count}
                           </span>
                         )}

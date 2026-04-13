@@ -49,6 +49,9 @@ const Reports = () => {
       const data = await getExportData(type);
       if (!data || data.length === 0) return alert("System data index is empty.");
 
+      const headers = Object.keys(data[0]);
+      let csv = headers.map(h => `"${h.replace(/_/g, ' ')}"`).join(",") + "\n";
+
       data.forEach(row => {
         csv += headers.map(h => {
           let val = row[h];
@@ -123,13 +126,7 @@ const Reports = () => {
           title="Data Exports" 
           subtitle="Manage system archives and digital records." 
         />
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-6 mb-8 -mt-10">
-          <div className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl border transition-all shadow-sm font-black text-[10px] uppercase tracking-widest
-            ${isDark ? 'bg-slate-800/50 border-slate-700 text-slate-400' : 'bg-white border-slate-100 text-slate-500'}`}>
-            <FileText className="w-4 h-4 text-emerald-500" />
-            PDF Engine Ready
-          </div>
-        </div>
+
 
         {loading ? (
              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

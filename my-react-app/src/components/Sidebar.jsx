@@ -27,7 +27,8 @@ const Sidebar = () => {
   const isDark = adminTheme === 'dark';
   const [adminUser, setAdminUser] = useState(getProfile());
   const [unreadCount, setUnreadCount] = useState(0);
-  const [unreadChatCount, setUnreadChatCount] = useState(0);
+  const [unreadUserChats, setUnreadUserChats] = useState(0);
+  const [unreadProviderChats, setUnreadProviderChats] = useState(0);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   useEffect(() => {
@@ -36,7 +37,8 @@ const Sidebar = () => {
     // Initial fetch and poll for unread notifications and chats
     const updateCounts = () => {
       getUnreadCount().then(count => setUnreadCount(count)).catch(() => {});
-      getUnreadChatCount().then(count => setUnreadChatCount(count)).catch(() => {});
+      getUnreadChatCount('user').then(count => setUnreadUserChats(count)).catch(() => {});
+      getUnreadChatCount('provider').then(count => setUnreadProviderChats(count)).catch(() => {});
     };
     
     updateCounts();
@@ -109,9 +111,14 @@ const Sidebar = () => {
                     <Icon className={`w-4 h-4 ${isActive ? (isDark ? 'text-emerald-400' : 'text-emerald-600') : ''}`} strokeWidth={isActive ? 2.5 : 2} />
                     <span>{item.label}</span>
                   </div>
-                  {(item.label === 'Client Chats' || item.label === 'Provider Chats') && unreadChatCount > 0 && (
-                    <span className="flex items-center justify-center min-w-[18px] h-4.5 px-1 rounded-full bg-rose-500 text-[9px] font-black text-white border-2 border-white dark:border-slate-800 animate-in zoom-in">
-                      {unreadChatCount}
+                  {item.label === 'Client Chats' && unreadUserChats > 0 && (
+                    <span className="flex items-center justify-center min-w-[20px] h-5 rounded-full bg-rose-500 text-[9px] font-black text-white border-2 border-white dark:border-slate-800 animate-in zoom-in flex-shrink-0">
+                      {unreadUserChats}
+                    </span>
+                  )}
+                  {item.label === 'Provider Chats' && unreadProviderChats > 0 && (
+                    <span className="flex items-center justify-center min-w-[20px] h-5 rounded-full bg-rose-500 text-[9px] font-black text-white border-2 border-white dark:border-slate-800 animate-in zoom-in flex-shrink-0">
+                      {unreadProviderChats}
                     </span>
                   )}
                 </Link>

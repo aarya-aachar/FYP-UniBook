@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { logout, getProfile } from '../services/authService';
 import api from '../services/api';
+import { getUnreadChatCount } from '../services/chatService';
 
 const CATEGORY_ICONS = {
   'Restaurants': Utensils,
@@ -31,8 +32,15 @@ const ProviderSidebar = ({ isDark = false }) => {
   const [showLogout, setShowLogout] = useState(false);
   const [category, setCategory] = useState(user?.category || null);
   const [displayName, setDisplayName] = useState(user?.name || 'Provider');
+  const [unreadChatCount, setUnreadChatCount] = useState(0);
 
   useEffect(() => {
+    const fetchUnread = () => {
+       getUnreadChatCount().then(count => setUnreadChatCount(count)).catch(() => {});
+    };
+    fetchUnread();
+    const interval = setInterval(fetchUnread, 5000);
+    window.addEventListener('chat-read', fetchUnread);
     // Fetch real provider profile to get the category (not available in JWT)
     api.get('/provider/profile')
       .then(res => setCategory(res.data?.category || null))
@@ -43,7 +51,11 @@ const ProviderSidebar = ({ isDark = false }) => {
       if (e.detail?.name) setDisplayName(e.detail.name);
     };
     window.addEventListener('profileUpdated', handleProfileUpdate);
-    return () => window.removeEventListener('profileUpdated', handleProfileUpdate);
+    return () => {
+       window.removeEventListener('profileUpdated', handleProfileUpdate);
+       clearInterval(interval);
+       window.removeEventListener('chat-read', fetchUnread);
+    };
   }, []);
 
   const handleLogout = () => {
@@ -101,6 +113,11 @@ const ProviderSidebar = ({ isDark = false }) => {
                     : (isDark ? 'text-slate-400 hover:bg-slate-800 hover:text-white' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-950')}`}>
                 <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? 'opacity-100' : 'opacity-70'}`} />
                 {!collapsed && <span>{item.label}</span>}
+                {!collapsed && item.label === 'Admin Support' && unreadChatCount > 0 && (
+                  <span className="ml-auto flex items-center justify-center min-w-[20px] h-5 rounded-full bg-rose-500 text-[9px] font-black text-white flex-shrink-0 animate-in zoom-in border-2 border-slate-50 dark:border-slate-800">
+                    {unreadChatCount}
+                  </span>
+                )}
               </Link>
             );
           })}

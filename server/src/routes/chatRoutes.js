@@ -52,11 +52,14 @@ router.get('/unread-total', authenticateToken, async (req, res) => {
     const pool = getPool();
     let query, params = [];
     if (req.user.role === 'admin') {
-      // For admins, count all messages sent by 'user' (is_admin_sender = 0)
-      // that have reached ANY admin and are still unread.
+      const { role } = req.query;
+      let senderCondition = '';
+      if (role) {
+         senderCondition = `AND sender_id IN (SELECT id FROM users WHERE role = '${role}')`;
+      }
       query = `SELECT COUNT(*) as total FROM messages 
                WHERE receiver_id IN (SELECT id FROM users WHERE role = 'admin') 
-               AND is_read = 0`;
+               ${senderCondition} AND is_read = 0`;
     } else {
       // For users, count messages sent to them (is_admin_sender = 1) that are unread
       query = 'SELECT COUNT(*) as total FROM messages WHERE receiver_id = ? AND is_read = 0';

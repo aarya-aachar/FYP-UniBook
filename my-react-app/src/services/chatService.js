@@ -26,7 +26,8 @@ export const getConversations = async (role = 'user') => {
 /**
  * Get total unread messages count for notifications
  */
-export const getUnreadChatCount = async () => {
-  const res = await api.get('/chat/unread-total');
+export const getUnreadChatCount = async (role = '') => {
+  const params = role ? `?role=${role}` : '';
+  const res = await api.get(`/chat/unread-total${params}`);
   return res.data.total || 0;
 };

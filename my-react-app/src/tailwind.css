@@ -20,7 +20,7 @@ h1, h2, h3, h4, h5, h6 {
 .font-inter   { font-family: 'Inter', sans-serif; }
 .font-condensed { font-family: 'Inter', sans-serif; font-feature-settings: "tnum" 1, "lnum" 1; } /* For numbers/tabular data */
 
-/* Global User Panel Background System */
+/* Global User Panel Background System — DARK MODE */
 .user-panel-bg {
   background-image: linear-gradient(to bottom, rgba(2, 6, 23, 0.45), rgba(2, 6, 23, 0.85)), 
                     url('./assets/booking-bg.jpg');
@@ -32,6 +32,13 @@ h1, h2, h3, h4, h5, h6 {
   position: relative;
 }
 
+/* LIGHT MODE override — bright calendar photo with subtle wash */
+.user-panel-bg.light {
+  background-image: linear-gradient(to bottom, rgba(255,255,255,0.25), rgba(240,245,255,0.35)),
+                    url('./assets/booking-bg-light.jpg');
+  background-color: #f0f4ff;
+}
+
 /* Base Glassmorphism utility */
 .glass-surface {
   @apply backdrop-blur-lg border border-white/20 shadow-lg;
@@ -39,10 +46,12 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Robust Card background for both themes */
 .glass-card {
-  @apply backdrop-blur-xl border transition-all duration-300;
+  @apply border transition-all duration-300;
 }
-.light .glass-card { @apply bg-white/95 border-white/60 shadow-xl shadow-slate-200/50; }
-.dark .glass-card { @apply bg-slate-950/95 border-slate-800/60 shadow-2xl shadow-black/50; }
+/* Light: plain solid white, no shine, no blur */
+.light .glass-card { @apply bg-white border-slate-200 shadow-sm; }
+/* Dark: frosted glass effect */
+.dark .glass-card { @apply backdrop-blur-xl bg-slate-950/95 border-slate-800/60 shadow-2xl shadow-black/50; }
 
 /* Header container for legibility */
 .glass-header {

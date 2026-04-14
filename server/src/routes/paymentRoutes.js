@@ -142,7 +142,7 @@ router.get('/payment/success/:booking_id', async (req, res) => {
       console.log(`>>> [ESEWA SUCCESS] Booking #${booking_id} confirmed and marked as paid (fallback).`);
     }
 
-    // --- Post Payment Success Notifications ---
+    // --- Post Payment Success Notifications (with dedup guard) ---
     try {
       const [bookingDetails] = await pool.query(`
         SELECT b.id, b.booking_date, b.booking_time, p.name as provider_name, p.user_id as provider_user_id, u.id as user_id, u.name as user_name
@@ -155,36 +155,46 @@ router.get('/payment/success/:booking_id', async (req, res) => {
 
       if (bookingDetails.length > 0) {
         const firstSlot = bookingDetails[0];
-        const providerName = firstSlot.provider_name;
-        const userName = firstSlot.user_name || 'A Customer';
-        const dateStr = new Date(firstSlot.booking_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-        const timeStr = bookingDetails.map(b => b.booking_time.substring(0, 5)).join(', ');
-        
         const mainId = firstSlot.id;
         const userId = firstSlot.user_id;
         const pvUserId = firstSlot.provider_user_id;
 
-        // 1. Notify User
-        await pool.query(
-          'INSERT INTO notifications (user_id, type, title, message, metadata, booking_id) VALUES (?, ?, ?, ?, ?, ?)',
-          [userId, 'booking_confirmed', 'Payment Successful!', `Your booking for ${providerName} on ${dateStr} at ${timeStr} is fully confirmed.`, JSON.stringify({ booking_id: mainId }), mainId]
+        // DEDUP: skip if notification already sent for this booking
+        const [existing] = await pool.query(
+          "SELECT id FROM notifications WHERE booking_id = ? AND type = 'booking_confirmed' LIMIT 1",
+          [mainId]
         );
+        if (existing.length > 0) {
+          console.log(`>>> [ESEWA NOTIF] Already notified for booking #${mainId}. Skipping.`);
+        } else {
+          const providerName = firstSlot.provider_name;
+          const userName = firstSlot.user_name || 'A Customer';
+          const dateStr = new Date(firstSlot.booking_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+          const timeStr = bookingDetails.map(b => b.booking_time.substring(0, 5)).join(', ');
 
-        // 2. Notify Admins
-        const [admins] = await pool.query("SELECT id FROM users WHERE role = 'admin'");
-        for (const admin of admins) {
+          // 1. Notify User
           await pool.query(
             'INSERT INTO notifications (user_id, type, title, message, metadata, booking_id) VALUES (?, ?, ?, ?, ?, ?)',
-            [admin.id, 'new_booking', 'New Booking Received', `${userName} confirmed and paid for ${providerName} on ${dateStr} at ${timeStr}.`, JSON.stringify({ booking_id: mainId }), mainId]
+            [userId, 'booking_confirmed', 'Payment Successful!', `Your booking for ${providerName} on ${dateStr} at ${timeStr} is fully confirmed.`, JSON.stringify({ booking_id: mainId }), mainId]
           );
-        }
 
-        // 3. Notify Service Provider
-        if (pvUserId) {
-          await pool.query(
-            'INSERT INTO notifications (user_id, type, title, message, metadata, booking_id) VALUES (?, ?, ?, ?, ?, ?)',
-            [pvUserId, 'new_booking', 'New Booking Received', `${userName} completed payment for a booking on ${dateStr} at ${timeStr}.`, JSON.stringify({ booking_id: mainId }), mainId]
-          );
+          // 2. Notify Admins
+          const [admins] = await pool.query("SELECT id FROM users WHERE role = 'admin'");
+          for (const admin of admins) {
+            await pool.query(
+              'INSERT INTO notifications (user_id, type, title, message, metadata, booking_id) VALUES (?, ?, ?, ?, ?, ?)',
+              [admin.id, 'new_booking', 'New Booking Received', `${userName} confirmed and paid for ${providerName} on ${dateStr} at ${timeStr}.`, JSON.stringify({ booking_id: mainId }), mainId]
+            );
+          }
+
+          // 3. Notify Service Provider
+          if (pvUserId) {
+            await pool.query(
+              'INSERT INTO notifications (user_id, type, title, message, metadata, booking_id) VALUES (?, ?, ?, ?, ?, ?)',
+              [pvUserId, 'new_booking', 'New Booking Received', `${userName} completed payment for a booking on ${dateStr} at ${timeStr}.`, JSON.stringify({ booking_id: mainId }), mainId]
+            );
+          }
+          console.log(`>>> [ESEWA NOTIF] Notifications sent for booking #${mainId}.`);
         }
       }
     } catch (notifErr) {
@@ -347,7 +357,7 @@ router.get('/payment/khalti/success/:booking_id', async (req, res) => {
     }
     console.log(`>>> [KHALTI SUCCESS] Booking #${booking_id} confirmed.`);
 
-    // Post-payment notifications
+    // Post-payment notifications (with dedup guard)
     try {
       const [bookingDetails] = await pool.query(`
         SELECT b.id, b.booking_date, b.booking_time,
@@ -361,32 +371,43 @@ router.get('/payment/khalti/success/:booking_id', async (req, res) => {
 
       if (bookingDetails.length > 0) {
         const firstSlot     = bookingDetails[0];
-        const providerName  = firstSlot.provider_name;
-        const userName      = firstSlot.user_name || 'A Customer';
-        const dateStr       = new Date(firstSlot.booking_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-        const timeStr       = bookingDetails.map(b => b.booking_time.substring(0, 5)).join(', ');
         const mainId        = firstSlot.id;
         const userId        = firstSlot.user_id;
         const pvUserId      = firstSlot.provider_user_id;
 
-        await pool.query(
-          'INSERT INTO notifications (user_id, type, title, message, metadata, booking_id) VALUES (?, ?, ?, ?, ?, ?)',
-          [userId, 'booking_confirmed', 'Payment Successful!', `Your booking for ${providerName} on ${dateStr} at ${timeStr} is fully confirmed.`, JSON.stringify({ booking_id: mainId }), mainId]
+        // DEDUP: skip if already notified
+        const [existing] = await pool.query(
+          "SELECT id FROM notifications WHERE booking_id = ? AND type = 'booking_confirmed' LIMIT 1",
+          [mainId]
         );
+        if (existing.length > 0) {
+          console.log(`>>> [KHALTI NOTIF] Already notified for booking #${mainId}. Skipping.`);
+        } else {
+          const providerName  = firstSlot.provider_name;
+          const userName      = firstSlot.user_name || 'A Customer';
+          const dateStr       = new Date(firstSlot.booking_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+          const timeStr       = bookingDetails.map(b => b.booking_time.substring(0, 5)).join(', ');
 
-        const [admins] = await pool.query("SELECT id FROM users WHERE role = 'admin'");
-        for (const admin of admins) {
           await pool.query(
             'INSERT INTO notifications (user_id, type, title, message, metadata, booking_id) VALUES (?, ?, ?, ?, ?, ?)',
-            [admin.id, 'new_booking', 'New Booking Received', `${userName} confirmed and paid (Khalti) for ${providerName} on ${dateStr} at ${timeStr}.`, JSON.stringify({ booking_id: mainId }), mainId]
+            [userId, 'booking_confirmed', 'Payment Successful!', `Your booking for ${providerName} on ${dateStr} at ${timeStr} is fully confirmed.`, JSON.stringify({ booking_id: mainId }), mainId]
           );
-        }
 
-        if (pvUserId) {
-          await pool.query(
-            'INSERT INTO notifications (user_id, type, title, message, metadata, booking_id) VALUES (?, ?, ?, ?, ?, ?)',
-            [pvUserId, 'new_booking', 'New Booking Received', `${userName} completed payment (Khalti) for a booking on ${dateStr} at ${timeStr}.`, JSON.stringify({ booking_id: mainId }), mainId]
-          );
+          const [admins] = await pool.query("SELECT id FROM users WHERE role = 'admin'");
+          for (const admin of admins) {
+            await pool.query(
+              'INSERT INTO notifications (user_id, type, title, message, metadata, booking_id) VALUES (?, ?, ?, ?, ?, ?)',
+              [admin.id, 'new_booking', 'New Booking Received', `${userName} confirmed and paid (Khalti) for ${providerName} on ${dateStr} at ${timeStr}.`, JSON.stringify({ booking_id: mainId }), mainId]
+            );
+          }
+
+          if (pvUserId) {
+            await pool.query(
+              'INSERT INTO notifications (user_id, type, title, message, metadata, booking_id) VALUES (?, ?, ?, ?, ?, ?)',
+              [pvUserId, 'new_booking', 'New Booking Received', `${userName} completed payment (Khalti) for a booking on ${dateStr} at ${timeStr}.`, JSON.stringify({ booking_id: mainId }), mainId]
+            );
+          }
+          console.log(`>>> [KHALTI NOTIF] Notifications sent for booking #${mainId}.`);
         }
       }
     } catch (notifErr) {

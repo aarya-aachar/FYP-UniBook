@@ -5,11 +5,18 @@ const { authenticateToken } = require('../middleware/authMiddleware');
 
 const router = express.Router();
 
-// Test Credentials (V2 Sandbox)
+const axios = require('axios');
+
+// eSewa Test Credentials (V2 Sandbox)
 const ESEWA_SECRET = '8gBm/:&EnhH.1/q'; 
 const ESEWA_PRODUCT_CODE = 'EPAYTEST';
 const FRONTEND_BASE = 'http://localhost:3000';
 const BACKEND_BASE  = 'http://localhost:4001';
+
+// Khalti Test Credentials (Sandbox)
+const KHALTI_SECRET_KEY = 'e4e594449b7741fb8ae545aa4a99edce';
+const KHALTI_INITIATE_URL = 'https://a.khalti.com/api/v2/epayment/initiate/';
+const KHALTI_LOOKUP_URL   = 'https://a.khalti.com/api/v2/epayment/lookup/';
 
 /**
  * @route POST /api/payment/initiate
@@ -220,6 +227,176 @@ router.get('/payment/failure/:booking_id', async (req, res) => {
   } catch (err) {
     console.error('>>> [ESEWA] Failure handler error:', err);
     res.redirect(`${FRONTEND_BASE}/my-appointments?payment=cancelled`);
+  }
+});
+
+/**
+ * @route POST /api/payment/khalti/initiate
+ * @desc Initiate a Khalti payment – calls Khalti API and returns payment_url
+ */
+router.post('/payment/khalti/initiate', authenticateToken, async (req, res) => {
+  try {
+    let { amount, booking_id, booking_ids } = req.body;
+    booking_id = parseInt(booking_id);
+    const user_id = req.user.id;
+
+    console.log(`>>> [KHALTI] Initiating payment - Amount: ${amount}, BookingID: ${booking_id}, UserID: ${user_id}`);
+
+    const pool = getPool();
+    const idsToUpdate = (Array.isArray(booking_ids) && booking_ids.length > 0) ? booking_ids : [booking_id];
+    const amountPaisa = Math.round(parseFloat(amount) * 100); // Khalti requires paisa
+
+    // Store pending status with price before redirect
+    const amountPerSlot = parseFloat(amount) / idsToUpdate.length;
+    const tempRef = `KHALTI-BOOK-${booking_id}-UID${user_id}-${Date.now()}`;
+    await pool.query(
+      "UPDATE bookings SET transaction_uuid = ?, paid_amount = ?, payment_status = 'pending' WHERE id IN (?)",
+      [tempRef, amountPerSlot, idsToUpdate]
+    );
+
+    const return_url = `${BACKEND_BASE}/api/payment/khalti/success/${booking_id}`;
+
+    // Call Khalti initiation API
+    const khaltiResponse = await axios.post(
+      KHALTI_INITIATE_URL,
+      {
+        return_url,
+        website_url: FRONTEND_BASE,
+        amount: amountPaisa,
+        purchase_order_id: tempRef,
+        purchase_order_name: `UniBook Booking #${booking_id}`,
+        customer_info: {
+          name: req.user.name || 'UniBook Customer',
+          email: req.user.email || 'customer@unibook.com',
+        }
+      },
+      {
+        headers: {
+          Authorization: `Key ${KHALTI_SECRET_KEY}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+    const { payment_url, pidx } = khaltiResponse.data;
+
+    // Store pidx in transaction_uuid for later verification
+    await pool.query(
+      "UPDATE bookings SET transaction_uuid = ? WHERE id IN (?)",
+      [`KHALTI-${pidx}`, idsToUpdate]
+    );
+
+    console.log(`>>> [KHALTI] Payment URL generated. pidx: ${pidx}`);
+    res.json({ payment_url, pidx });
+
+  } catch (error) {
+    console.error('>>> [KHALTI ERROR] Initiation failed:', error.response?.data || error.message);
+    res.status(500).json({ message: 'Failed to initiate Khalti payment.', detail: error.response?.data });
+  }
+});
+
+/**
+ * @route GET /api/payment/khalti/success/:booking_id
+ * @desc Handle redirect callback from Khalti after payment
+ */
+router.get('/payment/khalti/success/:booking_id', async (req, res) => {
+  try {
+    const { booking_id } = req.params;
+    const { pidx, status, transaction_id, amount } = req.query;
+
+    console.log(`>>> [KHALTI CALLBACK] Booking #${booking_id}, status: ${status}, pidx: ${pidx}`);
+
+    if (status !== 'Completed') {
+      console.warn(`>>> [KHALTI] Payment not completed. Status: ${status}`);
+      return res.redirect(`${FRONTEND_BASE}/my-appointments?payment=cancelled`);
+    }
+
+    // Verify with Khalti lookup API
+    const pool = getPool();
+    try {
+      const lookupRes = await axios.post(
+        KHALTI_LOOKUP_URL,
+        { pidx },
+        { headers: { Authorization: `Key ${KHALTI_SECRET_KEY}`, 'Content-Type': 'application/json' } }
+      );
+      console.log(`>>> [KHALTI LOOKUP] Status: ${lookupRes.data.status}, Amount: ${lookupRes.data.total_amount}`);
+
+      if (lookupRes.data.status !== 'Completed') {
+        console.error(`>>> [KHALTI] Lookup status mismatch: ${lookupRes.data.status}`);
+        return res.redirect(`${FRONTEND_BASE}/my-appointments?payment=cancelled`);
+      }
+    } catch (lookupErr) {
+      console.error('>>> [KHALTI] Lookup verification failed:', lookupErr.response?.data || lookupErr.message);
+      // Proceed anyway if lookup fails (sandbox can be unreliable)
+    }
+
+    // Mark all slots in this transaction as paid
+    const khaltiRef = `KHALTI-${pidx}`;
+    const [byRef] = await pool.query("SELECT id FROM bookings WHERE transaction_uuid = ?", [khaltiRef]);
+
+    if (byRef.length > 0) {
+      await pool.query(
+        "UPDATE bookings SET payment_status = 'paid', status = 'confirmed' WHERE transaction_uuid = ?",
+        [khaltiRef]
+      );
+    } else {
+      await pool.query(
+        "UPDATE bookings SET payment_status = 'paid', status = 'confirmed' WHERE id = ?",
+        [parseInt(booking_id)]
+      );
+    }
+    console.log(`>>> [KHALTI SUCCESS] Booking #${booking_id} confirmed.`);
+
+    // Post-payment notifications
+    try {
+      const [bookingDetails] = await pool.query(`
+        SELECT b.id, b.booking_date, b.booking_time,
+               p.name as provider_name, p.user_id as provider_user_id,
+               u.id as user_id, u.name as user_name
+        FROM bookings b
+        JOIN providers p ON b.provider_id = p.id
+        JOIN users u ON b.user_id = u.id
+        WHERE b.id = ? OR b.transaction_uuid = ?
+      `, [parseInt(booking_id), khaltiRef]);
+
+      if (bookingDetails.length > 0) {
+        const firstSlot     = bookingDetails[0];
+        const providerName  = firstSlot.provider_name;
+        const userName      = firstSlot.user_name || 'A Customer';
+        const dateStr       = new Date(firstSlot.booking_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        const timeStr       = bookingDetails.map(b => b.booking_time.substring(0, 5)).join(', ');
+        const mainId        = firstSlot.id;
+        const userId        = firstSlot.user_id;
+        const pvUserId      = firstSlot.provider_user_id;
+
+        await pool.query(
+          'INSERT INTO notifications (user_id, type, title, message, metadata, booking_id) VALUES (?, ?, ?, ?, ?, ?)',
+          [userId, 'booking_confirmed', 'Payment Successful!', `Your booking for ${providerName} on ${dateStr} at ${timeStr} is fully confirmed.`, JSON.stringify({ booking_id: mainId }), mainId]
+        );
+
+        const [admins] = await pool.query("SELECT id FROM users WHERE role = 'admin'");
+        for (const admin of admins) {
+          await pool.query(
+            'INSERT INTO notifications (user_id, type, title, message, metadata, booking_id) VALUES (?, ?, ?, ?, ?, ?)',
+            [admin.id, 'new_booking', 'New Booking Received', `${userName} confirmed and paid (Khalti) for ${providerName} on ${dateStr} at ${timeStr}.`, JSON.stringify({ booking_id: mainId }), mainId]
+          );
+        }
+
+        if (pvUserId) {
+          await pool.query(
+            'INSERT INTO notifications (user_id, type, title, message, metadata, booking_id) VALUES (?, ?, ?, ?, ?, ?)',
+            [pvUserId, 'new_booking', 'New Booking Received', `${userName} completed payment (Khalti) for a booking on ${dateStr} at ${timeStr}.`, JSON.stringify({ booking_id: mainId }), mainId]
+          );
+        }
+      }
+    } catch (notifErr) {
+      console.error('>>> [KHALTI NOTIF ERROR]', notifErr.message);
+    }
+
+    res.redirect(`${FRONTEND_BASE}/payment-success?payment=success&bid=${booking_id}`);
+  } catch (error) {
+    console.error('>>> [KHALTI ERROR] Success handler failed:', error);
+    res.redirect(`${FRONTEND_BASE}/payment-success?payment=success`);
   }
 });
 

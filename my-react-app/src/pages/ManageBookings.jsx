@@ -128,9 +128,18 @@ const ManageBookings = () => {
           title="Booking Overview" 
           subtitle={`Monitor and manage ${bookings.length} operational system reservations.`} 
           metrics={
-            <div className={`flex items-center gap-3 px-4 py-2 rounded-lg border transition-all ${isDark ? 'bg-slate-800/50 border-slate-700' : 'bg-white border-slate-200'}`}>
-              <span className={`text-xs font-bold uppercase tracking-widest ${textSecondary}`}>Total Bookings:</span>
-              <span className={`font-bold text-sm ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>{bookings.filter(b => b.status === 'confirmed').length}</span>
+            <div className={`flex items-center gap-6 px-5 py-2.5 rounded-xl border transition-all ${isDark ? 'bg-slate-800/50 border-slate-700' : 'bg-white border-slate-200'}`}>
+              <div className="flex flex-col">
+                <span className={`text-[10px] font-black uppercase tracking-[0.15em] ${textSecondary}`}>Live Sessions</span>
+                <span className={`font-black text-lg leading-none mt-1 ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>{bookings.length}</span>
+              </div>
+              <div className={`w-px h-8 ${isDark ? 'bg-slate-700' : 'bg-slate-200'}`} />
+              <div className="flex flex-col">
+                <span className={`text-[10px] font-black uppercase tracking-[0.15em] ${textSecondary}`}>Total Slots</span>
+                <span className={`font-black text-lg leading-none mt-1 ${isDark ? 'text-slate-300' : 'text-slate-500'}`}>
+                  {bookings.reduce((sum, b) => sum + b.ids.length, 0)}
+                </span>
+              </div>
             </div>
           }
         />

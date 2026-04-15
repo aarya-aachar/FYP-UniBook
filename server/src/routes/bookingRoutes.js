@@ -31,7 +31,7 @@ router.get('/bookings/provider/:provider_id/date/:date', authenticateToken, asyn
 // Create a new booking (Supporting multiple slots & Capacity)
 router.post('/bookings', authenticateToken, async (req, res) => {
   try {
-    const { provider_id, service_id, booking_date, booking_time, status, notes } = req.body;
+    const { provider_id, booking_date, booking_time, status, notes } = req.body;
     const user_id = req.user.id;
     const pool = getPool();
 
@@ -63,10 +63,12 @@ router.post('/bookings', authenticateToken, async (req, res) => {
 
     // 4. Create Bookings (One entry per slot/time)
     const bookingIds = [];
+    const slotDuration = req.body.duration ? (req.body.duration / times.length) : 60; // Calculate per-slot duration
+
     for (const t of times) {
       const [result] = await pool.query(
-        'INSERT INTO bookings (user_id, provider_id, service_id, booking_date, booking_time, status, notes) VALUES (?, ?, ?, ?, ?, ?, ?)',
-        [user_id, provider_id, service_id || null, booking_date, t, bookingStatus, notes || '']
+        'INSERT INTO bookings (user_id, provider_id, booking_date, booking_time, status, notes, duration) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        [user_id, provider_id, booking_date, t, bookingStatus, notes || '', slotDuration]
       );
       bookingIds.push(result.insertId);
     }
@@ -124,10 +126,9 @@ router.get('/bookings/user', authenticateToken, async (req, res) => {
     const pool = getPool();
 
     const query = `
-      SELECT b.id, b.provider_id, b.user_id, DATE_FORMAT(b.booking_date, '%Y-%m-%d') as booking_date, b.booking_time, b.status, b.paid_amount, b.service_id, b.created_at, p.name as provider_name, p.category, s.name as service_name
+      SELECT b.id, b.provider_id, b.user_id, DATE_FORMAT(b.booking_date, '%Y-%m-%d') as booking_date, b.booking_time, b.status, b.paid_amount, b.created_at, p.name as provider_name, p.category
       FROM bookings b
       JOIN providers p ON b.provider_id = p.id
-      LEFT JOIN services s ON b.service_id = s.id
       WHERE b.user_id = ?
         AND b.status != 'pending'
         AND NOT (b.status = 'confirmed' AND (b.booking_date < CURDATE() OR (b.booking_date = CURDATE() AND b.booking_time <= CURTIME())))
@@ -149,11 +150,10 @@ router.get('/bookings/user/reports', authenticateToken, async (req, res) => {
     const pool = getPool();
 
     const query = `
-      SELECT b.id, b.provider_id, b.user_id, DATE_FORMAT(b.booking_date, '%Y-%m-%d') as booking_date, b.booking_time, b.status, b.paid_amount, b.service_id, b.created_at, p.name as provider_name, p.category, s.name as service_name,
+      SELECT b.id, b.provider_id, b.user_id, DATE_FORMAT(b.booking_date, '%Y-%m-%d') as booking_date, b.booking_time, b.status, b.paid_amount, b.created_at, p.name as provider_name, p.category,
              r.rating, r.comment, r.id as review_id
       FROM bookings b
       JOIN providers p ON b.provider_id = p.id
-      LEFT JOIN services s ON b.service_id = s.id
       LEFT JOIN reviews r ON b.id = r.booking_id
       WHERE b.user_id = ? 
         AND b.status = 'confirmed'
@@ -175,11 +175,10 @@ router.get('/bookings/admin', authenticateToken, verifyAdmin, async (req, res) =
     const pool = getPool();
 
     const query = `
-      SELECT b.id, b.provider_id, b.user_id, DATE_FORMAT(b.booking_date, '%Y-%m-%d') as booking_date, b.booking_time, b.status, b.paid_amount, b.service_id, b.created_at, u.name as user_name, u.email as user_email, p.name as provider_name, p.category, s.name as service_name
+      SELECT b.id, b.provider_id, b.user_id, DATE_FORMAT(b.booking_date, '%Y-%m-%d') as booking_date, b.booking_time, b.status, b.paid_amount, b.created_at, u.name as user_name, u.email as user_email, p.name as provider_name, p.category
       FROM bookings b
       JOIN users u ON b.user_id = u.id
       JOIN providers p ON b.provider_id = p.id
-      LEFT JOIN services s ON b.service_id = s.id
       WHERE b.status != 'pending'
       ORDER BY b.booking_date DESC, b.booking_time DESC
     `;

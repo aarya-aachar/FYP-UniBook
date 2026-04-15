@@ -86,34 +86,24 @@ async function initDB() {
       )
     `;
 
-    const createServices = `
-      CREATE TABLE IF NOT EXISTS services (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        provider_id INT NOT NULL,
-        name VARCHAR(255),
-        price DECIMAL(10,2),
-        duration_minutes INT DEFAULT 60,
-        FOREIGN KEY (provider_id) REFERENCES providers(id) ON DELETE CASCADE
-      )
-    `;
+
 
     const createBookings = `
       CREATE TABLE IF NOT EXISTS bookings (
         id INT AUTO_INCREMENT PRIMARY KEY,
         user_id INT NOT NULL,
         provider_id INT NOT NULL,
-        service_id INT,
         booking_date DATE NOT NULL,
         booking_time TIME NOT NULL,
         status ENUM('pending', 'confirmed', 'cancelled') DEFAULT 'pending',
         payment_status ENUM('pending', 'paid', 'failed') DEFAULT 'pending',
         transaction_uuid VARCHAR(255) DEFAULT NULL,
         paid_amount DECIMAL(10,2) DEFAULT 0.00,
+        duration INT DEFAULT 60,
         notes TEXT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-        FOREIGN KEY (provider_id) REFERENCES providers(id) ON DELETE CASCADE,
-        FOREIGN KEY (service_id) REFERENCES services(id) ON DELETE SET NULL
+        FOREIGN KEY (provider_id) REFERENCES providers(id) ON DELETE CASCADE
       )
     `;
 
@@ -163,7 +153,6 @@ async function initDB() {
     await pool.query(createUsers);
     await pool.query(createProviders);
     await pool.query(createProviderApplications);
-    await pool.query(createServices);
     await pool.query(createBookings);
     await pool.query(createReviews);
     await pool.query(createNotifications);
@@ -202,10 +191,45 @@ async function initDB() {
         await pool.query("ALTER TABLE bookings ADD COLUMN payment_status ENUM('pending', 'paid', 'failed') DEFAULT 'pending' AFTER status");
       }
       if (!existingBookingCols.includes('transaction_uuid')) {
-        await pool.query("ALTER TABLE bookings ADD COLUMN transaction_uuid VARCHAR(255) UNIQUE DEFAULT NULL AFTER payment_status");
+        await pool.query("ALTER TABLE bookings ADD COLUMN transaction_uuid VARCHAR(255) DEFAULT NULL AFTER payment_status");
       }
       if (!existingBookingCols.includes('paid_amount')) {
         await pool.query("ALTER TABLE bookings ADD COLUMN paid_amount DECIMAL(10,2) DEFAULT 0.00 AFTER transaction_uuid");
+      }
+      // CLEANUP: Drop unused service architecture
+      try {
+        const bookingsFullCols = await pool.query("SHOW COLUMNS FROM bookings");
+        const hasServiceId = bookingsFullCols[0].some(c => c.Field === 'service_id');
+        if (hasServiceId) {
+          console.log(">>> [CLEANUP] Dropping unused service_id column...");
+          // Drop FK first (it might miss in some environments, so we try-catch individually)
+          try { await pool.query("ALTER TABLE bookings DROP FOREIGN KEY fk_booking_service"); } catch(e) {}
+          try { await pool.query("ALTER TABLE bookings DROP COLUMN service_id"); } catch(e) {}
+        }
+        await pool.query("DROP TABLE IF EXISTS services");
+      } catch (cleanupErr) {
+        console.log('Cleanup migration issues (non-fatal):', cleanupErr.message);
+      }
+
+      // Check for duration column and ensure 60min default
+      try {
+        const checkCols = await pool.query("SHOW COLUMNS FROM bookings");
+        const existing = checkCols[0].map(c => c.Field);
+        if (!existing.includes('duration')) {
+           await pool.query("ALTER TABLE bookings ADD COLUMN duration INT DEFAULT 60 AFTER paid_amount");
+        } else {
+           // Update existing 30s to 60s as requested by user
+           await pool.query("UPDATE bookings SET duration = 60 WHERE duration = 30");
+           await pool.query("ALTER TABLE bookings MODIFY COLUMN duration INT DEFAULT 60");
+        }
+
+        // Cleanup: Drop redundant duration_minutes if it exists
+        if (existing.includes('duration_minutes')) {
+          console.log(">>> [CLEANUP] Dropping redundant duration_minutes column...");
+          await pool.query("ALTER TABLE bookings DROP COLUMN duration_minutes");
+        }
+      } catch (err) {
+        console.log('Duration migration skipped:', err.message);
       }
 
       // Check providers table for gallery_images, capacity, and user_id columns

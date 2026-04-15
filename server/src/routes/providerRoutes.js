@@ -112,9 +112,7 @@ router.get('/providers/:id', async (req, res) => {
       return res.status(404).json({ message: 'Provider not found' });
     }
 
-    const [services] = await pool.query('SELECT * FROM services WHERE provider_id = ?', [req.params.id]);
     const provider = providers[0];
-    provider.services = services;
     provider.average_rating = parseFloat(provider.average_rating || 0).toFixed(1);
     provider.review_count = parseInt(provider.review_count || 0);
 

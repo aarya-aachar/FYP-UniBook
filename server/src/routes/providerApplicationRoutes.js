@@ -148,9 +148,9 @@ router.post('/admin/provider-applications/:id/approve', authenticateToken, verif
 
     // 2. Create the provider record linked to this user
     await pool.query(
-      `INSERT INTO providers (user_id, name, category, description, image, address, base_price, opening_time, closing_time, capacity)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [newUserId, app.name, app.service_type, app.description || '', app.image_path || '', app.address || '', app.base_price, app.opening_time, app.closing_time, app.capacity]
+      `INSERT INTO providers (user_id, application_id, name, category, description, image, address, base_price, opening_time, closing_time, capacity)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [newUserId, id, app.name, app.service_type, app.description || '', app.image_path || '', app.address || '', app.base_price, app.opening_time, app.closing_time, app.capacity]
     );
 
     // 3. Mark application as approved

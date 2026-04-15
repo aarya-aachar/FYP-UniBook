@@ -11,7 +11,7 @@ export const CHATBOT_INTENTS = [
   },
   {
     name: "Payment Intent",
-    keywords: ["payment", "pay", "esewa", "khalti", "price", "cost", "money", "transaction", "amount"],
+    keywords: ["payment", "pay", "esewa", "price", "cost", "money", "transaction", "amount"],
     response: "Currently, we support secure digital payments exclusively via eSewa. You can complete your payment securely during the checkout process."
   },
   {

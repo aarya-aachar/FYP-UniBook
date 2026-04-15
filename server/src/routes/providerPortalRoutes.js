@@ -17,7 +17,7 @@ router.get('/provider/profile', authenticateToken, verifyProvider, async (req, r
       `SELECT p.*, pa.pan_number, pa.document_path 
        FROM providers p 
        JOIN users u ON p.user_id = u.id
-       LEFT JOIN provider_applications pa ON pa.email = u.email 
+       LEFT JOIN provider_applications pa ON (p.application_id IS NOT NULL AND pa.id = p.application_id) OR (p.application_id IS NULL AND pa.email = u.email)
        WHERE p.user_id = ?`,
       [userId]
     );

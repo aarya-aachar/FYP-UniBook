@@ -59,8 +59,10 @@ async function initDB() {
         opening_time TIME DEFAULT '09:00:00',
         closing_time TIME DEFAULT '18:00:00',
         capacity INT DEFAULT 1,
+        application_id INT DEFAULT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
+        FOREIGN KEY (application_id) REFERENCES provider_applications(id) ON DELETE SET NULL
       )
     `;
 
@@ -245,6 +247,10 @@ async function initDB() {
       if (!existingProviderCols.includes('user_id')) {
         await pool.query("ALTER TABLE providers ADD COLUMN user_id INT DEFAULT NULL AFTER id");
         await pool.query("ALTER TABLE providers ADD CONSTRAINT fk_provider_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL");
+      }
+      if (!existingProviderCols.includes('application_id')) {
+        await pool.query("ALTER TABLE providers ADD COLUMN application_id INT DEFAULT NULL AFTER capacity");
+        await pool.query("ALTER TABLE providers ADD CONSTRAINT fk_provider_application FOREIGN KEY (application_id) REFERENCES provider_applications(id) ON DELETE SET NULL");
       }
 
       // Expand users role ENUM to include provider

@@ -2,8 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import UserNavbar from "../components/UserNavbar";
 import { getProviderById } from "../services/providerService";
-import { getBookedTimes } from "../services/bookingService";
-import { getProviderReviews } from "../services/reviewService";
+import { getBookedTimes, getProviderReviews } from "../services/bookingService";
 import { useUserTheme } from "../context/UserThemeContext";
 import { Hospital, Utensils, Trophy, Scissors, MapPin, Clock, CreditCard, ChevronDown, Calendar, Ban, Star, ArrowLeft, X } from "lucide-react";
 

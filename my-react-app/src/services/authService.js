@@ -1,17 +1,5 @@
 import api from './api';
 
-export const register = async (userData) => {
-  try {
-    const res = await api.post('/auth/register', userData);
-    if (res.data.token) {
-      localStorage.setItem('token', res.data.token);
-      localStorage.setItem('user', JSON.stringify(res.data.user));
-    }
-    return res.data;
-  } catch (error) {
-    throw new Error(error.response?.data?.message || 'Registration failed');
-  }
-};
 
 export const login = async (email, password) => {
   try {

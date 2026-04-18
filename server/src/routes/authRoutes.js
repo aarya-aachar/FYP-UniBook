@@ -99,40 +99,7 @@ router.post('/auth/verify-otp', async (req, res) => {
   }
 });
 
-router.post('/auth/register', async (req, res) => {
-  try {
-    const { name, email, password, role, age, gender, phone } = req.body;
-    const pool = getPool();
 
-    const [existingUsers] = await pool.query('SELECT id FROM users WHERE email = ?', [email]);
-    if (existingUsers.length > 0) {
-      return res.status(400).json({ message: 'Email is already registered' });
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const userRole = role === 'admin' ? 'admin' : 'user';
-
-    const [result] = await pool.query(
-      'INSERT INTO users (name, email, password, role, age, gender, phone) VALUES (?, ?, ?, ?, ?, ?, ?)',
-      [name, email, hashedPassword, userRole, age || null, gender || null, phone || null]
-    );
-
-    const token = jwt.sign(
-      { id: result.insertId, email, role: userRole, name },
-      process.env.JWT_SECRET || 'super_secret_unibook_key_12345',
-      { expiresIn: '24h' }
-    );
-
-    res.status(201).json({
-      message: 'User registered successfully',
-      token,
-      user: { id: result.insertId, name, email, role: userRole }
-    });
-  } catch (error) {
-    console.error('Registration Error:', error);
-    res.status(500).json({ message: 'Internal Server Error' });
-  }
-});
 
 
 router.post('/auth/login', async (req, res) => {

@@ -4,7 +4,7 @@ import { useAdminTheme } from '../context/AdminThemeContext';
 import { getProviders, updateProvider, toggleProviderStatus } from '../services/providerService';
 import api from '../services/api';
 import { 
-  Building2, Search, Filter, CheckCircle, AlertCircle, Edit, Trash2, MapPin, SearchX, Coffee, Trophy, Stethoscope, Scissors, Check, X, FileText, UserCheck, UserX
+  Building2, Search, Filter, CheckCircle, AlertCircle, MapPin, SearchX, Coffee, Trophy, Stethoscope, Scissors, Check, X, FileText, UserCheck, UserX
 } from 'lucide-react';
 import AdminTopHeader from '../components/AdminTopHeader';
 
@@ -28,7 +28,7 @@ const CAT = {
   'Salon / Spa': { gradient: 'bg-teal-600',      bg: 'bg-teal-600',   badge: 'bg-teal-500/10 text-teal-400 border border-teal-500/20',   badgeLight: 'bg-teal-50 text-teal-600 border border-teal-100' },
 };
 
-const EMPTY_FORM = { name: '', address: '', description: '', category: 'Restaurants', base_price: 0, opening_time: '09:00', closing_time: '18:00', capacity: 1 };
+
 
 const ManageProviders = () => {
   const { adminTheme } = useAdminTheme();
@@ -43,11 +43,7 @@ const ManageProviders = () => {
   const [filter, setFilter] = useState('All');
   const [search, setSearch] = useState('');
 
-  const [modalOpen, setModalOpen] = useState(false);
-  const [editingId, setEditingId] = useState(null);
-  const [form, setForm] = useState(EMPTY_FORM);
-  const [imageFiles, setImageFiles] = useState([null, null, null, null]);
-  const [submitting, setSubmitting] = useState(false);
+
 
   const [actionLoading, setActionLoading] = useState(null); // stores id of app being processed
   const [toasts, setToasts] = useState([]);
@@ -95,48 +91,7 @@ const ManageProviders = () => {
   // Filtering for pending applications (only pending status)
   const displayedPending = pendingApps.filter(a => a.status === 'pending');
 
-  const openEdit = (p) => {
-    let gallery = p.gallery_images;
-    if (!gallery || gallery === '[]' || (Array.isArray(gallery) && gallery.length === 0)) {
-      gallery = p.image ? [p.image] : null;
-    }
 
-    setForm({ 
-      name: p.name || '', address: p.address || '', description: p.description || '', 
-      category: p.category || 'Restaurants', existingImage: p.image || '',
-      base_price: p.base_price || 0, opening_time: (p.opening_time || '09:00:00').substring(0, 5),
-      closing_time: (p.closing_time || '18:00:00').substring(0, 5),
-      capacity: p.capacity || 1,
-      gallery_images: gallery
-    });
-    setImageFiles([null, null, null, null]); setEditingId(p.id); setModalOpen(true);
-  };
-
-  const handleUpdate = async () => {
-    if (!form.name.trim() || !form.address.trim() || !form.description.trim() || !form.base_price || !form.opening_time || !form.closing_time) { 
-      toast('All text fields and pricing are required', 'error'); return; 
-    }
-    try {
-      setSubmitting(true);
-      const existingGalleryToKeep = [];
-      const newFilesToUpload = [];
-
-      imageFiles.forEach((item, index) => {
-        if (item instanceof File) {
-          newFilesToUpload.push(item);
-        } else {
-          const currentGallery = form.gallery_images ? (typeof form.gallery_images === 'string' ? JSON.parse(form.gallery_images) : form.gallery_images) : [];
-          if (currentGallery[index]) existingGalleryToKeep.push(currentGallery[index]);
-        }
-      });
-
-      const submissionForm = { ...form, existing_gallery: existingGalleryToKeep };
-      await updateProvider(editingId, submissionForm, newFilesToUpload);
-      toast(`"${form.name}" updated successfully`);
-      setModalOpen(false); fetchAll();
-    } catch (err) { toast(err.message || "Server Communication Error", 'error'); }
-    finally { setSubmitting(false); }
-  };
 
   const handleApprove = async (id, name) => {
     if(actionLoading) return;
@@ -381,77 +336,7 @@ const ManageProviders = () => {
         )}
       </div>
 
-      {/* Edit Provider Modal */}
-      {modalOpen && (
-        <div className="fixed inset-0 z-[250] flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm animate-in fade-in" onClick={() => setModalOpen(false)}>
-          <div className={`w-full max-w-lg overflow-y-auto max-h-[90vh] rounded-xl p-8 border shadow-2xl animate-in zoom-in-95 duration-200 ${isDark ? 'bg-slate-900 border-slate-700' : 'bg-white border-slate-200'}`} onClick={e => e.stopPropagation()}>
-            <h2 className={`text-2xl font-black tracking-tight mb-2 ${textPrimary}`}>Update Service Details</h2>
-            <div className="space-y-4 mt-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className={`block text-xs font-bold uppercase tracking-widest mb-1 ${textSecondary}`}>Service Name</label>
-                  <input type="text" value={form.name} onChange={e => setForm({...form, name: e.target.value})} className={`w-full px-4 py-2.5 rounded-xl border font-semibold text-sm outline-none ${isDark ? 'bg-slate-800 border-slate-700 text-white focus:border-emerald-500' : 'bg-slate-50 border-slate-200 focus:border-emerald-600'}`} />
-                </div>
-                <div className="md:col-span-2">
-                  <label className={`block text-[10px] font-black uppercase tracking-[0.2em] mb-2 ${textSecondary}`}>Gallery</label>
-                  <div className="grid grid-cols-4 gap-3">
-                    {[0, 1, 2, 3].map(i => {
-                      const file = imageFiles[i];
-                      const extGallery = form.gallery_images ? (typeof form.gallery_images==='string' ? JSON.parse(form.gallery_images) : form.gallery_images) : [];
-                      const existing = extGallery[i];
-                      
-                      return (
-                        <label key={i} className={`aspect-square rounded-xl border-2 border-dashed flex flex-col items-center justify-center transition-all cursor-pointer overflow-hidden ${file || existing ? 'border-emerald-500/50 bg-emerald-500/5' : isDark ? 'bg-slate-800 border-slate-700 hover:border-slate-500' : 'bg-slate-50 border-slate-200 hover:border-slate-300'}`}>
-                          {file ? <img src={URL.createObjectURL(file)} alt="preview" className="w-full h-full object-cover" /> : existing ? <img src={existing.startsWith('/uploads') ? `${BACKEND_URL}${existing}` : existing} alt="existing" className="w-full h-full object-cover opacity-60" /> : <><Building2 className={`w-4 h-4 mb-1 ${textMuted}`} /><span className={`text-[8px] font-black uppercase tracking-widest ${textMuted}`}>Slot {i+1}</span></>}
-                          <input type="file" accept="image/*" className="hidden" onChange={e => { const nf=[...imageFiles]; nf[i]=e.target.files[0]; setImageFiles(nf); }} />
-                        </label>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className={`block text-xs font-bold uppercase tracking-widest mb-1 ${textSecondary}`}>Category</label>
-                  <select value={form.category} disabled className={`w-full px-4 py-2.5 rounded-xl border font-semibold text-sm opacity-60 ${isDark ? 'bg-slate-800 border-slate-700 text-white' : 'bg-slate-50 border-slate-200'}`}>
-                    <option>{form.category}</option>
-                  </select>
-                </div>
-                <div>
-                  <label className={`block text-xs font-bold uppercase tracking-widest mb-1 ${textSecondary}`}>Base Rate</label>
-                  <input type="number" value={form.base_price} onChange={e => setForm({...form, base_price: e.target.value})} className={`w-full px-4 py-2.5 rounded-xl border font-semibold text-sm outline-none ${isDark ? 'bg-slate-800 border-slate-700 text-white focus:border-emerald-500' : 'bg-slate-50 border-slate-200 focus:border-emerald-600'}`} />
-                </div>
-              </div>
-              <div>
-                <label className={`block text-xs font-bold uppercase tracking-widest mb-1 ${textSecondary}`}>Description</label>
-                <textarea value={form.description} onChange={e => setForm({...form, description: e.target.value})} className={`w-full px-4 py-2.5 rounded-xl border font-semibold text-sm outline-none h-20 resize-none ${isDark ? 'bg-slate-800 border-slate-700 text-white focus:border-emerald-500' : 'bg-slate-50 border-slate-200 focus:border-emerald-600'}`} />
-              </div>
-              <div>
-                <label className={`block text-xs font-bold uppercase tracking-widest mb-1 ${textSecondary}`}>Address</label>
-                <input type="text" value={form.address} onChange={e => setForm({...form, address: e.target.value})} className={`w-full px-4 py-2.5 rounded-xl border font-semibold text-sm outline-none ${isDark ? 'bg-slate-800 border-slate-700 text-white focus:border-emerald-500' : 'bg-slate-50 border-slate-200 focus:border-emerald-600'}`} />
-              </div>
-              <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <label className={`block text-xs font-bold uppercase tracking-widest mb-1 ${textSecondary}`}>Capacity</label>
-                  <input type="number" value={form.capacity} onChange={e => setForm({...form, capacity: e.target.value})} className={`w-full px-4 py-2.5 rounded-xl border font-semibold text-sm outline-none ${isDark ? 'bg-slate-800 border-slate-700 text-white focus:border-emerald-500' : 'bg-slate-50 border-slate-200 focus:border-emerald-600'}`} />
-                </div>
-                <div>
-                  <label className={`block text-xs font-bold uppercase tracking-widest mb-1 ${textSecondary}`}>Open</label>
-                  <input type="time" value={form.opening_time} onChange={e => setForm({...form, opening_time: e.target.value})} className={`w-full px-4 py-2.5 rounded-xl border font-semibold text-sm outline-none ${isDark ? 'bg-slate-800 border-slate-700 text-white focus:border-emerald-500' : 'bg-slate-50 border-slate-200 focus:border-emerald-600'}`} />
-                </div>
-                <div>
-                  <label className={`block text-xs font-bold uppercase tracking-widest mb-1 ${textSecondary}`}>Close</label>
-                  <input type="time" value={form.closing_time} onChange={e => setForm({...form, closing_time: e.target.value})} className={`w-full px-4 py-2.5 rounded-xl border font-semibold text-sm outline-none ${isDark ? 'bg-slate-800 border-slate-700 text-white focus:border-emerald-500' : 'bg-slate-50 border-slate-200 focus:border-emerald-600'}`} />
-                </div>
-              </div>
-              <div className="flex gap-3 pt-4">
-                <button onClick={() => setModalOpen(false)} className={`flex-1 py-3 rounded-xl font-bold text-sm transition-colors cursor-pointer ${isDark ? 'bg-slate-800 text-white hover:bg-slate-700' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>Cancel</button>
-                <button onClick={handleUpdate} disabled={submitting} className={`flex-1 py-3 rounded-xl font-bold text-sm bg-emerald-600 text-white hover:bg-emerald-700 cursor-pointer`}>{submitting ? 'Saving...' : 'Save'}</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+
     </div>
   );
 };

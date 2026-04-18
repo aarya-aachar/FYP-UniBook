@@ -75,32 +75,6 @@ router.post('/', authenticateToken, async (req, res) => {
   }
 });
 
-// Update an existing review
-router.put('/:id', authenticateToken, async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { rating, comment } = req.body;
-    const pool = getPool();
-    
-    if (!rating || rating < 1 || rating > 5) {
-      return res.status(400).json({ message: 'Valid rating (1-5) is required.' });
-    }
 
-    const [result] = await pool.query(`
-      UPDATE reviews 
-      SET rating = ?, comment = ? 
-      WHERE id = ? AND user_id = ?
-    `, [rating, comment, id, req.user.id]);
-    
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ message: 'Review not found or unauthorized' });
-    }
-
-    res.json({ message: 'Review updated successfully' });
-  } catch (error) {
-    console.error('Update Review Error:', error);
-    res.status(500).json({ message: 'Internal Server Error' });
-  }
-});
 
 module.exports = router;

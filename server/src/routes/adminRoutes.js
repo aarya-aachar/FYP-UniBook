@@ -26,8 +26,7 @@ router.get('/admin/metrics', authenticateToken, verifyAdmin, async (req, res) =>
     };
 
     // 3. Chart & Trends (Last 14 days)
-    const trendsMap = {};
-    const fourteenDaysAgo = new Date();
+    const trendsMap = {};    const fourteenDaysAgo = new Date();
     fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
     
     rawBookings.forEach(b => {
@@ -68,9 +67,9 @@ router.get('/admin/metrics', authenticateToken, verifyAdmin, async (req, res) =>
 router.get('/admin/users', authenticateToken, verifyAdmin, async (req, res) => {
   try {
     const pool = getPool();
-    console.log('Admin: Fetching all users...');
+
     const [users] = await pool.query('SELECT id, name, email, role, is_active, created_at FROM users ORDER BY created_at DESC');
-    console.log(`Admin: Found ${users.length} users.`);
+
     res.json(users);
   } catch (error) {
     console.error('Admin Fetch Users SQL Error:', error);
@@ -121,7 +120,7 @@ router.patch('/admin/users/:id/role', authenticateToken, verifyAdmin, async (req
 
 // ─── GET full reports and analytics (Stats Dashboard) ────────────────────────
 router.get('/admin/reports/full', authenticateToken, verifyAdmin, async (req, res) => {
-  console.log('>>> [SERVER] API RECEIVED: /api/admin/reports/full <<<');
+
   try {
     const pool = getPool();
     
@@ -186,7 +185,7 @@ router.get('/admin/reports/full', authenticateToken, verifyAdmin, async (req, re
 
 // ─── GET User Report Data (for export) ────────────────────────────────────────
 router.get('/admin/reports/users/export', authenticateToken, verifyAdmin, async (req, res) => {
-  console.log('--- ENTERING /admin/reports/users/export ---');
+
   try {
     const pool = getPool();
     const [users] = await pool.query('SELECT id, name, email, role, is_active, created_at FROM users ORDER BY created_at DESC');
@@ -229,6 +228,4 @@ router.get('/admin/reports/providers/export', authenticateToken, verifyAdmin, as
   } catch (error) {
     res.status(500).json({ message: 'Failed to fetch provider export data' });
   }
-});
-
-module.exports = router;
+});module.exports = router;

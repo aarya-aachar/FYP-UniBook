@@ -191,57 +191,6 @@ router.get('/bookings/admin', authenticateToken, verifyAdmin, async (req, res) =
   }
 });
 
-// Update booking status (Admin only)
-router.put('/bookings/:id/status', authenticateToken, verifyAdmin, async (req, res) => {
-  try {
-    const { status } = req.body;
-    const booking_id = req.params.id;
-    const pool = getPool();
 
-    await pool.query('UPDATE bookings SET status = ? WHERE id = ?', [status, booking_id]);
-
-    // Send response immediately
-    res.json({ message: 'Booking status updated successfully' });
-
-    // Fire-and-forget notifications
-    try {
-      const [bookingDetails] = await pool.query(
-        `SELECT b.*, u.name as user_name, p.name as provider_name 
-         FROM bookings b JOIN users u ON b.user_id = u.id JOIN providers p ON b.provider_id = p.id 
-         WHERE b.id = ?`, [booking_id]
-      );
-      
-      if (bookingDetails.length > 0) {
-        const b = bookingDetails[0];
-        const dateStr = new Date(b.booking_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-        const timeStr = b.booking_time.substring(0, 5);
-        
-        if (status === 'confirmed') {
-          await pool.query(
-            'INSERT INTO notifications (user_id, type, title, message, metadata) VALUES (?, ?, ?, ?, ?)',
-            [b.user_id, 'booking_confirmed', 'Booking Confirmed', `Your booking for ${b.provider_name} on ${dateStr} at ${timeStr} has been confirmed.`, JSON.stringify({ booking_id: b.id, provider_id: b.provider_id })]
-          );
-          const [admins] = await pool.query("SELECT id FROM users WHERE role = 'admin'");
-          for (const admin of admins) {
-            await pool.query(
-              'INSERT INTO notifications (user_id, type, title, message, metadata) VALUES (?, ?, ?, ?, ?)',
-              [admin.id, 'booking_confirmed', 'Booking Confirmed', `${b.user_name} confirmed a booking at ${b.provider_name} on ${dateStr} at ${timeStr}.`, JSON.stringify({ booking_id: b.id })]
-            );
-          }
-        } else if (status === 'cancelled') {
-          await pool.query(
-            'INSERT INTO notifications (user_id, type, title, message, metadata) VALUES (?, ?, ?, ?, ?)',
-            [b.user_id, 'booking_cancelled', 'Booking Cancelled', `Your booking for ${b.provider_name} on ${dateStr} at ${timeStr} has been cancelled.`, JSON.stringify({ booking_id: b.id })]
-          );
-        }
-      }
-    } catch (notifErr) {
-      console.error('Booking notification error (non-fatal):', notifErr.message);
-    }
-  } catch (error) {
-    console.error('Update Booking Status Error:', error);
-    res.status(500).json({ message: 'Internal Server Error' });
-  }
-});
 
 module.exports = router;

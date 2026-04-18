@@ -108,12 +108,8 @@ const UserReports = () => {
 
     try {
       setIsSubmitting(true);
-      if (activeBooking.review_id) {
-        await updateReview(activeBooking.review_id, rating, comment);
-      } else {
-        await submitReview(activeBooking.id, activeBooking.provider_id, rating, comment);
-      }
-      toast(activeBooking.review_id ? "Review updated successfully!" : "Review posted successfully!");
+      await submitReview(activeBooking.id, activeBooking.provider_id, rating, comment);
+      toast("Review posted successfully!");
       closeReviewModal();
       fetchReports();
     } catch (err) {
@@ -237,17 +233,17 @@ const UserReports = () => {
                   </div>
                 </div>
 
-                <div className="flex flex-col items-end justify-center w-full md:w-auto mt-2 md:mt-0 pt-4 md:pt-0 border-t md:border-none transition-colors border-slate-200 dark:border-slate-700">
-                  <button 
-                    onClick={() => openReviewModal(b)}
-                    className={`px-5 py-2.5 flex items-center justify-center gap-2 w-full md:w-auto rounded-lg border font-medium text-sm transition-all shadow-sm cursor-pointer
-                      ${hasReviewed 
-                        ? (isDark ? 'bg-slate-800 text-slate-300 border-slate-600 hover:text-white hover:bg-slate-700' : 'bg-white text-slate-600 border-slate-200 hover:text-slate-900 hover:bg-slate-50')
-                        : (isDark ? 'bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-500 hover:shadow' : 'bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700 shadow-sm')}`}
-                  >
-                    {hasReviewed ? <><Edit className="w-4 h-4" /> Edit Review</> : <><MessageSquare className="w-4 h-4" /> Leave Review</>}
-                  </button>
-                </div>
+                   {!hasReviewed && (
+                    <div className="flex flex-col items-end justify-center w-full md:w-auto mt-2 md:mt-0 pt-4 md:pt-0 border-t md:border-none transition-colors border-slate-200 dark:border-slate-700">
+                      <button 
+                        onClick={() => openReviewModal(b)}
+                        className={`px-5 py-2.5 flex items-center justify-center gap-2 w-full md:w-auto rounded-lg border font-medium text-sm transition-all shadow-sm cursor-pointer
+                          ${isDark ? 'bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-500 hover:shadow' : 'bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700 shadow-sm'}`}
+                      >
+                        <MessageSquare className="w-4 h-4" /> Leave Review
+                      </button>
+                    </div>
+                   )}
               </div>
             )})}
           </div>

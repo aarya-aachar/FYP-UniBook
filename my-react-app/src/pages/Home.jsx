@@ -240,9 +240,7 @@ const Home = () => {
                  <div>
                     <h5 className="font-black text-slate-950 mb-8 uppercase text-[10px] tracking-[0.4em]">Company</h5>
                     <ul className="space-y-5">
-                       <li><Link to="/about" className="text-slate-500 hover:text-emerald-600 transition-colors font-bold text-sm tracking-tight">Enterprise Infrastructure</Link></li>
-                       <li><Link to="/contact" className="text-slate-500 hover:text-emerald-600 transition-colors font-bold text-sm tracking-tight">Global Support</Link></li>
-                       <li><Link to="/provider/register" className="text-emerald-600 hover:text-emerald-700 transition-colors font-black text-sm tracking-tight group font-outfit">Become a Partner →</Link></li>
+                        <li><Link to="/provider/register" className="text-emerald-600 hover:text-emerald-700 transition-colors font-black text-sm tracking-tight group font-outfit">Become a Partner →</Link></li>
                     </ul>
                  </div>
                  <div>

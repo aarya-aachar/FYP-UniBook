@@ -16,7 +16,7 @@ export const CHATBOT_INTENTS = [
   },
   {
     name: "Cancellation Intent",
-    keywords: ["cancel", "delete", "remove", "stop", "change", "reschedule", "modify"],
+    keywords: ["cancel", "remove", "stop", "change", "reschedule", "modify"],
     response: "There is no direct cancellation or rescheduling policy in the system. Please contact the UniBook Administration via our support chat to request manual changes to your bookings."
   },
   {

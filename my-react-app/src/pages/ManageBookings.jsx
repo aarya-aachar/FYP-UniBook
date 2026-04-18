@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
 import { useAdminTheme } from '../context/AdminThemeContext';
-import { getAllBookings, updateBookingStatus } from '../services/bookingService';
+import { getAllBookings } from '../services/bookingService';
 import { CheckCircle, Clock, XCircle, CalendarX, AlertCircle, MapPin, CalendarDays, Key, Mail, User, Hash } from 'lucide-react';
 import AdminTopHeader from '../components/AdminTopHeader';
 import { formatMultiSlotRange } from '../utils/dateUtils';
@@ -78,15 +78,7 @@ const ManageBookings = () => {
     }
   };
 
-  const updateStatus = async (group, status) => {
-    try {
-      await Promise.all(group.ids.map(id => updateBookingStatus(id, status)));
-      setBookings(bookings.map(b => group.ids.includes(b.id) ? { ...b, status } : b));
-      toast(`Session ${status} successfully!`);
-    } catch (err) {
-      toast('Operation failed', 'error');
-    }
-  }
+
 
   const getStatusConfig = (status) => {
     return { 

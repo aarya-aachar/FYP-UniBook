@@ -19,10 +19,7 @@ export const getAllBookings = async () => {
   return res.data;
 };
 
-export const updateBookingStatus = async (id, status) => {
-  const res = await api.put(`/bookings/${id}/status`, { status });
-  return res.data;
-};
+
 
 export const getPastUserBookings = async () => {
   const res = await api.get('/bookings/user/reports');
@@ -34,7 +31,14 @@ export const submitReview = async (booking_id, provider_id, rating, comment) => 
   return res.data;
 };
 
-export const updateReview = async (review_id, rating, comment) => {
-  const res = await api.put(`/reviews/${review_id}`, { rating, comment });
+export const getProviderReviews = async (providerId) => {
+  const res = await api.get(`/reviews/provider/${providerId}`);
   return res.data;
 };
+
+export const getProviderReviewStats = async (providerId) => {
+  const res = await api.get(`/reviews/provider/${providerId}/stats`);
+  return res.data;
+};
+
+

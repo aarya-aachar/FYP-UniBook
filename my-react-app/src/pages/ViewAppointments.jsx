@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import UserNavbar from '../components/UserNavbar';
-import { getUserBookings, updateBookingStatus } from '../services/bookingService';
+import { getUserBookings } from '../services/bookingService';
 import { useUserTheme } from '../context/UserThemeContext';
 import { CheckCircle, Clock, XCircle, HelpCircle, Calendar, Utensils, Trophy, Hospital, Scissors, Plus, CalendarX } from 'lucide-react';
 import { formatMultiSlotRange } from '../utils/dateUtils';
@@ -74,17 +74,7 @@ const ViewAppointments = () => {
     }
   };
 
-  const cancelAppointment = async (group) => {
-    if(!window.confirm(`Are you sure you want to cancel this session?`)) return;
-    try {
-      // Cancel all IDs in the group
-      await Promise.all(group.ids.map(id => updateBookingStatus(id, 'cancelled')));
-      setAppointments(prev => prev.map(a => group.ids.includes(a.id) ? { ...a, status: 'cancelled' } : a));
-      toast('Booking(s) cancelled successfully');
-    } catch (err) {
-      toast("Failed to cancel booking.", 'error');
-    }
-  }
+
 
   const getStatusConfig = (status) => {
     const s = status?.toLowerCase();

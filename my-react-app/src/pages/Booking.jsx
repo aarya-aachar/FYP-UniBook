@@ -160,6 +160,7 @@ const Booking = () => {
   if (provider?.category === 'Hospitals') ProviderIcon = Hospital;
   if (provider?.category === 'Restaurants') ProviderIcon = Utensils;
   if (provider?.category === 'Futsal') ProviderIcon = Trophy;
+  if (provider?.category === 'Salon / Spa') ProviderIcon = Scissors;
   const timeSlots = generateTimeSlots();
 
   return (

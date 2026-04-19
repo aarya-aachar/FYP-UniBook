@@ -55,7 +55,7 @@ router.get('/providers', async (req, res) => {
     const pool = getPool();
 
     // Add check to allow admin to fetch all, while public only gets active
-    const showAll = req.query.all === 'true';
+    const showAll =-req.query.all === 'true';
     const activeFilter = showAll ? '1=1' : 'p.is_active = TRUE';
 
     let query = `

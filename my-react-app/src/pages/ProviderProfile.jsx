@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import ProviderSidebar from '../components/ProviderSidebar';
 import AdminTopHeader from '../components/AdminTopHeader';
 import { useAdminTheme } from '../context/AdminThemeContext';
 import api from '../services/api';
-import { updateProfile } from '../services/authService';
-import { User, Lock, Save, CheckCircle, AlertCircle, Sun, Moon, FileText, Hash, ExternalLink, ShieldCheck } from 'lucide-react';
+import { updateProfile, uploadProfilePhoto } from '../services/authService';
+import { User, Lock, Save, CheckCircle, AlertCircle, Sun, Moon, FileText, Hash, ExternalLink, ShieldCheck, Camera } from 'lucide-react';
 
 const BACKEND_URL = 'http://localhost:4001';
 
@@ -17,6 +17,9 @@ const ProviderProfile = () => {
   const [saving, setSaving]       = useState(false);
   const [message, setMessage]     = useState(null);
   const [error, setError]         = useState(null);
+  
+  const [profilePhoto, setProfilePhoto] = useState(null);
+  const photoInputRef = useRef(null);
   
   const [form, setForm] = useState({
     name: '',
@@ -33,6 +36,7 @@ const ProviderProfile = () => {
       .then(([userRes, provRes]) => {
         setProfile(userRes.data);
         setProviderData(provRes.data);
+        setProfilePhoto(userRes.data.profile_photo || null);
         setForm(prev => ({ ...prev, name: userRes.data.name || '' }));
       })
       .catch(err => console.error(err))
@@ -56,6 +60,20 @@ const ProviderProfile = () => {
       setTimeout(() => setError(null), 3000);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handlePhotoUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+      const res = await uploadProfilePhoto(file);
+      setProfilePhoto(res.profile_photo);
+      setMessage("Profile photo updated!");
+      setTimeout(() => setMessage(null), 3000);
+    } catch (err) {
+      setError(err.message || "Photo upload failed");
+      setTimeout(() => setError(null), 3000);
     }
   };
 
@@ -91,8 +109,31 @@ const ProviderProfile = () => {
               {/* Profile Details */}
               <div className="mb-8">
                 <div className="flex flex-col items-center mb-8">
-                   <div className={`w-20 h-20 rounded-full flex items-center justify-center mb-4 transition-colors ${isDark ? 'bg-emerald-500/10 text-emerald-400' : 'bg-emerald-50 text-emerald-600'}`}>
-                      <User className="w-10 h-10" />
+                   <div 
+                     className="relative group cursor-pointer" 
+                     onClick={() => photoInputRef.current?.click()}
+                   >
+                     <div className={`w-20 h-20 rounded-xl flex items-center justify-center mb-4 transition-all relative overflow-hidden border-2 ${isDark ? 'bg-emerald-500/10 border-slate-700' : 'bg-emerald-50 border-slate-100'}`}>
+                        {profilePhoto ? (
+                          <img 
+                            src={`${BACKEND_URL}${profilePhoto}`} 
+                            alt="Profile" 
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <User className="w-10 h-10" />
+                        )}
+                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                           <Camera className="w-5 h-5 text-white" />
+                        </div>
+                     </div>
+                     <input 
+                       type="file" 
+                       ref={photoInputRef} 
+                       onChange={handlePhotoUpload} 
+                       accept="image/*" 
+                       className="hidden" 
+                     />
                    </div>
                    <h3 className={`text-xl font-black transition-colors ${textPrimary}`}>{profile?.name}</h3>
                    <p className={`text-sm font-medium transition-colors ${textSecondary}`}>{profile?.email}</p>

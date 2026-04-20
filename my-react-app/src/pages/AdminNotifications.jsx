@@ -1,3 +1,21 @@
+/**
+ * The Systemic Event Ledger (Admin Notifications)
+ * 
+ * relative path: /src/pages/AdminNotifications.jsx
+ * 
+ * This component acts as the real-time "Pulse" of the UniBook platform. It 
+ * centralizes disparate system events into a unified, actionable timeline 
+ * for administrators.
+ * 
+ * Features:
+ * - Semantic Event Mapping: Categorizes raw system logs into meaningful 
+ *   visual channels (e.g., Bookings = Emerald, Cancellations = Rose).
+ * - State Persistence: Synchronizes read/unread states with the backend 
+ *   to ensure a consistent audit trail across different administrative sessions.
+ * - Reactive UI: Utilizes custom CSS keyframes and "Just-in-Time" toast 
+ *   mechanisms to notify the admin even when they are active on the page.
+ */
+
 import { useState, useEffect, useCallback } from 'react';
 import Sidebar from '../components/Sidebar';
 import { useAdminTheme } from '../context/AdminThemeContext';

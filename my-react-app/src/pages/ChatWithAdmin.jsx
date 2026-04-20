@@ -1,3 +1,23 @@
+/**
+ * The Direct Support Channel (Client-Admin Messaging)
+ * 
+ * relative path: /src/pages/ChatWithAdmin.jsx
+ * 
+ * This component acts as the primary service touchpoint for clients of the 
+ * UniBook platform. It provides a non-intimidating, direct line to system 
+ * administrators.
+ * 
+ * Technical Design:
+ * - Special Alias Routing: Uses an 'admin' alias in backend service calls 
+ *   to ensure users don't need to know specific administrative IDs to 
+ *   initiate support.
+ * - Reactive "Snappy" Polling: Implements a 12-second polling strategy to 
+ *   balance platform responsiveness with server load for high-volume 
+ *   client environments.
+ * - Secure Glassmorphic UI: Employs modern CSS backdrop filters to 
+ *   create a high-trust, professional "Help Desk" environment.
+ */
+
 import { useState, useEffect, useRef } from 'react';
 import { Send, User, ShieldCheck, Clock } from 'lucide-react';
 import UserNavbar from '../components/UserNavbar';

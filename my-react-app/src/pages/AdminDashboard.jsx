@@ -1,3 +1,18 @@
+/**
+ * The Platform Nerve Center (Admin Dashboard)
+ * 
+ * relative path: /src/pages/AdminDashboard.jsx
+ * 
+ * This is the primary monitoring hub for UniBook administrators. 
+ * It aggregates distributed data into a single, cohesive visibility layer.
+ * 
+ * Key Features:
+ * - KPI Orchestration: Summarizes Total Users, Providers, and Gross Revenue.
+ * - Time-Series Analysis: Visualizes revenue trends using Area Charts.
+ * - Industry Distribution: Categorizes the service landscape via Pie Charts.
+ * - Live Operations: Monitors the most recent booking events in the system.
+ */
+
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Users, Building2, CalendarCheck, DollarSign, CheckCircle2, Clock, Calendar, Activity } from "lucide-react";
@@ -19,12 +34,14 @@ import AdminTopHeader from "../components/AdminTopHeader";
 import { useAdminTheme } from "../context/AdminThemeContext";
 import api from "../services/api";
 
+// Semantic color palette for industry distribution charts
 const COLORS = ["#10B981", "#0D9488", "#14B8A6", "#059669", "#34D399"];
 
 const AdminDashboard = () => {
   const { adminTheme } = useAdminTheme();
   const isDark = adminTheme === 'dark';
 
+  // Master state for system-wide metrics
   const [metrics, setMetrics] = useState({
     totals: { users: 0, providers: 0, bookings: 0, revenue: 0 },
     chartData: [],
@@ -33,9 +50,14 @@ const AdminDashboard = () => {
   });
   const [loading, setLoading] = useState(true);
 
+  /**
+   * fetchMetrics
+   * The "Heartbeat" of the dashboard. It queries the aggregated 
+   * statistics endpoint with a timestamp to bypass browser caching.
+   */
   const fetchMetrics = () => {
     setLoading(true);
-    // Bypassing cache with timestamp
+    // Bypassing cache with timestamp ensures truly live data
     api.get(`/admin/metrics?t=${Date.now()}`)
       .then(res => setMetrics(res.data))
       .catch(err => console.error(">>> [ADMIN DASHBOARD ERROR]", err))
@@ -45,8 +67,9 @@ const AdminDashboard = () => {
   useEffect(() => {
     document.title = "Admin Dashboard | UniBook";
     fetchMetrics();
-    // Refresh every 5 minutes automatically
-    const interval = setInterval(fetchMetrics, 5 * 60 * 1000);
+    
+    // Background Refresh: Keeps the dashboard current without user interaction
+    const interval = setInterval(fetchMetrics, 5 * 60 * 1000); // 5-minute sync
     return () => clearInterval(interval);
   }, []);
 
@@ -57,6 +80,11 @@ const AdminDashboard = () => {
 
   const formatNumber = (val) => (val === undefined || val === null) ? '0' : Number(val).toLocaleString();
 
+  /**
+   * Stat Card Definition
+   * Defines the top-level KPIs. Using Lucide icons for high-level visual 
+   * identification of data types.
+   */
   const statCards = [
     { label: 'Total Users', value: metrics.totals.users || '0', icon: <Users className="w-5 h-5"/>, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
     { label: 'Service Providers', value: metrics.totals.providers || '0', icon: <Building2 className="w-5 h-5"/>, color: 'text-teal-500', bg: 'bg-teal-500/10' },
@@ -88,6 +116,7 @@ const AdminDashboard = () => {
             showTimestamp={true}
           />
 
+          {/* Quick Stats Grid: Immediate visibility of platform scale */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
             {statCards.map((card, i) => (
               <div key={i}
@@ -107,6 +136,8 @@ const AdminDashboard = () => {
           </div>
 
           <div className="grid lg:grid-cols-3 gap-6 mb-6">
+            
+            {/* Revenue Trend Analysis Chart */}
             <div className={`lg:col-span-2 rounded-xl p-6 transition-all duration-300 ${cardBase}`}
               style={{ animation: 'fadeIn 0.5s ease-out 0.2s forwards', opacity: 0 }}>
               <div className="flex justify-between items-center mb-6">
@@ -155,6 +186,7 @@ const AdminDashboard = () => {
               </div>
             </div>
 
+            {/* Service Distribution (Pie Chart) */}
             <div className={`rounded-xl p-6 flex flex-col transition-all duration-300 ${cardBase}`}
               style={{ animation: 'fadeIn 0.5s ease-out 0.3s forwards', opacity: 0 }}>
               <h2 className={`text-base font-bold mb-6 transition-colors ${textPrimary}`}>Service Distribution</h2>
@@ -192,6 +224,7 @@ const AdminDashboard = () => {
             </div>
           </div>
 
+          {/* Operational Log: Real-time monitoring of transactions */}
           <div className={`rounded-xl p-6 transition-all duration-300 ${cardBase}`}
             style={{ animation: 'fadeIn 0.5s ease-out 0.4s forwards', opacity: 0 }}>
             <div className="flex justify-between items-center mb-6">
@@ -217,6 +250,7 @@ const AdminDashboard = () => {
                         {new Date(activity.created_at).toLocaleString('en-US', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
                       </p>
                     </div>
+                    {/* Visual Status Tagging */}
                     <div className={`px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider border
                         ${activity.status === 'confirmed'
                         ? (isDark ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-emerald-50 text-emerald-700 border-emerald-200')

@@ -1,3 +1,20 @@
+/**
+ * The Booking Operations Hub (Provider Portal)
+ * 
+ * relative path: /src/pages/ProviderBookings.jsx
+ * 
+ * This is the operational engine for service providers. it transforms raw 
+ * appointment data into a manageable workflow hub.
+ * 
+ * Technical Highlights:
+ * - Session Merging: Intelligently groups consecutive 1-hour slots into cohesive 
+ *   experience cards, improving operational clarity.
+ * - Rescheduling Authority: Empowers providers to adjust schedules with 
+ *   integrated validation (hours, capacity, dates).
+ * - Multi-Axis Filtering: Separates focus between "Upcoming" revenue opportunities 
+ *   and "Completed" historical records.
+ */
+
 import { useState, useEffect, useRef } from 'react';
 import ProviderSidebar from '../components/ProviderSidebar';
 import { useAdminTheme } from '../context/AdminThemeContext';
@@ -13,6 +30,7 @@ const formatDate = (d) => {
   return new Date(year, month - 1, day).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 };
 
+// Visual mapping for booking lifecycle states
 const STATUS_CONFIG = {
   confirmed: { label: 'Confirmed', bg: 'bg-emerald-100 text-emerald-700', icon: CheckCircle2 },
 };
@@ -26,7 +44,7 @@ const ProviderBookings = () => {
   const [search, setSearch]     = useState('');
   const [filter, setFilter]     = useState('all');
   
-  // Reschedule State
+  // Reschedule Management State
   const [rescheduleBooking, setRescheduleBooking] = useState(null);
   const [newDate, setNewDate] = useState('');
   const [newTime, setNewTime] = useState('');
@@ -37,6 +55,11 @@ const ProviderBookings = () => {
     fetchBookings();
   }, []);
 
+  /**
+   * fetchBookings
+   * Pulls operation-critical data. Uses a grouping algorithm to merge 
+   * fragmented time slots into cohesive customer sessions.
+   */
   const fetchBookings = () => {
     setLoading(true);
     Promise.all([
@@ -46,7 +69,12 @@ const ProviderBookings = () => {
       .then(([bookingsRes, profileRes]) => {
         const raw = bookingsRes.data;
         
-        // Grouping Logic for Provider View
+        /**
+         * Grouping Algorithm (Session Merging)
+         * 1. Sorts all bookings chronologically.
+         * 2. Merges adjacent 1-hour slots belonging to the same user/date 
+         *    into a single "grouped" object for better UI display.
+         */
         const grouped = [];
         const sorted = [...raw].sort((a, b) => {
           const dateDiff = new Date(a.booking_date) - new Date(b.booking_date);
@@ -56,7 +84,7 @@ const ProviderBookings = () => {
 
         sorted.forEach(booking => {
           const last = grouped[grouped.length - 1];
-          // Merge if same user, date, status AND is consecutive
+          // Merging Condition: Same User + Same Date + Same Status + Sequential Time
           if (last && 
               last.user_id === booking.user_id && 
               last.booking_date === booking.booking_date && 
@@ -69,7 +97,6 @@ const ProviderBookings = () => {
             if (lastEndTimeStr === booking.booking_time.substring(0, 5)) {
               last.times.push(booking.booking_time);
               last.ids.push(booking.id);
-              // Sum up the paid amount for the group
               last.paid_amount = (parseFloat(last.paid_amount) + parseFloat(booking.paid_amount)).toFixed(2);
               return;
             }
@@ -89,20 +116,26 @@ const ProviderBookings = () => {
       .finally(() => setLoading(false));
   };
 
+  /**
+   * handleReschedule
+   * Orchestrates the complex logic of changing an existing appointment.
+   * Ensures the new slot is in the future and within business hours.
+   */
   const handleReschedule = async () => {
     if (!newDate || !newTime) return alert('Please select both date and time.');
     
-    // Calculate tomorrow's date at midnight local time
+    // Safety Check: Rescheduling only allowed for tomorrow onwards
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
     tomorrow.setHours(0, 0, 0, 0);
     
-    const selectedDateObj = new Date(newDate + 'T00:00:00'); // Ensure local parsing
+    const selectedDateObj = new Date(newDate + 'T00:00:00');
 
     if (selectedDateObj < tomorrow) {
       return alert('Cannot select today or past dates. Please pick a date starting from tomorrow.');
     }
 
+    // Business Hours Validation
     if (profile) {
       const opening = profile.opening_time || '09:00:00';
       const closing = profile.closing_time || '18:00:00';
@@ -119,7 +152,7 @@ const ProviderBookings = () => {
         booking_date: newDate,
         booking_time: newTime
       });
-      fetchBookings();
+      fetchBookings(); // Sync UI with backend
       setRescheduleBooking(null);
       alert('Booking rescheduled successfully.');
     } catch (err) {
@@ -129,6 +162,10 @@ const ProviderBookings = () => {
     }
   };
 
+  /**
+   * multiAxisFilter
+   * Combines name-based Search with status-based Chronology (Upcoming/Completed).
+   */
   const filtered = bookings.filter(b => {
     const matchSearch = !search || b.user_name?.toLowerCase().includes(search.toLowerCase()) || b.user_email?.toLowerCase().includes(search.toLowerCase());
     if (!matchSearch || b.status !== 'confirmed') return false;
@@ -137,7 +174,7 @@ const ProviderBookings = () => {
 
     const now = new Date();
     const bookingDateStr = b.booking_date.split('T')[0];
-    const lastTime = b.times[b.times.length - 1]; // e.g. "09:00:00"
+    const lastTime = b.times[b.times.length - 1]; 
     const bookingEndDateTime = new Date(`${bookingDateStr}T${lastTime}`);
     bookingEndDateTime.setMinutes(bookingEndDateTime.getMinutes() + 60);
 
@@ -166,7 +203,7 @@ const ProviderBookings = () => {
           subtitle="All bookings for your service"
         />
 
-        {/* Filters */}
+        {/* Operational Filter Suite */}
         <div className={`rounded-2xl border p-5 mb-6 flex flex-col sm:flex-row gap-4 sm:items-center justify-between ${cardBg}`}>
           <div className="relative flex-1 w-full sm:max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -186,9 +223,10 @@ const ProviderBookings = () => {
           </div>
         </div>
 
-        {/* Table */}
+        {/* Master Operations Table */}
         <div className={`rounded-3xl border overflow-hidden ${cardBg}`}>
           {loading ? (
+             // Skeletons: Layout stability during heavy grouping operations
             <div className="p-8 space-y-4">
               {[1,2,3,4,5].map(i => <div key={i} className={`h-16 rounded-xl animate-pulse ${isDark ? 'bg-slate-800' : 'bg-slate-100'}`} />)}
             </div>
@@ -235,7 +273,7 @@ const ProviderBookings = () => {
                           <Icon className="w-3 h-3" /> {cfg.label}
                         </span>
                         
-                        {/* Inline Reschedule button since we removed Actions column */}
+                        {/* Reschedule Initiation: Opens the modification modal */}
                          {b.status === 'confirmed' && (
                            <button 
                              onClick={() => {
@@ -259,7 +297,7 @@ const ProviderBookings = () => {
         </div>
       </div>
 
-      {/* Reschedule Modal */}
+      {/* Reschedule Orchestration Modal */}
       {rescheduleBooking && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
            <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm" onClick={() => setRescheduleBooking(null)} />

@@ -1,3 +1,21 @@
+/**
+ * The Entry Gateway (Login Page)
+ * 
+ * relative path: /src/pages/Login.jsx
+ * 
+ * This is the front door for every user of UniBook.
+ * 
+ * Design Strategy:
+ * - Brand Immersion (Left Side): Reminds the user why they are here with high-impact 
+ *   visuals and growth stats (50k+ users).
+ * - Secure Portal (Right Side): A focused, distraction-free form for authentication.
+ * 
+ * Logic:
+ * - Single Entry Point: One form handles Admins, Providers, and regular Clients.
+ * - Dynamic Direction: After login, the component reads the user's role from 
+ *   the system and automatically sends them to their specific "Command Center".
+ */
+
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { login } from '../services/authService';
@@ -14,6 +32,12 @@ const Login = () => {
     document.title = "Access UniBook | Secure Login";
   }, []);
 
+  /**
+   * handleSubmit
+   * The core of the login process. It gathers the user inputs, 
+   * sends them to the authService, and then performs the critical 
+   * "Role Check" to navigate the user.
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
@@ -26,15 +50,24 @@ const Login = () => {
     try {
       setLoading(true);
       const data = await login(email, password);
+      
+      // Parse the user role (ensuring it's case-insensitive and clean)
       const candidateUser = data.user || data; 
       const rawRole = candidateUser.role || (data.user && data.user.role) || '';
       const userRole = String(rawRole).toLowerCase().trim();
 
+      /**
+       * --- THE REDIRECT HUB ---
+       * Here, we decide which world the user enters.
+       */
       if (userRole === 'admin') {
+        // Admins go to the site-wide management portal
         window.location.assign('/dashboard/admin');
       } else if (userRole === 'provider') {
+        // Business owners (Futsal, Clinics) go to their merchant dashboard
         navigate('/provider/dashboard');
       } else {
+        // Regular customers go to their personal appointment list
         navigate('/dashboard');
       }
     } catch (err) {
@@ -46,7 +79,10 @@ const Login = () => {
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-[#020617] font-inter">
-      {/* Left Pane - Visual Branding */}
+      {/* 
+          --- LEFT PANE (Desktop Branding) ---
+          Used for visual focus and trust-building on larger screens.
+      */}
       <div className="hidden md:flex md:w-1/2 lg:w-[60%] relative overflow-hidden bg-slate-900 border-r border-white/5">
         <img 
           src="https://images.unsplash.com/photo-1563986768609-322da13575f3?q=80&w=1470&auto=format&fit=crop" 
@@ -67,6 +103,7 @@ const Login = () => {
           <p className="text-slate-400 text-lg font-medium max-w-md leading-relaxed">
             The professional standard for automated appointment management. Join thousands of users optimizing their daily workflow.
           </p>
+          {/* Trust Indicators */}
           <div className="mt-12 flex gap-8">
              <div>
                 <p className="text-2xl font-black text-white">50k+</p>
@@ -81,24 +118,20 @@ const Login = () => {
         </div>
       </div>
 
-      {/* Right Pane - Authentication Form */}
+      {/* 
+          --- RIGHT PANE (Interaction Hub) ---
+          Contains the actual login form. Dark mode by default for high contrast.
+      */}
       <div className="w-full md:w-1/2 lg:w-[40%] flex items-center justify-center p-8 md:p-16 bg-[#020617] relative">
-        {/* Background Decor */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full max-w-md bg-emerald-600/5 blur-[120px] -z-0" />
         
         <div className="w-full max-w-sm relative z-10">
-          <div className="mb-12 md:hidden">
-             <div className="flex items-center gap-2.5 mb-2">
-                <img src="/logo.png" alt="UniBook Logo" className="w-8 h-8 object-contain" />
-                <h2 className="text-lg font-black tracking-tighter text-white">UniBook<span className="text-emerald-600">.</span></h2>
-             </div>
-          </div>
-
           <div className="mb-10">
             <h1 className="text-3xl font-extrabold text-white tracking-tight mb-2">Welcome Back</h1>
             <p className="text-slate-400 font-medium text-sm">Sign in to your professional workspace</p>
           </div>
 
+          {/* Validation Alert */}
           {error && (
             <div className="mb-6 px-4 py-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-500 text-xs font-bold flex items-center gap-2 animate-in slide-in-from-top-2">
                <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>

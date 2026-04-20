@@ -1,3 +1,21 @@
+/**
+ * The Transaction Hub (Secure Checkout)
+ * 
+ * relative path: /src/pages/Payment.jsx
+ * 
+ * This component is the bridge between a user's intent to book 
+ * and the final financial commitment. It handles the integration 
+ * with the eSewa payment gateway.
+ * 
+ * Key Logic:
+ * 1. Pre-Booking: Before going to eSewa, we save the booking in a 
+ *    'pending' state to ensure the data persists if the user's internet drops.
+ * 2. Signature Handshake: Requests the backend to generate a secure 
+ *    eSewa payload (including a HMAC signature).
+ * 3. Secure Redirection: Dynamically creates and submits a POST form 
+ *    to eSewa's portal to ensure a seamless, secure transition.
+ */
+
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import UserNavbar from "../components/UserNavbar";
@@ -16,6 +34,7 @@ const Payment = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // Destructure the passed state from the Booking page
   const { date, time, price, providerName } = location.state || {};
 
   useEffect(() => {
@@ -23,10 +42,19 @@ const Payment = () => {
     document.title = "Secure Checkout | UniBook";
   }, [date, time, navigate]);
 
+  /**
+   * handlePayment
+   * The master orchestrator for the eSewa workflow.
+   */
   const handlePayment = async () => {
     setLoading(true);
     setError(null);
     try {
+      /**
+       * Step 1: Create the Local Record
+       * We mark it as 'pending' so it doesn't show up as 'Confirmed' until 
+       * we receive the success callback from eSewa.
+       */
       const booking = await createBooking({
         provider_id: providerId,
         booking_date: date,
@@ -35,12 +63,21 @@ const Payment = () => {
         notes: "ESEWA Transaction Initiation"
       });
 
+      /**
+       * Step 2: Get Secure Parameters
+       * The backend generates the signature and transaction IDs required by eSewa.
+       */
       const response = await api.post('/payment/initiate', {
         amount: price,
         booking_id: booking.id,
         booking_ids: booking.ids
       });
 
+      /**
+       * Step 3: Secure Redirection (Form Injection)
+       * We create a hidden HTML form in memory and submit it immediately. 
+       * This is the standard, secure way to transition to eSewa's gateway.
+       */
       const params = response.data;
       const form = document.createElement('form');
       form.setAttribute('method', 'POST');
@@ -172,15 +209,14 @@ const Payment = () => {
               </div>
             </div>
 
-            {/* Non-Refundable Policy */}
+            {/* Refund Policy Disclosure: Vital for Legal Compliance */}
             <div className="policy-box rounded-2xl p-5 text-left mb-8 flex gap-4">
               <Info className={`w-6 h-6 shrink-0 mt-0.5 ${isDark ? 'text-amber-500' : 'text-amber-600'}`} />
               <div>
                 <h3 className={`font-bold text-sm mb-1.5 ${isDark ? 'text-amber-500' : 'text-amber-700'}`}>Non-Refundable Policy</h3>
                 <p className={`text-[11.5px] leading-[1.6] ${isDark ? 'text-amber-200/80' : 'text-amber-900/80'}`}>
-                  Please note that there is a strict no-refund policy. Once you book by making a payment, 
-                  there will be no cancellation. However, appointments can be rebooked to the next day. 
-                  To request a rebooking, you must contact the admin through the support chat.
+                   There is a strict no-refund policy once payment is finalized. However, appointments can be shifted. 
+                   Contact UniBook support for rescheduling requests.
                 </p>
               </div>
             </div>

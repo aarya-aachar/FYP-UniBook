@@ -1,3 +1,17 @@
+/**
+ * Provider Directory & Management Routes
+ * 
+ * relative path: /api/providers
+ * 
+ * This file handles the "Public Catalog" of businesses (Hospitals, Futsals, etc.)
+ * and allows Admins to manage these listings.
+ * 
+ * Key Features:
+ * - Public searching/filtering of service providers.
+ * - Multi-image gallery uploads using Multer.
+ * - Logic for merging new photo uploads with existing ones during updates.
+ */
+
 const express = require('express');
 const multer = require('multer');
 const path = require('path');
@@ -7,30 +21,37 @@ const { authenticateToken, verifyAdmin } = require('../middleware/authMiddleware
 
 const router = express.Router();
 
-// ─── Multer Setup (image upload) ─────────────────────────────────────────────
+/**
+ * --- MULTER SETUP ---
+ * Configures how we save business banners and gallery photos.
+ * Files are stored in the root '/uploads' directory.
+ */
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    // Relative to src/routes, we need to go up two levels to reach the root uploads dir
+    // Navigate up to the root project directory's 'uploads' folder
     const uploadDir = path.join(__dirname, '../../uploads');
     if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
     cb(null, uploadDir);
   },
   filename: (req, file, cb) => {
+    // Generate a unique filename using a timestamp to prevent overwriting
     const uniqueName = `provider_${Date.now()}${path.extname(file.originalname)}`;
     cb(null, uniqueName);
   }
 });
 
+/**
+ * Filter out any non-image files to keep the storage clean.
+ */
 const fileFilter = (req, file, cb) => {
   const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
   allowed.includes(file.mimetype) ? cb(null, true) : cb(new Error('Only images are allowed'));
 };
 
-const upload = multer({ storage, fileFilter, limits: { fileSize: 5 * 1024 * 1024 } }); // 5MB limit
+const upload = multer({ storage, fileFilter, limits: { fileSize: 5 * 1024 * 1024 } });
 
+// Custom wrapper to handle multiple file fields and catch errors gracefully
 const uploadImages = (req, res, next) => {
-  // Use any() to be permissive and prevent "Unexpected field" errors.
-  // We'll manually filter for 'images' in the route handler.
   upload.any()(req, res, (err) => {
     if (err instanceof multer.MulterError) {
       console.error('>>> [MULTER ERROR]:', err);
@@ -39,25 +60,25 @@ const uploadImages = (req, res, next) => {
       console.error('>>> [UPLOAD ERROR]:', err);
       return res.status(400).json({ message: `Server Error: ${err.message}` });
     }
-
-    // Diagnostic log to see what fields are actually arriving
-    if (req.files && req.files.length > 0) {
-      console.log('>>> [UPLOAD] Fields received:', [...new Set(req.files.map(f => f.fieldname))]);
-    }
     next();
   });
 };
 
-// ─── GET all providers ────────────────────────────────────────────────────────
+/**
+ * @route GET /api/providers
+ * @desc Public route to fetch businesses. Supports filtering by category and 
+ *       hides inactive businesses unless requested by an Admin.
+ */
 router.get('/providers', async (req, res) => {
   try {
     const { category } = req.query;
     const pool = getPool();
 
-    // Add check to allow admin to fetch all, while public only gets active
-    const showAll =-req.query.all === 'true';
+    // Check if the requester wants to see hidden/inactive businesses (Admin view)
+    const showAll = req.query.all === 'true';
     const activeFilter = showAll ? '1=1' : 'p.is_active = TRUE';
 
+    // Core query to fetch provider details + their average rating/review count
     let query = `
       SELECT p.*, 
              (SELECT COUNT(*) FROM reviews WHERE provider_id = p.id) as review_count,
@@ -68,6 +89,7 @@ router.get('/providers', async (req, res) => {
     `;
     const params = [];
 
+    // Filter by category if the user clicked a specific category on the homepage
     if (category) {
       query = `
         SELECT p.*, 
@@ -82,7 +104,7 @@ router.get('/providers', async (req, res) => {
 
     const [providers] = await pool.query(query, params);
     
-    // Format the average_rating for clean JSON response
+    // Clean up the numbers (rounding stars to 1 decimal place) before sending to React
     const formattedProviders = providers.map(p => ({
       ...p,
       average_rating: parseFloat(p.average_rating || 0).toFixed(1),
@@ -96,7 +118,10 @@ router.get('/providers', async (req, res) => {
   }
 });
 
-// ─── GET single provider ──────────────────────────────────────────────────────
+/**
+ * @route GET /api/providers/:id
+ * @desc Fetch detailed data for a specific business (used on the Service Details page)
+ */
 router.get('/providers/:id', async (req, res) => {
   try {
     const pool = getPool();
@@ -123,7 +148,11 @@ router.get('/providers/:id', async (req, res) => {
   }
 });
 
-// ─── POST create provider (admin only, upgraded for multi-photo) ───────────
+/**
+ * @route POST /api/providers
+ * @desc Admin only: Manually create a new business listing. 
+ *       Also handles multiple image uploads for the business gallery.
+ */
 router.post('/providers', authenticateToken, verifyAdmin, uploadImages, async (req, res) => {
   try {
     const { name, category, description, address, base_price, opening_time, closing_time, capacity } = req.body;
@@ -132,12 +161,14 @@ router.post('/providers', authenticateToken, verifyAdmin, uploadImages, async (r
       return res.status(400).json({ message: 'Name, address, and category are required' });
     }
 
-    // Process gallery images (Filter to ensure we only collect from 'images' field)
+    // Convert the uploaded files into a list of accessible URL paths
     const galleryPaths = (req.files || [])
       .filter(f => f.fieldname === 'images')
       .map(f => `/uploads/${f.filename}`);
       
     const primaryImage = galleryPaths.length > 0 ? galleryPaths[0] : '/images/default.jpg';
+    
+    // We store the gallery as a JSON string in MySQL for easy retrieval
     const galleryJson = JSON.stringify(galleryPaths.length > 0 ? galleryPaths : [primaryImage]);
 
     const pool = getPool();
@@ -159,7 +190,7 @@ router.post('/providers', authenticateToken, verifyAdmin, uploadImages, async (r
 
     res.status(201).json({ message: 'Provider created successfully', id: result.insertId, imageUrl: primaryImage });
 
-    // Notify other admins (fire-and-forget)
+    // Send an alert notification to other admins so they know a new business was added
     try {
       const [admins] = await pool.query("SELECT id FROM users WHERE role = 'admin' AND id != ?", [req.user.id]);
       const creatorName = req.user.name || 'An admin';
@@ -181,13 +212,18 @@ router.post('/providers', authenticateToken, verifyAdmin, uploadImages, async (r
   }
 });
 
-// ─── PUT update provider (admin only, handles multi-photo updates) ────────────
+/**
+ * @route PUT /api/providers/:id
+ * @desc Admin only: Update an existing business. 
+ *       This logic is sophisticated because it handles MERGING newly uploaded 
+ *       photos with existing ones while keeping a maximum of 4 photos.
+ */
 router.put('/providers/:id', authenticateToken, verifyAdmin, uploadImages, async (req, res) => {
   try {
     const { name, category, description, address, base_price, opening_time, closing_time, capacity } = req.body;
     const pool = getPool();
 
-    // Check duplicate name (exclude self)
+    // Prevent name duplicates when renaming a business
     if (name) {
       const [existing] = await pool.query(
         'SELECT id FROM providers WHERE name = ? AND id != ?',
@@ -198,7 +234,7 @@ router.put('/providers/:id', authenticateToken, verifyAdmin, uploadImages, async
       }
     }
 
-    // Build update fields dynamically
+    // Build the SQL update string dynamically based on what fields changed
     const fields = [];
     const values = [];
 
@@ -212,8 +248,14 @@ router.put('/providers/:id', authenticateToken, verifyAdmin, uploadImages, async
     if (capacity !== undefined) { fields.push('capacity = ?'); values.push(parseInt(capacity)); }
     
     let imageUrl = null;
+    
+    /**
+     * --- GALLERY MERGE LOGIC ---
+     * 1. Get the list of 'Existing photos' the admin wants to keep.
+     * 2. Identify the 'Newly uploaded' files.
+     * 3. Combine them and limit the total to 4 images.
+     */
     if (req.files && req.files.length > 0) {
-      // 1. Get existing gallery items we want to keep
       let existingToKeep = [];
       try {
         if (req.body.existing_gallery) {
@@ -221,23 +263,21 @@ router.put('/providers/:id', authenticateToken, verifyAdmin, uploadImages, async
         }
       } catch (e) { console.error('Error parsing existing_gallery', e); }
 
-      // 2. Identify newly uploaded files
       const newFiles = req.files.filter(f => f.fieldname === 'images');
       const newPaths = newFiles.map(f => `/uploads/${f.filename}`);
 
-      // 3. Merge: If no explicit mapping, just append. 
-      // But for our 4-slot system, we'll favor the order: existing first, then new
+      // Combine existing first, then new ones
       const mergedGallery = [...existingToKeep, ...newPaths].slice(0, 4);
 
       if (mergedGallery.length > 0) {
-        imageUrl = mergedGallery[0];
+        imageUrl = mergedGallery[0]; // First image is the "Banner"
         fields.push('image = ?');
         values.push(imageUrl);
         fields.push('gallery_images = ?');
         values.push(JSON.stringify(mergedGallery));
       }
     } else if (req.body.existing_gallery) {
-      // Case where no new files were uploaded but slots might have been rearranged or removed
+      // If no new files, just re-save the rearranged gallery order
       try {
         const existingToKeep = JSON.parse(req.body.existing_gallery);
         if (existingToKeep.length > 0) {
@@ -272,13 +312,18 @@ router.put('/providers/:id', authenticateToken, verifyAdmin, uploadImages, async
   }
 });
 
-// ─── PATCH provider status (Activate / Deactivate - admin only) ─────────
+/**
+ * @route PATCH /api/providers/:id/status
+ * @desc Admin only: Toggle a business Between "Active" and "Deactivated".
+ *       When deactivating, we also restrict the login access of the associated 
+ *       Provider user for security.
+ */
 router.patch('/providers/:id/status', authenticateToken, verifyAdmin, async (req, res) => {
   try {
     const { is_active } = req.body;
     const pool = getPool();
 
-    // Fetch user_id for role syncing
+    // Find the real user account linked to this business
     const [pRows] = await pool.query('SELECT user_id FROM providers WHERE id = ?', [req.params.id]);
     let targetUserId = null;
 
@@ -288,22 +333,20 @@ router.patch('/providers/:id/status', authenticateToken, verifyAdmin, async (req
       return res.status(404).json({ message: 'Provider not found' });
     }
 
-    // Toggle active status
-    const [result] = await pool.query('UPDATE providers SET is_active = ? WHERE id = ?', [is_active ? 1 : 0, req.params.id]);
+    // 1. Update business listing status
+    await pool.query('UPDATE providers SET is_active = ? WHERE id = ?', [is_active ? 1 : 0, req.params.id]);
     
-    // Sync user role logically and send notification emails
+    // 2. Sync the user's role: If active, they are a 'provider'. If deactivated, they are 'restricted'.
     if (targetUserId) {
       const [uRows] = await pool.query('SELECT email, name FROM users WHERE id = ?', [targetUserId]);
       if (uRows.length > 0) {
          const user = uRows[0];
-         // If reactivating, give them provider role back. If deactivating, restrict login.
          await pool.query("UPDATE users SET role = ? WHERE id = ?", [is_active ? 'provider' : 'restricted', targetUserId]);
          
+         // If we are banning them, send an email alert
          if (!is_active) {
            const { sendProviderDeleted } = require('../services/emailService');
            await sendProviderDeleted(user.email, user.name);
-         } else {
-           // We could optionally inform them they are reactivated here
          }
       }
     }

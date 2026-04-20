@@ -1,3 +1,21 @@
+/**
+ * The Account Stewardship Hub (Admin User Management)
+ * 
+ * relative path: /src/pages/ManageUsers.jsx
+ * 
+ * This component provides a comprehensive view of the entity landscape in UniBook.
+ * It allows administrators to monitor account growth and exercise moderation 
+ * authority over the user population.
+ * 
+ * Design Principles:
+ * - Role-Based Visuals: Uses distinctive color tokens and icons to differentiate 
+ *   between standard clients, service providers, and administrators.
+ * - Non-Destructive Moderation: Status toggling (Suspend/Restore) allows for 
+ *   moderation without data loss, preserving the audit trail of past bookings.
+ * - Glanceable Metrics: Real-time active member count provides a snapshot of 
+ *   platform health directly in the management header.
+ */
+
 import { useState, useEffect, useCallback } from 'react';
 import Sidebar from '../components/Sidebar';
 import { useAdminTheme } from '../context/AdminThemeContext';
@@ -5,6 +23,11 @@ import { getUsers, updateUserStatus, updateUserRole } from '../services/adminSer
 import { Search, ShieldAlert, ShieldCheck, Ban, CheckCircle, UserX, UserCheck, Filter, AlertCircle, Building2 } from 'lucide-react';
 import AdminTopHeader from '../components/AdminTopHeader';
 
+/**
+ * ROLE_CONFIG
+ * Maps technical role strings to a rich UI configuration.
+ * Each role gets a dedicated visual "Identity" to ensure error-free moderation.
+ */
 const ROLE_CONFIG = {
   admin: { 
     color: 'bg-emerald-600', 
@@ -39,12 +62,17 @@ const ManageUsers = () => {
   const [roleFilter, setRoleFilter] = useState('All');
   const [toasts, setToasts] = useState([]);
 
+  // Internal notification engine for operation feedback
   const toast = (message, type = 'success') => {
     const id = Date.now();
     setToasts(t => [...t, { id, message, type }]);
     setTimeout(() => setToasts(t => t.filter(x => x.id !== id)), 4000);
   };
 
+  /**
+   * fetchUsers
+   * Pulls the master list of accounts from the backend service.
+   */
   const fetchUsers = useCallback(async () => {
     try {
       setLoading(true);
@@ -62,6 +90,11 @@ const ManageUsers = () => {
     fetchUsers(); 
   }, [fetchUsers]);
 
+  /**
+   * handleToggleStatus
+   * Orchestrates the suspension/restoration flow.
+   * This updates the global membership state and updates the UI reactively.
+   */
   const handleToggleStatus = async (user) => {
     try {
       const newStatus = !user.is_active;
@@ -73,6 +106,10 @@ const ManageUsers = () => {
     }
   };
 
+  /**
+   * Client-Side Filtering
+   * Multi-axis filtering logic that combines Search string and Role categorization.
+   */
   const filtered = (users || [])
     .filter(u => {
       const matchSearch = String(u.name || '').toLowerCase().includes(search.toLowerCase()) || 
@@ -97,6 +134,7 @@ const ManageUsers = () => {
         @keyframes fadeIn  { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
       `}</style>
 
+      {/* Ephemeral Alert Portal */}
       <div className="fixed top-6 right-6 z-[200] flex flex-col gap-3 pointer-events-none">
         {toasts.map(t => (
           <div key={t.id} className={`flex items-center gap-3 pl-4 pr-5 py-3 rounded-lg shadow-lg text-white text-sm font-bold pointer-events-auto
@@ -113,6 +151,7 @@ const ManageUsers = () => {
           title="User Accounts" 
           subtitle={`Manage system access and privileges for ${users.length} registered accounts.`} 
           metrics={
+            /* Active Membership Pulse: A real-time growth metric */
             <div className={`flex items-center gap-3 px-4 py-2 rounded-lg border transition-all ${isDark ? 'bg-slate-800/50 border-slate-700' : 'bg-white border-slate-200'}`}>
                <div className={`w-2 h-2 rounded-full ${isDark ? 'bg-emerald-400' : 'bg-emerald-500'} animate-pulse`} />
                <span className={`text-xs font-bold uppercase tracking-wider ${textSecondary}`}>Active Members:</span>
@@ -121,7 +160,7 @@ const ManageUsers = () => {
           }
         />
 
-        {/* Data Table Controls */}
+        {/* Search & Role Filtering Controls */}
         <div className={`p-4 rounded-t-xl border-b-0 transition-all ${cardBase} flex flex-col md:flex-row gap-4 mb-0`} style={{ animation: 'fadeIn 0.6s ease-out' }}>
           <div className="relative flex-1">
             <span className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors ${textMuted}`}>
@@ -154,7 +193,7 @@ const ManageUsers = () => {
           </div>
         </div>
 
-        {/* Data Table */}
+        {/* Master Account Table */}
         <div className={`overflow-x-auto rounded-b-xl border border-t-0 transition-all ${cardBase}`} style={{ animation: 'fadeIn 0.7s ease-out' }}>
           <table className="w-full text-left border-collapse">
             <thead>
@@ -168,9 +207,9 @@ const ManageUsers = () => {
             </thead>
             <tbody>
               {loading ? (
-                // Loading Skeletons
+                // Skeletons: Maintains visual layout stability during data fetches
                 Array.from({ length: 5 }).map((_, i) => (
-                  <tr key={i} className={`border-b ${borderCol}`}>
+                   <tr key={i} className={`border-b ${borderCol}`}>
                     <td className="px-6 py-4"><div className={`h-10 w-48 rounded-lg animate-pulse ${isDark ? 'bg-white/5' : 'bg-slate-200'}`} /></td>
                     <td className="px-6 py-4"><div className={`h-6 w-24 rounded-full animate-pulse ${isDark ? 'bg-white/5' : 'bg-slate-200'}`} /></td>
                     <td className="px-6 py-4"><div className={`h-6 w-20 rounded-full animate-pulse ${isDark ? 'bg-white/5' : 'bg-slate-200'}`} /></td>
@@ -214,6 +253,7 @@ const ManageUsers = () => {
                         {new Date(u.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right">
+                        {/* Status Toggle: Suspends or Restores account privileges */}
                         <button 
                           onClick={() => handleToggleStatus(u)}
                           className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all border outline-none cursor-pointer

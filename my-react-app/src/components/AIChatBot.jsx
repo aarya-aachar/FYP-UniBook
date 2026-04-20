@@ -1,3 +1,19 @@
+/**
+ * The Self-Service AI Companion (Chatbot)
+ * 
+ * relative path: /src/components/AIChatBot.jsx
+ * 
+ * This component provides an "Instant Help" experience for users. 
+ * It uses a lightweight NLP (Natural Language Processing) approach 
+ * based on keyword detection to answer common questions about 
+ * bookings, payments, and platform usage.
+ * 
+ * Design Features:
+ * - Intent-Based NLP: Matches user queries to pre-defined responses.
+ * - Typing Simulations: Delay timers to make the bot feel "Human".
+ * - Glassmorphism UI: High-end aesthetic with blurs and emerald accents.
+ */
+
 import { useState, useEffect, useRef } from 'react';
 import { MessageSquare, X, Send, User, Bot, Command, Clock } from 'lucide-react';
 import { CHATBOT_INTENTS, DEFAULT_RESPONSE } from '../utils/chatbotIntents';
@@ -11,20 +27,32 @@ const AIChatBot = ({ isDark }) => {
   const [isTyping, setIsTyping] = useState(false);
   const scrollRef = useRef(null);
 
+  /**
+   * --- AUTO-SCROLL LOGIC ---
+   * Whenever a new message is added, we automatically scroll to the 
+   * bottom so the user always sees the latest reply.
+   */
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages, isTyping]);
 
+  /**
+   * handleIntentDetection (The "Brain")
+   * 
+   * This function breaks down the user's sentence into "Tokens" (words).
+   * It then scans our intent dictionary to find which category has the 
+   * most matching keywords.
+   */
   const handleIntentDetection = (query) => {
     const tokens = query.toLowerCase().split(/\W+/);
     
-    // Simple Keyword Matching logic
     let matchedIntent = null;
     let maxMatches = 0;
 
     CHATBOT_INTENTS.forEach(intent => {
+      // Intersection count: how many bot-keywords did the user mention?
       const matchCount = intent.keywords.filter(keyword => tokens.includes(keyword)).length;
       if (matchCount > maxMatches) {
         maxMatches = matchCount;
@@ -32,6 +60,7 @@ const AIChatBot = ({ isDark }) => {
       }
     });
 
+    // Return the specific answer or a generic "I don't know" response
     return matchedIntent ? matchedIntent.response : DEFAULT_RESPONSE;
   };
 
@@ -42,10 +71,14 @@ const AIChatBot = ({ isDark }) => {
     const userMessage = input.trim();
     setInput("");
     
-    // Add user message
+    // Add user message to the UI
     setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
     
-    // Simulate Bot thinking
+    /**
+     * --- BOT TYPING DELAY ---
+     * We show a "Typing..." state for 800ms before replying. 
+     * This makes the interaction feel more natural and less robotic.
+     */
     setIsTyping(true);
     setTimeout(() => {
       const botResponse = handleIntentDetection(userMessage);
@@ -62,7 +95,10 @@ const AIChatBot = ({ isDark }) => {
 
   return (
     <div className="fixed bottom-6 right-6 z-[999] font-inter">
-      {/* Floating Toggle Button */}
+      {/* 
+          --- FLOATING ACTION BUTTON ---
+          Features a pulsing notification ring to catch the user's eye.
+      */}
       {!isOpen && (
         <button 
           onClick={() => setIsOpen(true)}
@@ -76,11 +112,11 @@ const AIChatBot = ({ isDark }) => {
         </button>
       )}
 
-      {/* Chat Window */}
+      {/* --- CHAT WINDOW --- */}
       {isOpen && (
         <div className={`w-[380px] h-[550px] rounded-3xl border flex flex-col overflow-hidden animate-in slide-in-from-bottom-8 slide-in-from-right-4 duration-500 ${bgCard}`}>
           
-          {/* Header */}
+          {/* Brand Header */}
           <div className="bg-emerald-600 p-5 flex items-center justify-between text-white">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center backdrop-blur-md">
@@ -99,7 +135,7 @@ const AIChatBot = ({ isDark }) => {
             </button>
           </div>
 
-          {/* Conversation Area */}
+          {/* Conversation Feed */}
           <div ref={scrollRef} className="flex-1 overflow-y-auto p-5 space-y-4 scroll-smooth">
             {messages.map((msg, idx) => (
               <div key={idx} className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'} animate-in fade-in slide-in-from-bottom-2`}>
@@ -113,6 +149,8 @@ const AIChatBot = ({ isDark }) => {
                 </div>
               </div>
             ))}
+            
+            {/* Animated Typing Indicator */}
             {isTyping && (
               <div className="flex flex-col items-start animate-in fade-in duration-300">
                 <div className="flex items-center gap-2 mb-1 opacity-40">
@@ -128,7 +166,7 @@ const AIChatBot = ({ isDark }) => {
             )}
           </div>
 
-          {/* Input Area */}
+          {/* Smart Input Bar */}
           <div className={`p-4 border-t ${isDark ? 'bg-slate-900/50' : 'bg-slate-50'}`}>
             <form onSubmit={handleSendMessage} className="relative flex items-center">
               <input 

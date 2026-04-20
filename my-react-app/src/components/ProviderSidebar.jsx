@@ -1,3 +1,19 @@
+/**
+ * The Provider Portal Command (Sidebar)
+ * 
+ * relative path: /src/components/ProviderSidebar.jsx
+ * 
+ * This is the dashboard navigator for our partners (Futsal owners, 
+ * Doctors, Salon managers). Since each provider belongs to a different 
+ * category, the sidebar dynamically adapts its branding to match 
+ * their industry.
+ * 
+ * Key Logic:
+ * - Industry Adaptation: Swaps icons based on category (Trophy for Sports, Stethoscope for Health).
+ * - Real-Time Support: Polls for unread messages from the platform admin.
+ * - Profile Sync: Listens for system-wide "profileUpdated" events to keep the sidebar name in sync.
+ */
+
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { 
@@ -8,6 +24,10 @@ import { logout, getProfile } from '../services/authService';
 import api from '../services/api';
 import { getUnreadChatCount } from '../services/chatService';
 
+/**
+ * --- INDUSTRY SYMBOLS ---
+ * Maps the provider's business category to the most relevant icon.
+ */
 const CATEGORY_ICONS = {
   'Restaurants': Utensils,
   'Futsal': Trophy,
@@ -28,6 +48,8 @@ const ProviderSidebar = ({ isDark = false }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const user = getProfile();
+
+  // State to handle collapsible behavior and real-time counts
   const [collapsed, setCollapsed] = useState(false);
   const [showLogout, setShowLogout] = useState(false);
   const [category, setCategory] = useState(user?.category || null);
@@ -35,22 +57,32 @@ const ProviderSidebar = ({ isDark = false }) => {
   const [unreadChatCount, setUnreadChatCount] = useState(0);
 
   useEffect(() => {
+    /** 
+     * fetchUnread
+     * Monitors the support channel for new messages from the platform admin.
+     */
     const fetchUnread = () => {
        getUnreadChatCount().then(count => setUnreadChatCount(count)).catch(() => {});
     };
     fetchUnread();
-    const interval = setInterval(fetchUnread, 5000);
+    const interval = setInterval(fetchUnread, 5000); // 5s poll for high responsiveness
     window.addEventListener('chat-read', fetchUnread);
-    // Fetch real provider profile to get the category (not available in JWT)
+
+    // Initial API call to get the specific provider category details
     api.get('/provider/profile')
       .then(res => setCategory(res.data?.category || null))
       .catch(() => {});
 
-    // Listen for name updates from the profile page
+    /**
+     * handleProfileUpdate
+     * If the user updates their name on the profile page, we catch the 
+     * event here and update the sidebar immediately without a page refresh.
+     */
     const handleProfileUpdate = (e) => {
       if (e.detail?.name) setDisplayName(e.detail.name);
     };
     window.addEventListener('profileUpdated', handleProfileUpdate);
+
     return () => {
        window.removeEventListener('profileUpdated', handleProfileUpdate);
        clearInterval(interval);
@@ -70,7 +102,7 @@ const ProviderSidebar = ({ isDark = false }) => {
       <aside className={`${collapsed ? 'w-20' : 'w-64'} h-screen sticky top-0 flex-shrink-0 flex flex-col transition-all duration-300 border-r
         ${isDark ? 'bg-slate-950 border-slate-800' : 'bg-white border-slate-100 shadow-sm'}`}>
         
-        {/* Header */}
+        {/* --- BRANDING & TOGGLE --- */}
         <div className={`flex items-center ${collapsed ? 'justify-center px-4' : 'justify-between px-6'} py-5 border-b ${isDark ? 'border-slate-800' : 'border-slate-100'}`}>
           {!collapsed && (
             <div className="flex items-center gap-2.5">
@@ -85,7 +117,7 @@ const ProviderSidebar = ({ isDark = false }) => {
           </button>
         </div>
 
-        {/* Provider Badge */}
+        {/* --- INDUSTRY IDENTIFICATION CARD --- */}
         {!collapsed && (
           <div className={`mx-4 mt-4 px-4 py-3 rounded-2xl border ${isDark ? 'bg-emerald-500/10 border-emerald-500/20' : 'bg-emerald-50 border-emerald-100'}`}>
             <div className="flex items-center gap-3">
@@ -100,7 +132,7 @@ const ProviderSidebar = ({ isDark = false }) => {
           </div>
         )}
 
-        {/* Navigation */}
+        {/* --- NAVIGATION LINKS --- */}
         <nav className="flex-1 px-3 py-4 space-y-1 mt-2 overflow-y-auto custom-scrollbar">
           {NAV_ITEMS.map(item => {
             const isActive = location.pathname === item.path;
@@ -113,6 +145,8 @@ const ProviderSidebar = ({ isDark = false }) => {
                     : (isDark ? 'text-slate-400 hover:bg-slate-800 hover:text-white' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-950')}`}>
                 <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? 'opacity-100' : 'opacity-70'}`} />
                 {!collapsed && <span>{item.label}</span>}
+                
+                {/* Chat Alert Dot */}
                 {!collapsed && item.label === 'Admin Support' && unreadChatCount > 0 && (
                   <span className="ml-auto flex items-center justify-center min-w-[20px] h-5 rounded-full bg-rose-500 text-[9px] font-black text-white flex-shrink-0 animate-in zoom-in border-2 border-slate-50 dark:border-slate-800">
                     {unreadChatCount}
@@ -123,7 +157,7 @@ const ProviderSidebar = ({ isDark = false }) => {
           })}
         </nav>
 
-        {/* Logout */}
+        {/* --- SESSION CONTROL --- */}
         <div className={`p-3 border-t ${isDark ? 'border-slate-800' : 'border-slate-100'}`}>
           <button
             onClick={() => setShowLogout(true)}
@@ -135,7 +169,7 @@ const ProviderSidebar = ({ isDark = false }) => {
         </div>
       </aside>
 
-      {/* Logout Modal */}
+      {/* --- LOGOUT CONFIRMATION MODAL --- */}
       {showLogout && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-950/60 backdrop-blur-sm">
           <div className={`p-8 rounded-3xl w-full max-w-xs shadow-2xl border ${isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-100'}`}>

@@ -1,3 +1,19 @@
+/**
+ * The Front Window (Landing Page)
+ * 
+ * relative path: /src/pages/Home.jsx
+ * 
+ * This is the primary marketing page for UniBook. It is designed to be 
+ * professional and "Enterprise-Grade," aiming to build trust with 
+ * both regular customers and business providers.
+ * 
+ * Major Sections:
+ * - Hero Area: High-impact copy and a dashboard mockup to show the product in action.
+ * - Social Proof: Trust marquee and customer reviews.
+ * - Ecosystem Grid: Categories (Futsal, Hospitals, etc.) to show versatility.
+ * - Business CTA: A dedicated section to recruit new service providers.
+ */
+
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import UserNavbar from '../components/UserNavbar';
@@ -22,12 +38,20 @@ const Home = () => {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
+    // Tracks scroll position to adjust navbar styles if needed
     const handleScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener('scroll', handleScroll);
+    
+    // SEO Optimization: Clear Page Title
     document.title = "UniBook | The Professional Operating System for Your Lifestyle";
+    
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  /**
+   * --- SERVICE CATEGORIES ---
+   * The 4 pillars of the UniBook ecosystem.
+   */
   const serviceCategories = [
     { name: "Restaurants", icon: Utensils, label: "Fine Dining & Cafes" },
     { name: "Futsal", icon: Trophy, label: "Sports & Arena Booking" },
@@ -41,12 +65,16 @@ const Home = () => {
     <div className="min-h-screen bg-white text-slate-900 font-inter selection:bg-emerald-100 selection:text-emerald-900">
       <UserNavbar />
       
-      {/* Hero Section - The Enterprise SaaS Aesthetic (NO ANIMATIONS) */}
+      {/* 
+          --- HERO SECTION --- 
+          Designed with a "SaaS" (Software as a Service) aesthetic. 
+          Uses plenty of white space and bold typography.
+      */}
       <section className="relative pt-32 pb-20 overflow-hidden bg-gradient-to-b from-slate-50 to-white">
         <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-16 lg:gap-24 items-center">
           
-          {/* Left Content */}
           <div className="text-left">
+            {/* The "Social Proof" Badge */}
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold uppercase tracking-widest mb-8 border border-emerald-100">
               <span className="flex h-2 w-2 rounded-full bg-emerald-500"></span>
               Join 5,000+ businesses automating their growth
@@ -70,27 +98,27 @@ const Home = () => {
               </button>
               <button 
                 onClick={() => navigate('/provider/register')} 
-                className="w-full sm:w-auto px-10 py-5 rounded-2xl bg-white text-slate-950 border-2 border-slate-100 font-bold text-lg hover:border-emerald-600 hover:text-emerald-600 transition-all flex items-center justify-center cursor-pointer"
+                className="w-full sm:w-auto px-10 py-5 rounded-2xl bg-white text-slate-900 border-2 border-slate-100 font-bold text-lg hover:border-emerald-600 hover:text-emerald-600 transition-all flex items-center justify-center cursor-pointer"
               >
                 Apply as Provider
               </button>
             </div>
           </div>
 
-          {/* Right Interface Mockup */}
+          {/* RIGHT SIDE: The Product Visualization */}
           <div className="relative">
              <div className="relative z-10 p-2 bg-gradient-to-br from-slate-200 to-slate-50 rounded-[2.5rem] shadow-[0_40px_100px_-20px_rgba(0,0,0,0.15)] overflow-hidden">
                 <img 
-                  src={heroDashboard} 
-                  alt="UniBook Dynamic Interface" 
-                  className="rounded-[2.2rem] w-full h-auto object-cover"
+                   src={heroDashboard} 
+                   alt="UniBook Dynamic Interface" 
+                   className="rounded-[2.2rem] w-full h-auto object-cover"
                 />
              </div>
           </div>
         </div>
       </section>
 
-      {/* Trust & Social Proof Marquee */}
+      {/* --- TRUST MARQUEE --- */}
       <section className="py-16 border-y border-slate-100 bg-white">
         <div className="max-w-7xl mx-auto px-6 text-center">
           <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.5em] mb-12">Empowering Local Ecosystems</p>
@@ -102,7 +130,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Real Reviews Marketplace: 3 Reviews */}
+      {/* --- USER REVIEWS --- */}
       <section className="py-32 bg-slate-50 px-6 overflow-hidden">
         <div className="max-w-7xl mx-auto">
            <p className="text-emerald-600 font-black text-[10px] uppercase tracking-[0.4em] mb-12 text-center">Validated by Industry Leaders</p>
@@ -120,7 +148,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Redesigned Category Grid: Corrected to 4 Categories with Icons */}
+      {/* --- CATEGORY EXPLORATION --- */}
       <section className="py-32 bg-white border-y border-slate-100 px-6">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-10 mb-20 px-4 text-center md:text-left">
@@ -153,7 +181,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* UniBook for Business: High-Impact Provider Section */}
+      {/* --- BUSINESS / PROVIDER SECTION --- */}
       <section id="business-section" className="py-20 px-6 mb-20">
          <div className="max-w-7xl mx-auto overflow-hidden rounded-[3rem] bg-slate-950 relative border border-slate-800/50">
             <div className="relative z-10 px-10 md:px-20 py-24 grid lg:grid-cols-2 gap-16 items-center text-center lg:text-left">
@@ -172,6 +200,7 @@ const Home = () => {
                   </button>
                </div>
                
+               {/* Visual Mockup for Admins */}
                <div className="relative hidden lg:block">
                   <div className="p-8 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-sm shadow-2xl">
                      <div className="space-y-6">
@@ -197,7 +226,7 @@ const Home = () => {
          </div>
       </section>
 
-      {/* Professional Footer */}
+      {/* --- FOOTER --- */}
       <footer className="pt-32 pb-12 bg-white border-t border-slate-100">
         <div className="max-w-7xl mx-auto px-6">
            <div className="grid lg:grid-cols-12 gap-20 mb-24">

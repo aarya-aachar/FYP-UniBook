@@ -1,3 +1,25 @@
+/**
+ * The Provider Onboarding Orchestrator (Registration)
+ * 
+ * relative path: /src/pages/ProviderRegister.jsx
+ * 
+ * This component manages the complex, multi-stage funnel for new service 
+ * providers entering the UniBook ecosystem. It balances user experience with 
+ * rigorous data collection requirements.
+ * 
+ * Technical Design:
+ * - Multi-Step State Machine: Uses a progressive disclosure pattern (Steps 0-2) 
+ *   to collect business category, operational metadata, and security credentials 
+ *   without overwhelming the user.
+ * - Multipart/Binary Handling: Orchestrates the transmission of multiple 
+ *   binary streams (Business Images + Identity Documents) using the FormData API.
+ * - Out-of-Band Verification: Implements a 6-digit OTP (One-Time Password) 
+ *   authentication phase to verify email ownership before the final 
+ *   moderation queue entry.
+ * - Categorical Token Mapping: Dynamically styles the UI based on the selected 
+ *   business type to provide a tailor-made onboarding feel.
+ */
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';

@@ -1,5 +1,18 @@
+/**
+ * Communication Hub (Email Service)
+ * 
+ * relative path: /src/services/emailService.js
+ * 
+ * This file is responsible for all outgoing communication with users. 
+ * We use Nodemailer with Gmail SMTP to send professionally branded HTML emails 
+ * for everything from account verification to appointment reminders.
+ * 
+ * Security: SMTP credentials are pulled from Environment Variables (process.env).
+ */
+
 const nodemailer = require('nodemailer');
 
+// --- SMTP CONFIGURATION ---
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
@@ -8,6 +21,10 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+/**
+ * sendEmail
+ * The base function that handles the heavy lifting of connecting to Gmail servers.
+ */
 const sendEmail = async (to, subject, html) => {
   try {
     const info = await transporter.sendMail({
@@ -19,10 +36,16 @@ const sendEmail = async (to, subject, html) => {
     console.log(`>>> [EMAIL] Sent to ${to}: ${subject}`);
     return info;
   } catch (err) {
+    // We log the error but don't crash the server (important for "fire-and-forget" calls)
     console.error(`>>> [EMAIL ERROR] Failed to send to ${to}:`, err.message);
   }
 };
 
+/**
+ * --- PROVIDER ONBOARDING TEMPLATES ---
+ */
+
+// Sent when an Admin approves a new business listing
 const sendProviderApproved = (email, name) => sendEmail(
   email,
   '🎉 Your UniBook Provider Account is Approved!',
@@ -51,6 +74,7 @@ const sendProviderApproved = (email, name) => sendEmail(
   `
 );
 
+// Sent when an Admin rejects a business application (includes the reason)
 const sendProviderRejected = (email, name, reason = '') => sendEmail(
   email,
   'UniBook Provider Application Update',
@@ -76,6 +100,7 @@ const sendProviderRejected = (email, name, reason = '') => sendEmail(
   `
 );
 
+// Auto-reply sent as soon as a provider submits their documents
 const sendProviderApplicationReceived = (email, name) => sendEmail(
   email,
   '📝 Application Received - UniBook',
@@ -101,6 +126,7 @@ const sendProviderApplicationReceived = (email, name) => sendEmail(
   `
 );
 
+// Sent if an Admin manually deactivates/removes a partner account
 const sendProviderDeleted = (email, name) => sendEmail(
   email,
   '⚠️ Account Restricted - UniBook',
@@ -126,6 +152,11 @@ const sendProviderDeleted = (email, name) => sendEmail(
   `
 );
 
+/**
+ * --- CLIENT & TRANSACTIONAL TEMPLATES ---
+ */
+
+// The automated 1-hour appointment reminder
 const sendBookingReminder = (email, name, providerName, time, date) => sendEmail(
   email,
   '⏰ Reminder: Your UniBook Appointment is in 1 Hour!',
@@ -164,6 +195,7 @@ const sendBookingReminder = (email, name, providerName, time, date) => sendEmail
   `
 );
 
+// A security alert sent as soon as a password reset is completed
 const sendPasswordResetAlert = (email, name) => sendEmail(
   email,
   '🔐 Security Alert: Your Password was Reset',

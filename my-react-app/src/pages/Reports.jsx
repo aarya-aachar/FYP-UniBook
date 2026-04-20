@@ -1,3 +1,19 @@
+/**
+ * The Digital Archives Hub (Admin Reports)
+ * 
+ * relative path: /src/pages/Reports.jsx
+ * 
+ * This component handles the high-fidelity data extraction requirements of 
+ * UniBook's administrative layer. It transforms backend indices into 
+ * professional, management-ready electronic documents.
+ * 
+ * Key Pillars:
+ * - Dynamic Dependency Management: Loads archival libraries only when needed.
+ * - Format Versatility: Supports CSV (for data analysis) and PDF (for auditing).
+ * - High-Fidelity Printing: Uses a dedicated off-screen blueprint for PDF generation 
+ *   to ensure consistent branding and layout.
+ */
+
 import { useState, useEffect } from "react";
 import Sidebar from "../components/Sidebar";
 import { useAdminTheme } from "../context/AdminThemeContext";
@@ -18,7 +34,11 @@ const Reports = () => {
   useEffect(() => {
     document.title = "Data Exports | Admin UniBook";
     
-    // 1. Dynamic Script Loader for html2pdf
+    /**
+     * Dynamic Script Loader
+     * Lazily loads the html2pdf library to optimize initial bundle size.
+     * The system stays lean until the user explicitly requests a PDF export.
+     */
     const scriptId = "html2pdf-cdn-script";
     if (!document.getElementById(scriptId)) {
       const script = document.createElement("script");
@@ -31,7 +51,7 @@ const Reports = () => {
       setLibReady(true);
     }
 
-    // 2. Fetch Initial Analytics check
+    // Initial analytics warm-up
     const init = async () => {
       try {
         await getFullReports();
@@ -44,6 +64,11 @@ const Reports = () => {
     init();
   }, []);
 
+  /**
+   * exportCSV (Data Science Path)
+   * Converts deep relational data into flat comma-separated values.
+   * Includes smart date-string normalization to ensure cross-platform consistency.
+   */
   const exportCSV = async (type) => {
     try {
       const data = await getExportData(type);
@@ -55,7 +80,7 @@ const Reports = () => {
       data.forEach(row => {
         csv += headers.map(h => {
           let val = row[h];
-          // Detect dates and format if found
+          // Smart Date Mapping: Normalizes ISO strings into readable local timestamps
           if ((h.toLowerCase().includes('date') || h.toLowerCase().includes('at')) && val && !isNaN(Date.parse(val))) {
             const d = new Date(val);
             val = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
@@ -75,6 +100,11 @@ const Reports = () => {
     }
   };
 
+  /**
+   * exportPDF (Auditing Path)
+   * Captures a high-density, off-screen visual blueprint and renders it 
+   * as a portable document. Optimized for landscape orientation.
+   */
   const exportPDF = async (type) => {
     if (!libReady || !window.html2pdf) {
       return alert("PDF Core is initializing. Please wait.");
@@ -88,6 +118,7 @@ const Reports = () => {
       setPrintType(type);
       setPrinting(true);
 
+      // Rendering Delay: Ensures the React DOM has painted the template before capture
       setTimeout(() => {
         const element = document.getElementById('report-to-print');
         const opt = {
@@ -161,6 +192,7 @@ const Reports = () => {
                 />
             </div>
 
+            {/* Archival Status Banner */}
             <div className={`backdrop-blur-xl border rounded-[3rem] p-10 text-center transition-all duration-500
               ${cardBase}`}>
                <div className={`w-16 h-16 mx-auto rounded-full flex items-center justify-center mb-6 ${isDark ? 'bg-emerald-500/10 text-emerald-400' : 'bg-emerald-50 text-emerald-600 shadow-sm'}`}>
@@ -176,6 +208,7 @@ const Reports = () => {
       </div>
 
       {printType && (
+        /* PDF Capture Blueprint: This hidden component ensures high-fidelity archival branding */
         <div style={{ position: 'absolute', top: '-10000px', left: '-10000px' }}>
           <div id="report-to-print" style={{ padding: '30px', width: '960px', fontFamily: 'Inter, system-ui, sans-serif', color: '#0f172a', boxSizing: 'border-box' }}>
              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: '2px solid #e2e8f0', paddingBottom: '30px', marginBottom: '40px' }}>
@@ -206,7 +239,7 @@ const Reports = () => {
                      <tr key={i} style={{ background: i % 2 === 0 ? '#ffffff' : '#f8fafc' }}>
                        {Object.keys(row).map((key, idx) => {
                          let val = row[key];
-                         // Format dates in PDF table as well
+                         // Internal Data Mapping: Format dates before physical render
                          if ((key.toLowerCase().includes('date') || key.toLowerCase().includes('at')) && val && !isNaN(Date.parse(val))) {
                            const d = new Date(val);
                            val = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;

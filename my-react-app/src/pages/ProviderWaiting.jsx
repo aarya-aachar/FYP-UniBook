@@ -1,3 +1,23 @@
+/**
+ * The Moderation Stewardship Hub (Waiting Area)
+ * 
+ * relative path: /src/pages/ProviderWaiting.jsx
+ * 
+ * This component serves as the "Holding Pattern" for newly registered service 
+ * providers. It bridges the gap between registration submission and 
+ * administrative activation.
+ * 
+ * UX Design Logic:
+ * - Transparency Ledger: Clearly delineates the 24-48 hour verification 
+ *   workflow to manage provider expectations and reduce support overhead.
+ * - Visual Feedback: Uses amber-toned "Under Review" tokens and floating 
+ *   animations to signify that the application is active but pending human 
+ *   intervention.
+ * - Non-Blocking Transitions: Provides clear egress paths for the provider 
+ *   to RETURN to the homepage or login, ensuring they aren't trapped in 
+ *   the pending state.
+ */
+
 import { useNavigate } from 'react-router-dom';
 import { Clock, Mail, CheckCircle, ArrowRight } from 'lucide-react';
 

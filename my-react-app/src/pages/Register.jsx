@@ -1,32 +1,58 @@
+/**
+ * The Onboarding Experience (Registration Page)
+ * 
+ * relative path: /src/pages/Register.jsx
+ * 
+ * This component handles the multi-stage process of creating a new 
+ * UniBook account. To ensure high user quality and security, it includes 
+ * an Email Verification (OTP) step.
+ * 
+ * Flow:
+ * 1. Data Collection: Gathers name, age, gender, and credentials.
+ * 2. OTP Challenge: Verification code sent to the platform for security.
+ * 3. Success Celebration: A visual "Welcome" state before redirecting to login.
+ */
+
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { User, Mail, Lock, ArrowRight, Phone, Calendar as CalendarIcon, Users as UsersIcon, ShieldCheck, RotateCcw, CheckCircle } from 'lucide-react';
 import api from '../services/api';
 
 const Register = () => {
-  const [step, setStep] = useState('form'); // 'form' | 'otp' | 'success'
+  /**
+   * --- STATE MANAGEMENT ---
+   * 'step' controls which "Screen" the user sees (form, otp, or success).
+   */
+  const [step, setStep] = useState('form'); 
   const [form, setForm] = useState({ name:'', email:'', password:'', confirm:'', age:'', gender:'', phone:'' });
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [resendCooldown, setResendCooldown] = useState(0);
-  const otpRefs = useRef([]);
+  const otpRefs = useRef([]); // References for auto-focusing OTP boxes
   const navigate = useNavigate();
 
   useEffect(() => {
     document.title = "Join UniBook | Create Your Account";
   }, []);
 
-  // Countdown timer for resend
+  // OTP Resend Timer: Prevents spamming the verification service
   useEffect(() => {
     if (resendCooldown <= 0) return;
     const timer = setTimeout(() => setResendCooldown(c => c - 1), 1000);
     return () => clearTimeout(timer);
   }, [resendCooldown]);
 
+  /**
+   * handleFormSubmit
+   * Triggers the "Send OTP" request. Checks for age requirements (18+)
+   * and password matching before proceeding.
+   */
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    
+    // Quick validation gates
     if (!form.name.trim() || !form.email.trim() || !form.password || !form.confirm) {
       return setError('Name, Email, and Password are compulsory fields.');
     }
@@ -40,6 +66,7 @@ const Register = () => {
         name: form.name, email: form.email, password: form.password,
         age: ageNum, gender: form.gender, phone: form.phone
       });
+      // Move to the next step
       setStep('otp');
       setResendCooldown(60);
       setTimeout(() => otpRefs.current[0]?.focus(), 100);
@@ -50,6 +77,11 @@ const Register = () => {
     }
   };
 
+  /**
+   * OTP Interaction Logic
+   * Manages the "Smart Input" behavior: auto-focusing the next box, 
+   * handling backspaces, and allowing pasting of the full 6-digit code.
+   */
   const handleOtpChange = (index, value) => {
     if (!/^\d*$/.test(value)) return;
     const newOtp = [...otp];
@@ -73,6 +105,11 @@ const Register = () => {
     }
   };
 
+  /**
+   * handleVerifyOtp
+   * Finalizes the account creation by confirming the code matches 
+   * the server's record.
+   */
   const handleVerifyOtp = async (e) => {
     e.preventDefault();
     setError('');
@@ -82,11 +119,11 @@ const Register = () => {
     try {
       setLoading(true);
       await api.post('/auth/verify-otp', { email: form.email, otp: code });
-      setStep('success');
+      setStep('success'); // User is verified!
       setTimeout(() => navigate('/login'), 2500);
     } catch (err) {
       setError(err.response?.data?.message || 'Invalid OTP. Please try again.');
-      setOtp(['', '', '', '', '', '']);
+      setOtp(['', '', '', '', '', '']); // Clear on fail
       setTimeout(() => otpRefs.current[0]?.focus(), 50);
     } finally {
       setLoading(false);
@@ -109,7 +146,10 @@ const Register = () => {
     }
   };
 
-  // ─── Left pane (shared) ───────────────────────────────────────────────
+  /**
+   * --- SHARED UI COMPONENT ---
+   * The Left Branding Pane remains consistent across steps.
+   */
   const LeftPane = () => (
     <div className="hidden md:flex md:w-1/2 lg:w-[40%] relative overflow-hidden bg-slate-900 border-r border-white/5">
       <img src="https://images.unsplash.com/photo-1563986768609-322da13575f3?q=80&w=1470&auto=format&fit=crop" alt="Time Efficiency" className="absolute inset-0 w-full h-full object-cover opacity-50 grayscale hover:grayscale-0 transition-all duration-1000" />
@@ -138,12 +178,12 @@ const Register = () => {
     </div>
   );
 
-  // ─── OTP Step ─────────────────────────────────────────────────────────
+  // --- STEP 2: OTP VERIFICATION UI ---
   if (step === 'otp') return (
     <div className="min-h-screen flex flex-col md:flex-row bg-[#020617] font-inter">
       <LeftPane />
       <div className="w-full md:w-1/2 lg:w-[60%] flex items-center justify-center p-8 md:p-16 bg-[#020617] relative overflow-y-auto">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full max-w-lg bg-emerald-600/5 blur-[120px] -z-0" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full max-lg bg-emerald-600/5 blur-[120px] -z-0" />
         <div className="w-full max-w-md relative z-10">
           <div className="text-center mb-10">
             <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto mb-5">
@@ -161,7 +201,7 @@ const Register = () => {
                 {otp.map((digit, i) => (
                   <input
                     key={i}
-                    ref={el => otpRefs.current[i] = el}
+                    ref={el => otpRefs.current[index] = el}
                     type="text"
                     inputMode="numeric"
                     maxLength={1}
@@ -201,19 +241,13 @@ const Register = () => {
                 {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Resend Code'}
               </button>
             </div>
-
-            <div className="text-center">
-              <button type="button" onClick={() => { setStep('form'); setError(''); setOtp(['','','','','','']); }} className="text-slate-500 text-xs hover:text-slate-300 transition-colors cursor-pointer">
-                ← Back to registration
-              </button>
-            </div>
           </form>
         </div>
       </div>
     </div>
   );
 
-  // ─── Success Step ─────────────────────────────────────────────────────
+  // --- STEP 3: SUCCESS CELEBRATION ---
   if (step === 'success') return (
     <div className="min-h-screen flex items-center justify-center font-inter user-panel-bg">
       <div className="absolute inset-0 bg-slate-950/40 backdrop-blur-[2px]" />
@@ -238,28 +272,22 @@ const Register = () => {
     </div>
   );
 
-  // ─── Registration Form Step ───────────────────────────────────────────
+  // --- STEP 1: INITIAL REGISTRATION FORM ---
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-[#020617] font-inter">
       <LeftPane />
 
       <div className="w-full md:w-1/2 lg:w-[60%] flex items-center justify-center p-8 md:p-16 bg-[#020617] relative overflow-y-auto">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full max-w-lg bg-emerald-600/5 blur-[120px] -z-0" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full max-lg bg-emerald-600/5 blur-[120px] -z-0" />
         
         <div className="w-full max-w-xl relative z-10 py-12">
-          <div className="mb-12 md:hidden">
-            <div className="flex items-center gap-2.5 mb-2">
-              <img src="/logo.png" alt="UniBook Logo" className="w-8 h-8 object-contain" />
-              <h2 className="text-lg font-black tracking-tighter text-white">UniBook<span className="text-emerald-600">.</span></h2>
-            </div>
-          </div>
-
           <div className="mb-10">
             <h1 className="text-3xl font-extrabold text-white tracking-tight mb-2">Create Account</h1>
             <p className="text-slate-400 font-medium text-sm">Join the premium multi-service booking ecosystem</p>
           </div>
 
           <form onSubmit={handleFormSubmit} className="space-y-4">
+            {/* Input Grid: Name & Email */}
             <div className="grid md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label className="text-[10px] font-black text-slate-500 ml-1 uppercase tracking-[0.2em]">Full Name *</label>
@@ -277,6 +305,7 @@ const Register = () => {
               </div>
             </div>
 
+            {/* Profile Details: Age, Gender, Phone */}
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <label className="text-[10px] font-black text-slate-500 ml-1 uppercase tracking-[0.2em]">Age (18+) *</label>
@@ -306,6 +335,7 @@ const Register = () => {
               </div>
             </div>
 
+            {/* Credentials Logic */}
             <div className="grid md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label className="text-[10px] font-black text-slate-500 ml-1 uppercase tracking-[0.2em]">Password *</label>

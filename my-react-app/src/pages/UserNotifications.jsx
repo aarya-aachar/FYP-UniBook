@@ -1,3 +1,27 @@
+/**
+ * The Systemic Event Ledger (User Notifications)
+ * 
+ * relative path: /src/pages/UserNotifications.jsx
+ * 
+ * This component centralizes all platform-originated events relevant to 
+ * the client, providing a real-time audit trail of bookings, security 
+ * updates, and administrative announcements.
+ * 
+ * Technical Design:
+ * - Semantic Icon Mapping: Orchestrates a lookup table (ICON_MAP) to 
+ *   visually categorize raw backend payloads into high-fidelity status 
+ *   indicators (e.g., Rose for Cancellations, Emerald for Confirmations).
+ * - Temporal Logic: Implements a custom time-difference algorithm to 
+ *   provide relative "humanized" timestamps (e.g., "5m ago") for immediate 
+ *   context.
+ * - Secure State Mutators: Provides granular control over the notification 
+ *   lifecycle, allowing for individual read-receipts, bulk dismissals, 
+ *   and permanent record deletion.
+ * - Reactive UI Transitions: Uses custom CSS keyframes and glassmorphic 
+ *   containers to ensure the notification feed feels integrated into 
+ *   the wider ecosystem branding.
+ */
+
 import { useState, useEffect, useCallback } from 'react';
 import UserNavbar from '../components/UserNavbar';
 import { useUserTheme } from '../context/UserThemeContext';

@@ -1,3 +1,22 @@
+/**
+ * The Security Governance Hub (Admin Profile)
+ * 
+ * relative path: /src/pages/AdminProfile.jsx
+ * 
+ * This component oversees the personal security and operational preferences 
+ * of the system administrator. It ensures that the highest level of system 
+ * access remains secure through robust credential management.
+ * 
+ * Technical Focus:
+ * - Security Protocols: Manages the authentication state and orchestrates 
+ *   password rotation workflows with mandatory multi-field verification.
+ * - Interface Calibration: Serves as the central state-manager for the 
+ *   system-wide theme context (AdminThemeContext), allowing for high-contrast 
+ *   dark mode and accessibility toggles.
+ * - Profile Persistence: Synchronizes administrative metadata and binary 
+ *   avatars with the core authentication service.
+ */
+
 import { useState, useEffect, useRef } from "react";
 import Sidebar from "../components/Sidebar";
 import axios from "axios";

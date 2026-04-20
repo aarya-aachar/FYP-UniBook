@@ -1,3 +1,22 @@
+/**
+ * The User's Timeline (Appointment Browser)
+ * 
+ * relative path: /src/pages/ViewAppointments.jsx
+ * 
+ * This component provides a focused view of the user's booking history. 
+ * Its primary goal is to take raw, individual slot data and present it 
+ * as cohesive "Sessions".
+ * 
+ * Technical Highlights:
+ * - Session Merging: Many systems show individual 1-hour slots as separate cards. 
+ *   We implement a grouping algorithm that finds consecutive hours for the 
+ *   same provider and merges them into a single, clean range (e.g. 2:00 PM - 5:00 PM).
+ * - Multi-Axis Sorting: Orders data by date first, then by time, ensuring 
+ *   a logical chronological flow.
+ * - Semantic UI: Maps backend status strings (Pending/Confirmed/Cancelled) 
+ *   to specific color palettes and icons for rapid visual scanning.
+ */
+
 import { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import UserNavbar from '../components/UserNavbar';
@@ -15,6 +34,7 @@ const ViewAppointments = () => {
   const [toasts, setToasts] = useState([]);
   const [searchParams, setSearchParams] = useSearchParams();
 
+  // Simple ephemeral notification system
   const toast = (message, type = 'success') => {
     const id = Date.now();
     setToasts(t => [...t, { id, message, type }]);
@@ -26,12 +46,22 @@ const ViewAppointments = () => {
     fetchBookings();
   }, []);
 
+  /**
+   * fetchBookings
+   * Pulls the user's master list and applies the "Session Merging" algorithm.
+   */
   const fetchBookings = async () => {
     try {
       setLoading(true);
       const data = await getUserBookings();
       
-      // Grouping Logic for Consecutive Slots
+      /**
+       * --- SESSION MERGING ALGORITHM ---
+       * We first sort every single booking chronologically. 
+       * Then, we loop through and check if the current slot is 
+       * IMMEDIATELY after the last one of the same provider and date.
+       * If yes, we append the time to the existing "Session" card.
+       */
       const grouped = [];
       const sorted = [...data].sort((a, b) => {
         const dateDiff = new Date(a.booking_date) - new Date(b.booking_date);
@@ -42,13 +72,15 @@ const ViewAppointments = () => {
       sorted.forEach(booking => {
         const last = grouped[grouped.length - 1];
         
+        // Logical Gate: Match Provider, Date, and Status
         if (last && 
             last.provider_id === booking.provider_id && 
             last.booking_date === booking.booking_date && 
             last.status === booking.status) {
           
+          // Check if this slot is exactly 1 hour after the end of the previous one
           const lastTime = new Date(`2000-01-01T${last.times[last.times.length - 1]}`);
-          lastTime.setMinutes(lastTime.getMinutes() + 60); // Use 60 now
+          lastTime.setMinutes(lastTime.getMinutes() + 60); 
           const lastEndTimeStr = lastTime.toTimeString().substring(0, 5);
           
           if (lastEndTimeStr === booking.booking_time.substring(0, 5)) {
@@ -58,6 +90,7 @@ const ViewAppointments = () => {
           }
         }
         
+        // If not consecutive, it's a new separate session
         grouped.push({
           ...booking,
           times: [booking.booking_time],
@@ -74,8 +107,10 @@ const ViewAppointments = () => {
     }
   };
 
-
-
+  /**
+   * getStatusConfig
+   * Maps backend statuses to semantic UI tokens.
+   */
   const getStatusConfig = (status) => {
     const s = status?.toLowerCase();
     switch(s) {
@@ -121,6 +156,7 @@ const ViewAppointments = () => {
           .slide-up { animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         `}</style>
 
+        {/* Global Toast Notification Portal */}
         <div className="fixed top-6 right-6 z-[200] flex flex-col gap-3 pointer-events-none">
           {toasts.map(t => (
             <div key={t.id} className={`flex items-center gap-3 px-5 py-4 rounded-xl shadow-lg text-white text-sm font-medium pointer-events-auto
@@ -148,6 +184,7 @@ const ViewAppointments = () => {
 
           <div className="space-y-4 pb-12">
             {loading ? (
+               // Ghost/Skeleton loading state for high perceived performance
                <div className="flex flex-col gap-4">
                  {[1,2,3].map(i => (
                    <div key={i} className={`h-28 rounded-2xl animate-pulse border transition-all ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-slate-100 border-slate-200'}`} />
@@ -156,7 +193,7 @@ const ViewAppointments = () => {
              ) : appointments.filter(a => a.status === 'confirmed').length === 0 ? (
                <div className={`text-center py-20 rounded-2xl border border-dashed transition-all ${isDark ? 'bg-slate-800/50 border-slate-600' : 'bg-slate-50 border-slate-300'}`}>
                  <div className={`w-16 h-16 rounded-xl flex items-center justify-center mx-auto mb-4 transition-all ${isDark ? 'bg-slate-700 text-slate-500' : 'bg-slate-200 text-slate-400'}`}>
-                    <CalendarX className="w-8 h-8" />
+                     <CalendarX className="w-8 h-8" />
                  </div>
                  <h3 className={`text-xl font-semibold transition-colors ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>No confirmed appointments</h3>
                  <p className={`mt-1 text-sm transition-colors ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>
@@ -177,8 +214,9 @@ const ViewAppointments = () => {
                   </div>
                   <div className="min-w-0">
                     <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-2">
-                      <h3 className={`text-lg font-bold truncate transition-colors ${isDark ? 'text-white' : 'text-slate-900 group-hover:text-emerald-600'}`}>{a.provider_name}</h3>
-                      <span className={`text-xs font-semibold px-3 py-1 rounded inline-flex items-center gap-1.5 whitespace-nowrap tracking-wide transition-all w-max border ${cfg.badge}`}>
+                       <h3 className={`text-lg font-bold truncate transition-colors ${isDark ? 'text-white' : 'text-slate-900 group-hover:text-emerald-600'}`}>{a.provider_name}</h3>
+                       {/* Status Badge: Provides immediate confirmation of the booking state */}
+                       <span className={`text-xs font-semibold px-3 py-1 rounded inline-flex items-center gap-1.5 whitespace-nowrap tracking-wide transition-all w-max border ${cfg.badge}`}>
                         {cfg.icon} <span className="uppercase">{a.status}</span>
                       </span>
                     </div>
@@ -190,6 +228,7 @@ const ViewAppointments = () => {
                       <div className="flex items-center gap-2">
                         <Clock className="w-4 h-4 opacity-70" /> 
                         <span className={`font-bold transition-colors ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>
+                           {/* Display the calculated range (e.g. 10:00 - 12:00) */}
                            {formatMultiSlotRange(a.times, 60)}
                         </span>
                       </div>

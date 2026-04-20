@@ -1,9 +1,29 @@
+/**
+ * The Service Gateway (Category Selection)
+ * 
+ * relative path: /src/pages/Services.jsx
+ * 
+ * This page is the "Hub" where users decide what type of service 
+ * they want to book. It presents a clean, icon-focused grid of 
+ * business categories.
+ * 
+ * Flow:
+ * 1. User picks an industry (Restaurant, Futsal, etc.).
+ * 2. The app encodes the choice and takes them to the Provider List.
+ * 3. Includes a quick link back to the Dashboard for active bookings.
+ */
+
 import { useNavigate, Link } from "react-router-dom";
 import UserNavbar from "../components/UserNavbar";
 import { useEffect } from "react";
 import { useUserTheme } from "../context/UserThemeContext";
 import { Utensils, Trophy, Hospital, Scissors, ArrowRight } from "lucide-react";
 
+/**
+ * --- INDUSTRY DATABASE ---
+ * We define the core service types here. Each has a description, 
+ * a professional icon, and specific hover colors.
+ */
 const services = [
   {
     name: "Restaurants",
@@ -55,6 +75,8 @@ const Services = () => {
 
       <main className="flex-1 overflow-y-auto px-6 md:px-10 py-12 relative transition-all duration-300">
         <div className="max-w-7xl mx-auto w-full pt-16 relative z-10">
+          
+          {/* Header Section */}
           <div className="mb-12">
             <div className="glass-header">
               <h1 className={`text-4xl font-bold mb-2 tracking-tight transition-colors ${isDark ? 'text-white' : 'text-slate-900'}`}>
@@ -66,12 +88,14 @@ const Services = () => {
             </div>
           </div>
 
+          {/* --- CATEGORY GRID --- */}
           <div className="grid sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-6">
             {services.map((service, i) => {
               const Icon = service.icon;
               return (
               <div
                 key={service.name}
+                // Redirect user to the provider sub-page for this specific industry
                 onClick={() => navigate(`/services/${encodeURIComponent(service.name)}`)}
                 className={`group cursor-pointer relative rounded-2xl p-6 transition-all duration-200 shadow-sm hover:-translate-y-[2px] hover:shadow-md border glass-card`}
               >
@@ -97,6 +121,7 @@ const Services = () => {
             )})}
           </div>
 
+          {/* User Dashboard Quick-Access Footer */}
           <div className={`mt-16 p-8 rounded-2xl border flex flex-col sm:flex-row items-center justify-between gap-6 transition-all duration-300
             ${isDark ? 'bg-slate-900 border-slate-800 shadow-2xl shadow-black/20' : 'bg-white border-slate-200 shadow-xl'}`}>
             <div>

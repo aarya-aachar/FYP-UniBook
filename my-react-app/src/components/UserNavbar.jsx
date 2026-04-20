@@ -1,3 +1,16 @@
+/**
+ * The Personalized Header (User Navbar)
+ * 
+ * relative path: /src/components/UserNavbar.jsx
+ * 
+ * This is the high-performance navigation bar used within the User Dashboards.
+ * It is much more complex than the standard Navbar because it handles:
+ * - Real-time Chat Counters (polling every 30s).
+ * - Dynamic Theme switching (Dark/Light).
+ * - Role-specific shortcuts (e.g. "My Bookings" for users, "Admin Dash" for admins).
+ * - Animated Profile Dropdowns.
+ */
+
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useUserTheme } from "../context/UserThemeContext";
@@ -22,23 +35,31 @@ const UserNavbar = () => {
   const isDark = userTheme === 'dark';
   const navigate = useNavigate();
   const location = useLocation();
+  
+  // State for UI interactions
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [unreadChatCount, setUnreadChatCount] = useState(0);
   const [user, setUser] = useState(getProfile());
 
   useEffect(() => {
-    // Initial fetch on mount if user exists
+    // 1. On mount, refresh the user's latest stats (photo, name, etc.)
     if (user) {
       fetchFullProfile().then(data => setUser(data)).catch(() => {});
       
+      /**
+       * --- REAL-TIME CHAT MONITORING ---
+       * We poll the server every 30 seconds to update the notification 
+       * badge on the "Chat with Admin" button.
+       */
       const updateChatCount = () => {
         getUnreadChatCount().then(count => setUnreadChatCount(count)).catch(() => {});
       };
       
       updateChatCount();
-      const interval = setInterval(updateChatCount, 30000); // Optimized polling (30s)
+      const interval = setInterval(updateChatCount, 30000); 
 
+      // Support for instant updates when a message is read in another tab
       window.addEventListener('chat-read', updateChatCount);
 
       return () => {
@@ -46,7 +67,7 @@ const UserNavbar = () => {
         window.removeEventListener('chat-read', updateChatCount);
       };
     }
-  }, []); // Run once on mount — empty deps prevents infinite re-render loop
+  }, []); 
 
   const proceedLogout = () => {
     logout();
@@ -57,6 +78,11 @@ const UserNavbar = () => {
 
   const isHomePage = location.pathname === '/';
 
+  /**
+   * --- NAVIGATION BUILDER ---
+   * We dynamically build the menu list based on whether the user 
+   * is an Admin or a regular Customer.
+   */
   let navItems = [];
   if (!isHomePage) {
     if (user?.role === 'admin') {
@@ -77,11 +103,15 @@ const UserNavbar = () => {
 
   return (
     <>
+      {/* 
+          Glassmorphism Navbar: 
+          Uses backdrop-filter for a premium "iPhone-style" transparent look.
+      */}
       <nav className={`fixed top-0 z-[100] w-full border-b transition-all duration-300 backdrop-blur-md
         ${isDark ? 'bg-slate-950/90 border-slate-800' : 'bg-white/90 border-slate-100 shadow-sm shadow-slate-200/20'}`}>
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           
-          {/* Branding */}
+          {/* Logo Section */}
           <div className="flex items-center gap-2.5 group cursor-pointer" onClick={() => navigate(user ? (user.role === 'admin' ? '/dashboard/admin' : '/dashboard') : '/')}>
             <img src="/logo.png" alt="UniBook Logo" className="w-8 h-8 object-contain" />
             <h2 className={`text-lg font-extrabold tracking-tighter transition-colors hidden sm:block ${isDark ? 'text-white' : 'text-slate-950'}`}>
@@ -89,7 +119,7 @@ const UserNavbar = () => {
             </h2>
           </div>
 
-          {/* Navigation - Centered for Professional feel */}
+          {/* Centered Navigation Menu */}
           <div className="flex items-center gap-1">
             {navItems.map((item) => {
               const isActive = location.pathname === item.path;
@@ -105,6 +135,8 @@ const UserNavbar = () => {
                 >
                   <Icon className={`w-3.5 h-3.5 ${isActive ? 'opacity-100' : 'opacity-70'}`} />
                   <span className="hidden lg:block">{item.label}</span>
+                  
+                  {/* Floating Notification Dot for Chat messages */}
                   {item.label === 'Chat with Admin' && unreadChatCount > 0 && (
                      <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[14px] h-3.5 px-1 rounded-full bg-rose-500 text-[8px] font-black text-white border border-white dark:border-slate-950 animate-bounce">
                         {unreadChatCount}
@@ -115,7 +147,7 @@ const UserNavbar = () => {
             })}
           </div>
 
-          {/* User Actions */}
+          {/* Right Side: Profile & Notifications */}
           <div className="relative flex items-center gap-4">
             {user && !isHomePage ? (
               <>
@@ -125,6 +157,7 @@ const UserNavbar = () => {
                   className={`flex items-center gap-3 p-1 rounded-full border transition-all cursor-pointer bg-transparent
                     ${isDark ? 'border-slate-800 hover:border-slate-700' : 'border-slate-100 hover:border-slate-200'}`}
                 >
+                  {/* User Avatar Circle */}
                   <div className="w-8 h-8 rounded-full border border-slate-200 overflow-hidden">
                     {user.profile_photo ? (
                       <img src={`http://localhost:4001${user.profile_photo}`} alt="User Avatar" className="w-full h-full object-cover" />
@@ -134,7 +167,7 @@ const UserNavbar = () => {
                   </div>
                 </button>
 
-
+                {/* --- CUSTOM DROPDOWN MENU --- */}
                 {dropdownOpen && (
                    <>
                      <div className="fixed inset-0 z-[110]" onClick={() => setDropdownOpen(false)} />
@@ -178,7 +211,7 @@ const UserNavbar = () => {
         </div>
       </nav>
 
-      {/* Logout Confirmation Modal - Sharpened for Professional feel */}
+      {/* --- LOGOUT CONFIRMATION MODAL --- */}
       {showLogoutConfirm && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-slate-950/60 backdrop-blur-sm animate-in fade-in transition-all">
           <div className={`p-8 rounded-3xl w-full max-w-xs shadow-2xl border transition-all animate-in zoom-in duration-200

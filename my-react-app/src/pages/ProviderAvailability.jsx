@@ -1,3 +1,21 @@
+/**
+ * The Availability Tracker (Capacity Monitoring)
+ * 
+ * relative path: /src/pages/ProviderAvailability.jsx
+ * 
+ * This is a critical business tool for service providers. it allows for 
+ * proactive management of time-slot density and real-time monitoring of 
+ * operational capacity.
+ * 
+ * Design Rationale:
+ * - Dynamic Slot Generation: Calculates available booking windows based on the 
+ *   provider's configured opening/closing hours.
+ * - Real-Time Conflict Detection: Cross-references the global booking ledger to 
+ *   calculate remaining capacity for any given hour.
+ * - Visual Density: Uses progress bars and color-coding (Emerald for Free, 
+ *   Rose for Full) to provide instant visual feedback on business load.
+ */
+
 import { useState, useEffect } from 'react';
 import ProviderSidebar from '../components/ProviderSidebar';
 import { useAdminTheme } from '../context/AdminThemeContext';
@@ -20,6 +38,11 @@ const ProviderAvailability = () => {
     fetchData();
   }, []);
 
+  /**
+   * fetchData
+   * Syncs the provider's configuration (hours/capacity) and the 
+   * current booking records.
+   */
   const fetchData = async () => {
     try {
       setLoading(true);
@@ -36,6 +59,11 @@ const ProviderAvailability = () => {
     }
   };
 
+  /**
+   * generateSlots
+   * The "Time Blueprint" of the business. It slices the operating day 
+   * into discrete 1-hour booking blocks.
+   */
   const generateSlots = () => {
     if (!profile) return [];
     let { opening_time, closing_time } = profile;
@@ -54,11 +82,15 @@ const ProviderAvailability = () => {
     return slots;
   };
 
+  /**
+   * getSlotDetails
+   * The "Capacity Engine". It calculates the real-time density of a specific 
+   * slot by filtering the booking ledger for the selected date and time.
+   */
   const getSlotDetails = (time) => {
     const capacity = profile?.capacity || 1;
-    // Filter bookings by date and time
+    // Density calculation: Filters out cancelled reservations
     const filled = bookings.filter(b => {
-      // Handle both plain "2026-04-11" and ISO "2026-04-11T00:00:00.000Z" formats
       const bDate = b.booking_date.includes('T') ? b.booking_date.split('T')[0] : b.booking_date;
       const bTime = (b.booking_time || '').substring(0, 5);
       return bDate === selectedDate && bTime === time && b.status !== 'cancelled';
@@ -85,7 +117,7 @@ const ProviderAvailability = () => {
           subtitle="Monitor filled slots and remaining capacity for any date."
         />
 
-        {/* Date Selector */}
+        {/* Temporal Navigation: Focus on specific operational dates */}
         <div className={`rounded-2xl border p-6 mb-8 flex flex-col md:flex-row md:items-center justify-between gap-6 ${cardBg}`}>
            <div className="flex items-center gap-4">
               <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${isDark ? 'bg-emerald-500/10 text-emerald-400' : 'bg-emerald-50 text-emerald-600'}`}>
@@ -110,6 +142,7 @@ const ProviderAvailability = () => {
         </div>
 
         {loading ? (
+             // Layout Skeletons: Maintains structural integrity during calculation
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[1,2,3,4,5,6].map(i => <div key={i} className={`h-40 rounded-3xl animate-pulse ${isDark ? 'bg-slate-800' : 'bg-slate-100'}`} />)}
           </div>
@@ -119,6 +152,7 @@ const ProviderAvailability = () => {
              <p className={`text-sm font-bold ${textSecondary}`}>No slots configured in service settings.</p>
           </div>
         ) : (
+          /* Slot Density Grid: Visualizes the operational load of the day */
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {slots.map(time => {
               const { filled, left, capacity, percentage } = getSlotDetails(time);
@@ -129,10 +163,10 @@ const ProviderAvailability = () => {
                    <div className="flex justify-between items-start mb-6">
                       <div className="flex flex-col gap-1">
                          <div className="flex items-center gap-2">
-                           <Clock className={`w-4 h-4 ${isDark ? 'text-slate-500' : 'text-slate-400'}`} />
-                           <span className={`text-sm font-black tracking-tight ${textPrimary}`}>
-                              {formatTimeRange(time, 60)}
-                           </span>
+                            <Clock className={`w-4 h-4 ${isDark ? 'text-slate-500' : 'text-slate-400'}`} />
+                            <span className={`text-sm font-black tracking-tight ${textPrimary}`}>
+                               {formatTimeRange(time, 60)}
+                            </span>
                          </div>
                          {isFull && <span className="text-[10px] font-black uppercase text-rose-500 tracking-widest">Fully Booked</span>}
                       </div>
@@ -158,7 +192,7 @@ const ProviderAvailability = () => {
                       </div>
                    </div>
 
-                   {/* Progress Bar */}
+                   {/* Load Progress Visualization */}
                    <div className={`h-2 w-full rounded-full overflow-hidden ${isDark ? 'bg-slate-800' : 'bg-slate-100'}`}>
                       <div 
                         className={`h-full transition-all duration-700 ${isFull ? 'bg-rose-500' : 'bg-emerald-500'}`}
@@ -171,7 +205,7 @@ const ProviderAvailability = () => {
           </div>
         )}
 
-        {/* Footer Info */}
+        {/* Operational Context: Educating the user on capacity logic */}
         <div className={`mt-10 p-6 rounded-3xl border border-dashed flex items-start gap-4 transition-all ${isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200 shadow-sm'}`}>
            <Info className="w-6 h-6 text-emerald-500 shrink-0 mt-0.5" />
            <div>

@@ -1,3 +1,24 @@
+/**
+ * The Identity Governance Hub (User Profile)
+ * 
+ * relative path: /src/pages/Profile.jsx
+ * 
+ * This component oversees the personal identity and interface preferences 
+ * of the standard client. It serves as the central authority for account 
+ * security and platform personalization.
+ * 
+ * Technical Design:
+ * - Distributed State Management: Synchronizes local form states with 
+ *   federated backend services for both identity metadata and binary 
+ *   profile avatars.
+ * - Reactive Interface Personalization: Manages the high-fidelity theme 
+ *   switching logic (UserThemeContext), allowing for dynamic recalibration 
+ *   of the entire UI's visual palette (Emerald-Light vs Obsidian-Dark).
+ * - Secure Authorization Workflows: Implements mandatory "Current Password" 
+ *   verification for all sensitive profile mutations to prevent 
+ *   unauthorized state changes.
+ */
+
 import { useState, useEffect, useRef } from "react";
 import UserNavbar from "../components/UserNavbar";
 import { fetchFullProfile, updateProfile, uploadProfilePhoto } from "../services/authService";

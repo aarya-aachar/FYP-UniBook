@@ -1,3 +1,21 @@
+/**
+ * The Business Configuration Hub (Service Settings)
+ * 
+ * relative path: /src/pages/ProviderServiceSettings.jsx
+ * 
+ * This component acts as the control panel for the provider's digital identity. 
+ * It allows for the calibration of critical operational variables that drive 
+ * the booking engine.
+ * 
+ * Technical Focus:
+ * - Hybrid Gallery Management: Handles both server-stored images and new 
+ *   client-side uploads in a unified "Preview" state.
+ * - Multipart Transaction: Orchestrates complex data transmission using FormData 
+ *   to handle a mix of text-based parameters and binary image blobs.
+ * - Operational Calibration: Manages business-critical fields (Capacity, Price, 
+ *   Hours) that directly impact real-time customer availability.
+ */
+
 import { useState, useEffect, useRef } from 'react';
 import ProviderSidebar from '../components/ProviderSidebar';
 import AdminTopHeader from '../components/AdminTopHeader';
@@ -12,12 +30,18 @@ const ProviderServiceSettings = () => {
   const [saving, setSaving]     = useState(false);
   const [success, setSuccess]   = useState(false);
   const [form, setForm]         = useState({});
-  const [images, setImages]     = useState([]); // Store as { file, preview }
-  const [existingImages, setExistingImages] = useState([]);
+  const [images, setImages]     = useState([]); // Local state for new file uploads
+  const [existingImages, setExistingImages] = useState([]); // Persistent server images
   const fileInputRef            = useRef(null);
 
   useEffect(() => {
     document.title = 'Service Settings | Provider Portal';
+    
+    /**
+     * fetchProfile
+     * Warm-up call to populate current business configurations and 
+     * parse existing gallery data.
+     */
     api.get('/provider/profile')
       .then(res => {
         setForm({
@@ -29,6 +53,7 @@ const ProviderServiceSettings = () => {
           capacity:      res.data.capacity || 1,
         });
         
+        // Gallery Parser: Normalizes different data formats (String vs Array)
         if (res.data.gallery_images) {
            try {
              const gallery = typeof res.data.gallery_images === 'string' 
@@ -41,13 +66,18 @@ const ProviderServiceSettings = () => {
              console.error("Gallery parse error:", e);
            }
         } else if (res.data.image) {
-           setExistingImages([res.data.image]);
+           setExistingImages([res.data.image]); // Fallback to single primary image
         }
       })
       .catch(err => console.error(err))
       .finally(() => setLoading(false));
   }, []);
 
+  /**
+   * handleImageChange
+   * Manages the "Soft-Limit" upload logic. Generates local URLs for 
+   * immediate UI feedback without server round-trips.
+   */
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
     const availableSlots = 4 - (existingImages.length + images.length);
@@ -65,16 +95,24 @@ const ProviderServiceSettings = () => {
   const removeExistingImage = (index) => setExistingImages(prev => prev.filter((_, i) => i !== index));
   const removeNewImage = (index) => setImages(prev => prev.filter((_, i) => i !== index));
 
+  /**
+   * handleSave
+   * The "Commit" operation. It synchronizes the current UI state with the 
+   * backend using a multipart/form-data request.
+   */
   const handleSave = async (e) => {
     e.preventDefault();
     try {
       setSaving(true);
       
       const formData = new FormData();
+      // 1. Append textual business metadata
       Object.keys(form).forEach(key => {
         formData.append(key, form[key]);
       });
+      // 2. Transmit the state of the existing gallery (for deletions)
       formData.append('existing_gallery', JSON.stringify(existingImages));
+      // 3. Append physical binary files for new updates
       images.forEach(img => {
         formData.append('images', img.file);
       });
@@ -95,7 +133,7 @@ const ProviderServiceSettings = () => {
       setSuccess(true);
       setTimeout(() => {
         setSuccess(false);
-        window.location.reload();
+        window.location.reload(); // Refresh to sync finalized server state
       }, 1500);
     } catch (err) {
       console.error(err);
@@ -110,6 +148,10 @@ const ProviderServiceSettings = () => {
   const inputCls      = `w-full px-4 py-3 rounded-xl border text-sm font-medium outline-none transition-all ${isDark ? 'bg-slate-800 border-slate-700 text-white focus:border-emerald-500' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10'}`;
   const labelCls      = `block text-xs font-black uppercase tracking-widest mb-2 ${isDark ? 'text-slate-400' : 'text-slate-500'}`;
 
+  /**
+   * renderImageThumbnail
+   * Helper for gallery visualization with interactive removal controls.
+   */
   const renderImageThumbnail = (src, onRemove) => (
     <div className="relative group rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 aspect-[4/3]">
       <img src={src} alt="Gallery" className="w-full h-full object-cover transition-transform group-hover:scale-105" />
@@ -139,7 +181,7 @@ const ProviderServiceSettings = () => {
           <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
             <form onSubmit={handleSave} className={`rounded-3xl border p-8 ${cardBg}`}>
               
-               {/* Gallery Section */}
+               {/* Visual Portfolio (Gallery) Section */}
                <div className="mb-8">
                 <label className={labelCls}>Service Gallery (Max 4)</label>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-3">
@@ -154,6 +196,7 @@ const ProviderServiceSettings = () => {
                     </div>
                   ))}
                   
+                  {/* Photo Uplift Target */}
                   {existingImages.length + images.length < 4 && (
                     <button 
                       type="button"
@@ -175,6 +218,7 @@ const ProviderServiceSettings = () => {
                 />
               </div>
 
+              {/* Business Parameter Controls */}
               <div className="space-y-6">
                 <div>
                   <label className={labelCls}><MapPin className="inline w-3 h-3 mr-1" />Address</label>

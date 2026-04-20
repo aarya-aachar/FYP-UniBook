@@ -1,3 +1,15 @@
+/**
+ * The Admin Command Center (Sidebar)
+ * 
+ * relative path: /src/components/Sidebar.jsx
+ * 
+ * This is the central navigation for the platform administrator. 
+ * Since the Admin needs to react quickly to new activity, it features:
+ * - High-frequency polling (every 5 seconds) for new reports/chats.
+ * - Multi-Badge support (separated counts for client chats vs provider chats).
+ * - Full Dark Mode integration for a focused "Command Suite" aesthetic.
+ */
+
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useAdminTheme } from '../context/AdminThemeContext';
@@ -32,9 +44,14 @@ const Sidebar = () => {
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   useEffect(() => {
+    // Refresh the admin profile data on mount
     fetchFullProfile().then(data => setAdminUser(data)).catch(() => {});
     
-    // Initial fetch and poll for unread notifications and chats
+    /**
+     * --- DASHBOARD COUNTERS ---
+     * Admin needs to know about new activity ASAP. 
+     * We poll every 5 seconds for unread counts.
+     */
     const updateCounts = () => {
       getUnreadCount().then(count => setUnreadCount(count)).catch(() => {});
       getUnreadChatCount('user').then(count => setUnreadUserChats(count)).catch(() => {});
@@ -42,9 +59,9 @@ const Sidebar = () => {
     };
     
     updateCounts();
-    const interval = setInterval(updateCounts, 5000); // Faster polling (5s)
+    const interval = setInterval(updateCounts, 5000); 
 
-    // Listen for instant sync event
+    // Listen for events to refresh counts instantly (e.g. read a message)
     window.addEventListener('chat-read', updateCounts);
 
     return () => {
@@ -59,6 +76,10 @@ const Sidebar = () => {
     navigate('/login');
   };
 
+  /**
+   * --- NAVIGATION ITEMS ---
+   * Ordered by administrative priority.
+   */
   const navItems = [
     { path: '/dashboard/admin', label: 'Overview', icon: LayoutDashboard },
     { path: '/dashboard/admin/providers', label: 'Providers', icon: Building2 },
@@ -77,12 +98,15 @@ const Sidebar = () => {
         @keyframes zoomIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
       `}</style>
       
-      {/* Sidebar */}
+      {/* 
+          Main Sidebar Wrapper:
+          Uses a sticky fixed height to stay present while the dashboard scrolls.
+      */}
       <div className={`w-72 min-h-screen p-6 flex flex-col justify-between sticky top-0 h-screen border-r z-[100] transition-colors duration-300 font-inter
         ${isDark ? 'bg-[#0f172a] border-slate-800' : 'bg-[#f8fafc] border-slate-200'}`}>
         
         <div>
-          {/* Branding */}
+          {/* Logo & Platform Name */}
           <div className="flex items-center gap-3 mb-10 px-2 cursor-pointer transition-opacity hover:opacity-80" onClick={() => navigate('/dashboard/admin')}>
             <div className="flex items-center justify-center">
               <img src="/logo.png" alt="UniBook Logo" className="w-10 h-10 object-contain" />
@@ -93,7 +117,7 @@ const Sidebar = () => {
             </div>
           </div>
 
-          {/* Navigation */}
+          {/* Navigation Links */}
           <nav className="space-y-1">
             {navItems.map((item) => {
               const isActive = location.pathname === item.path;
@@ -111,6 +135,8 @@ const Sidebar = () => {
                     <Icon className={`w-4 h-4 ${isActive ? (isDark ? 'text-emerald-400' : 'text-emerald-600') : ''}`} strokeWidth={isActive ? 2.5 : 2} />
                     <span>{item.label}</span>
                   </div>
+                  
+                  {/* Floating Notification Badges for Chats */}
                   {item.label === 'Client Chats' && unreadUserChats > 0 && (
                     <span className="flex items-center justify-center min-w-[20px] h-5 rounded-full bg-rose-500 text-[9px] font-black text-white border-2 border-white dark:border-slate-800 animate-in zoom-in flex-shrink-0">
                       {unreadUserChats}
@@ -127,7 +153,7 @@ const Sidebar = () => {
           </nav>
         </div>
 
-        {/* Footer actions */}
+        {/* Footer: Admin Session Logout */}
         <div className={`mt-auto pt-6 border-t ${isDark ? 'border-slate-800' : 'border-slate-200'}`}>
           <button
             onClick={() => setShowLogoutConfirm(true)}
@@ -142,7 +168,7 @@ const Sidebar = () => {
         </div>
       </div>
 
-      {/* Admin Logout Confirmation Modal */}
+      {/* --- ADMIN LOGOUT CONFIRMATION --- */}
       {showLogoutConfirm && (
         <div className="fixed inset-0 z-[1000] flex items-center justify-center p-6 bg-slate-950/80 backdrop-blur-md animate-in fade-in transition-all">
           <div className={`p-8 rounded-[2rem] w-full max-w-sm shadow-2xl border transition-all animate-[zoomIn_0.3s_ease-out]

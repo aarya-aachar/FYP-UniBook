@@ -1,10 +1,27 @@
+/**
+ * Appointment & Booking Routes
+ * 
+ * relative path: /api/bookings
+ * 
+ * This is the "Heart" of the system. It handles:
+ * - Checking if a specific time slot is free or taken.
+ * - Creating new appointments (handling single or multiple hour blocks).
+ * - Enforcing "Capacity" limits (e.g., if a hospital has 5 doctors, it can take 5 bookings per hour).
+ * - Categorizing bookings into "Upcoming" and "History" for user dashboards.
+ */
+
 const express = require('express');
 const { getPool } = require('../config/db');
 const { authenticateToken, verifyAdmin } = require('../middleware/authMiddleware');
 
 const router = express.Router();
 
-// Get booked times for a provider on a specific date (Availability Engine)
+/**
+ * @route GET /api/bookings/provider/:provider_id/date/:date
+ * @desc AVAILABILITY ENGINE:
+ *       Checks a provider's calendar for a specific date and returns how 
+ *       many people have already booked each hour.
+ */
 router.get('/bookings/provider/:provider_id/date/:date', authenticateToken, async (req, res) => {
   try {
     const { provider_id, date } = req.params;
@@ -15,7 +32,7 @@ router.get('/bookings/provider/:provider_id/date/:date', authenticateToken, asyn
       [provider_id, date]
     );
 
-    // Map to { 'HH:MM': count } for precise capacity checking
+    // Map the results into a clean object like { '09:00': 1, '10:00': 2 }
     const bookedData = {};
     bookings.forEach(b => {
       const slot = b.booking_time.substring(0, 5);
@@ -28,24 +45,30 @@ router.get('/bookings/provider/:provider_id/date/:date', authenticateToken, asyn
   }
 });
 
-// Create a new booking (Supporting multiple slots & Capacity)
+/**
+ * @route POST /api/bookings
+ * @desc THE BOOKING ENGINE:
+ *       Handles creating new appointments. It is "Capacity Aware" and 
+ *       prevents double-booking. It also supports booking multiple 
+ *       consecutive hours in one go.
+ */
 router.post('/bookings', authenticateToken, async (req, res) => {
   try {
     const { provider_id, booking_date, booking_time, status, notes } = req.body;
     const user_id = req.user.id;
     const pool = getPool();
 
-    // 1. Convert booking_time to array (it might be a single string from older clients)
+    // 1. We treat 'booking_time' as an array to support multi-hour matches (like Futsal)
     const times = Array.isArray(booking_time) ? booking_time : [booking_time];
     const bookingStatus = status || 'confirmed';
 
-    // 2. Fetch Provider Capacity
+    // 2. Look up the business capacity (e.g. how many slots per hour?)
     const [providers] = await pool.query("SELECT name, capacity FROM providers WHERE id = ?", [provider_id]);
     if (providers.length === 0) return res.status(404).json({ message: 'Provider not found' });
     const provider = providers[0];
     const capacity = provider.capacity || 1;
 
-    // 3. Validate Availability for ALL slots
+    // 3. SECURE CHECK: Ensure EVERY requested slot has at least one free space left
     const [existing] = await pool.query(
       "SELECT booking_time, COUNT(*) as count FROM bookings WHERE provider_id = ? AND booking_date = ? AND status = 'confirmed' AND booking_time IN (?) GROUP BY booking_time",
       [provider_id, booking_date, times]
@@ -55,15 +78,16 @@ router.post('/bookings', authenticateToken, async (req, res) => {
     existing.forEach(e => { counts[e.booking_time.substring(0, 5)] = e.count; });
 
     for (const t of times) {
-       const shortT = t.substring(0, 5);
-       if ((counts[shortT] || 0) >= capacity) {
-          return res.status(400).json({ message: `Slot ${shortT} is already full at ${capacity}/${capacity} capacity.` });
-       }
+      const shortT = t.substring(0, 5);
+      if ((counts[shortT] || 0) >= capacity) {
+        // If even ONE slot in the range is full, the whole booking fails
+        return res.status(400).json({ message: `Slot ${shortT} is already full at ${capacity}/${capacity} capacity.` });
+      }
     }
 
-    // 4. Create Bookings (One entry per slot/time)
+    // 4. Create the records. One row per hour slot in the database.
     const bookingIds = [];
-    const slotDuration = req.body.duration ? (req.body.duration / times.length) : 60; // Calculate per-slot duration
+    const slotDuration = req.body.duration ? (req.body.duration / times.length) : 60;
 
     for (const t of times) {
       const [result] = await pool.query(
@@ -75,7 +99,11 @@ router.post('/bookings', authenticateToken, async (req, res) => {
 
     const mainBookingId = bookingIds[0];
 
-    // --- NOTIFICATIONS ---
+    /**
+     * --- MULTI-PARTY NOTIFICATION CHAIN ---
+     * If the payment was successful (or skipped for testing), 
+     * we alert everyone involved.
+     */
     if (bookingStatus === 'confirmed') {
       try {
         const providerName = provider.name;
@@ -83,13 +111,13 @@ router.post('/bookings', authenticateToken, async (req, res) => {
         const timeStr = times.map(t => t.substring(0, 5)).join(', ');
         const userName = req.user.name || 'A Customer';
 
-        // 1. Notify User
+        // 1. Notify the User (Confirmation)
         await pool.query(
           'INSERT INTO notifications (user_id, type, title, message, metadata, booking_id) VALUES (?, ?, ?, ?, ?, ?)',
           [user_id, 'booking_confirmed', 'Booking Confirmed!', `Your booking for ${providerName} on ${dateStr} at ${timeStr} has been confirmed.`, JSON.stringify({ booking_id: mainBookingId }), mainBookingId]
         );
 
-        // 2. Notify Admins
+        // 2. Notify System Admins (Audit/Tracking)
         const [admins] = await pool.query("SELECT id FROM users WHERE role = 'admin'");
         for (const admin of admins) {
           await pool.query(
@@ -98,7 +126,7 @@ router.post('/bookings', authenticateToken, async (req, res) => {
           );
         }
 
-        // 3. Notify the Service Provider (if they have a portal account)
+        // 3. Notify the Service Provider (Business Alert)
         const [providerUser] = await pool.query("SELECT user_id FROM providers WHERE id = ?", [provider_id]);
         if (providerUser.length > 0 && providerUser[0].user_id) {
           await pool.query(
@@ -119,7 +147,11 @@ router.post('/bookings', authenticateToken, async (req, res) => {
   }
 });
 
-// Get bookings for the currently logged-in user
+/**
+ * @route GET /api/bookings/user
+ * @desc Used for the "My Bookings" page. 
+ *       Shows only future/upcoming appointments that have been confirmed.
+ */
 router.get('/bookings/user', authenticateToken, async (req, res) => {
   try {
     const user_id = req.user.id;
@@ -143,7 +175,11 @@ router.get('/bookings/user', authenticateToken, async (req, res) => {
   }
 });
 
-// Get user past/attended bookings for My Reports
+/**
+ * @route GET /api/bookings/user/reports
+ * @desc Used for the "My Reports" page. 
+ *       Shows historical appointments so the user can review them or export their history.
+ */
 router.get('/bookings/user/reports', authenticateToken, async (req, res) => {
   try {
     const user_id = req.user.id;
@@ -169,7 +205,10 @@ router.get('/bookings/user/reports', authenticateToken, async (req, res) => {
   }
 });
 
-// Get all bookings (Admin only)
+/**
+ * @route GET /api/bookings/admin
+ * @desc Admin only: See every appointment in the whole system for audit purposes.
+ */
 router.get('/bookings/admin', authenticateToken, verifyAdmin, async (req, res) => {
   try {
     const pool = getPool();
@@ -191,6 +230,5 @@ router.get('/bookings/admin', authenticateToken, verifyAdmin, async (req, res) =
   }
 });
 
-
-
 module.exports = router;
+;

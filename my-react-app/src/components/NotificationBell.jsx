@@ -1,9 +1,27 @@
+/**
+ * The Real-Time Alert Hub (Notification Bell)
+ * 
+ * relative path: /src/components/NotificationBell.jsx
+ * 
+ * This component is the eyes and ears of the user. It manages the 
+ * notification dropdown and the red badge count seen on the navbar.
+ * 
+ * Major Features:
+ * - Visual Categorization: Each alert type (booking, security, etc.) has its own icon/color.
+ * - Intelligent Routing: Clicking an alert takes the user to exactly where they need to be.
+ * - Live Sync: It polls the server every 30 seconds to keep the count fresh.
+ */
+
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Bell, Check, CheckCheck, Trash2, CalendarCheck, Building2, ShieldCheck, Camera, X, Clock, CheckCircle2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { getProfile } from '../services/authService';
 import { getNotifications, getUnreadCount, markAsRead, markAllAsRead, deleteNotification } from '../services/notificationService';
 
+/**
+ * --- ICON & COLOR DICTIONARY ---
+ * We map backend notification types to beautiful UI styles.
+ */
 const ICON_MAP = {
   booking_received: { icon: CalendarCheck, color: 'text-blue-500', bg: 'bg-blue-500/10' },
   new_booking: { icon: Building2, color: 'text-indigo-500', bg: 'bg-indigo-500/10' },
@@ -15,6 +33,7 @@ const ICON_MAP = {
   photo_updated: { icon: Camera, color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
 };
 
+// Formats timestamps into "2m ago" or "Yesterday"
 const timeAgo = (dateStr) => {
   const diff = (Date.now() - new Date(dateStr).getTime()) / 1000;
   if (diff < 60) return 'Just now';
@@ -30,6 +49,10 @@ const NotificationBell = ({ isDark = false }) => {
   const panelRef = useRef(null);
   const navigate = useNavigate();
 
+  /**
+   * refresh
+   * Pulls the absolute latest alerts and unread count from the API.
+   */
   const refresh = useCallback(async () => {
     try {
       const [notifs, count] = await Promise.all([getNotifications(), getUnreadCount()]);
@@ -40,11 +63,12 @@ const NotificationBell = ({ isDark = false }) => {
 
   useEffect(() => {
     refresh();
+    // Background polling: Keep the bell updated without page refreshes
     const interval = setInterval(refresh, 30000);
     return () => clearInterval(interval);
   }, [refresh]);
 
-  // Close on click outside
+  // UI Helper: Close the panel if the user clicks anywhere else on the screen
   useEffect(() => {
     const handler = (e) => {
       if (panelRef.current && !panelRef.current.contains(e.target)) {
@@ -70,11 +94,16 @@ const NotificationBell = ({ isDark = false }) => {
     refresh();
   };
 
+  /**
+   * handleNotifClick
+   * THE SMART REDIRECTER: 
+   * Figures out where to send the user based on their ROLE and the NOTIF TYPE.
+   */
   const handleNotifClick = async (n) => {
     const user = getProfile();
-    // Route logic
     let target = '';
 
+    // Logic to decide target URL
     if (n.type.startsWith('booking_') || n.type === 'new_booking') {
       if (user?.role === 'admin') target = '/dashboard/admin/bookings';
       else if (user?.role === 'provider') target = '/provider/bookings';
@@ -87,7 +116,7 @@ const NotificationBell = ({ isDark = false }) => {
       target = '/dashboard/admin/providers';
     }
 
-    // Mark as read immediately if not read
+    // Auto-mark as read on click
     if (!n.is_read) {
       await markAsRead(n.id);
       refresh();
@@ -101,7 +130,7 @@ const NotificationBell = ({ isDark = false }) => {
 
   return (
     <div className="relative" ref={panelRef}>
-      {/* Bell Button */}
+      {/* --- THE BELL BUTTON --- */}
       <button
         onClick={() => { setOpen(!open); if (!open) refresh(); }}
         className={`relative w-10 h-10 rounded-full flex items-center justify-center transition-all cursor-pointer border
@@ -111,18 +140,18 @@ const NotificationBell = ({ isDark = false }) => {
       >
         <Bell className="w-[18px] h-[18px]" />
         {unread > 0 && (
+          // The floating badge
           <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center px-1 shadow-sm animate-in zoom-in">
             {unread > 9 ? '9+' : unread}
           </span>
         )}
       </button>
 
-      {/* Dropdown Panel - Purely Absolute and Elevated */}
+      {/* --- THE NOTIFICATION PANEL --- */}
       {open && (
         <div className={`absolute right-0 top-12 w-[320px] sm:w-[380px] max-h-[480px] rounded-2xl shadow-2xl border overflow-hidden z-[999] animate-in fade-in duration-200
           ${isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'}`}>
           
-          {/* Header */}
           <div className={`flex items-center justify-between px-5 py-4 border-b ${isDark ? 'border-slate-800' : 'border-slate-100'}`}>
             <h3 className={`text-sm font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>Notifications</h3>
             {unread > 0 && (
@@ -137,19 +166,18 @@ const NotificationBell = ({ isDark = false }) => {
             )}
           </div>
 
-          {/* List */}
+          {/* THE SCROLLABLE LIST */}
           <div className="overflow-y-auto max-h-[380px] flex flex-col">
             {notifications.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 px-6">
                 <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-3 ${isDark ? 'bg-slate-800 text-slate-600' : 'bg-slate-100 text-slate-400'}`}>
-                  <Bell className="w-6 h-6" />
+                   <Bell className="w-6 h-6" />
                 </div>
                 <p className={`text-sm font-semibold ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>No notifications yet</p>
                 <p className={`text-xs mt-1 ${isDark ? 'text-slate-600' : 'text-slate-400'}`}>You're all caught up!</p>
               </div>
             ) : (
               <>
-                {/* View All Header Action - Now at top */}
                 <button 
                   onClick={() => { 
                     const user = getProfile();

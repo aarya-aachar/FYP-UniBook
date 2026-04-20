@@ -1,3 +1,23 @@
+/**
+ * The Professional Identity Governance (Provider Profile)
+ * 
+ * relative path: /src/pages/ProviderProfile.jsx
+ * 
+ * This component manages the dual-nature of a provider's digital presence: 
+ * their personal account security and their verified professional credentials.
+ * 
+ * Technical Design:
+ * - Distributed State Synchronization: Orchestrates parallel data fetching 
+ *   from both the authentication service (User metadata) and the provider 
+ *   service (Business credentials).
+ * - Verification Persistence: Displays high-fidelity read-only views of 
+ *   sensitive documents (PAN, Identity Documents) that were validated during 
+ *   onboarding to maintain platform integrity.
+ * - Reactive Branding: Serves as a configuration hub for the system-wide 
+ *   theme (AdminThemeContext), ensuring the dashboard environment matches 
+ *   the provider's professional preference.
+ */
+
 import { useState, useEffect, useRef } from 'react';
 import ProviderSidebar from '../components/ProviderSidebar';
 import AdminTopHeader from '../components/AdminTopHeader';

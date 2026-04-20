@@ -1,3 +1,25 @@
+/**
+ * The Infrastructure Security Hub (Account Recovery)
+ * 
+ * relative path: /src/pages/ForgotPassword.jsx
+ * 
+ * This component orchestrates the secure, multi-stage "Forgot Password" 
+ * workflow. It ensures that account access can be restored through verified 
+ * out-of-band communication channels.
+ * 
+ * Technical Design:
+ * - Multi-Phase State Machine: Manages a linear progression through four 
+ *   critical states: Identity Identification (Email), Out-of-Band 
+ *   Verification (OTP), Credential Resynchronization (Reset), and Success.
+ * - OTP Input Orchestration: Implements a managed array of refs to handle 
+ *   auto-focus and backspace deletion logic for a professional 6-digit 
+ *   verification experience.
+ * - Secure UI Guardrails: Includes real-time validation for password matching 
+ *   and email formatting to prevent aborted server transactions.
+ * - Glassmorphic Aesthetic: Uses high-contrast emerald tokens and 
+ *   motion-blurred backdrops for a high-trust security feel.
+ */
+
 import { useState, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Mail, Lock, ShieldCheck, ArrowRight, RotateCcw, CheckCircle } from 'lucide-react';

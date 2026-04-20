@@ -1,3 +1,22 @@
+/**
+ * The Operational Heartbeat (Provider Notifications)
+ * 
+ * relative path: /src/pages/ProviderNotifications.jsx
+ * 
+ * This component acts as the real-time operational monitor for the service 
+ * provider. It centralizes all mission-critical events, such as new revenue 
+ * opportunities (bookings) and schedule disruptions (cancellations).
+ * 
+ * Logic Overview:
+ * - Semantic Event Mapping: Categorizes system payloads into distinct functional 
+ *   groups (Booking, System, Alert) with unique visual signatures to facilitate 
+ *   rapid cognitive processing during busy business hours.
+ * - Temporal Tracking: Uses relative time-distance logic (date-fns) to provide 
+ *   providers with a clear sense of event recency.
+ * - State Synchronization: Ensures that read-receipts are pushed to the backend 
+ *   instantly to maintain a clean operational dashboard.
+ */
+
 import { useState, useEffect } from 'react';
 import ProviderSidebar from '../components/ProviderSidebar';
 import { useAdminTheme } from '../context/AdminThemeContext';

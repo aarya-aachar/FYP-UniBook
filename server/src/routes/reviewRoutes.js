@@ -1,15 +1,33 @@
+/**
+ * Community Feedback & Review Routes
+ * 
+ * relative path: /api/reviews
+ * 
+ * This file manages the "Trust System" of UniBook. 
+ * It allows customers to share their experiences and rate the quality 
+ * of services like Hospitals, Futsals, and Event Venues.
+ * 
+ * Key Logic:
+ * - Aggregate average star ratings for business profiles.
+ * - Display chronological user feedback with reviewer names.
+ * - Secure submission of new reviews linked to verifiable bookings.
+ */
+
 const express = require('express');
 const router = express.Router();
 const { getPool } = require('../config/db');
 const { authenticateToken } = require('../middleware/authMiddleware');
 
-// Get all reviews for a specific provider
+/**
+ * @route GET /api/reviews/provider/:providerId
+ * @desc Get the full feed of reviews for a business listing.
+ */
 router.get('/provider/:providerId', async (req, res) => {
   try {
     const { providerId } = req.params;
     const pool = getPool();
     
-    // Join with users to get the reviewer's name
+    // We join with the 'users' table so we can show "Aarya said..." instead of "User #12 said..."
     const [rows] = await pool.query(`
       SELECT r.*, u.name as user_name 
       FROM reviews r
@@ -25,7 +43,11 @@ router.get('/provider/:providerId', async (req, res) => {
   }
 });
 
-// Get average rating and total count for a provider
+/**
+ * @route GET /api/reviews/provider/:providerId/stats
+ * @desc Summary Stats Engine. 
+ *       Calculates the big star rating and total count seen on the search results.
+ */
 router.get('/provider/:providerId/stats', async (req, res) => {
   try {
     const { providerId } = req.params;
@@ -42,6 +64,7 @@ router.get('/provider/:providerId/stats', async (req, res) => {
     const stats = rows[0];
     res.json({
       total_reviews: stats.total_reviews || 0,
+       // Round the average to one decimal place (e.g. 4.3)
       average_rating: parseFloat(stats.average_rating || 0).toFixed(1)
     });
   } catch (error) {
@@ -50,12 +73,17 @@ router.get('/provider/:providerId/stats', async (req, res) => {
   }
 });
 
-// Submit a review (Simplified version)
+/**
+ * @route POST /api/reviews
+ * @desc POST-SERVICE FEEDBACK:
+ *       Allows a logged-in user to leave a comment and a star rating.
+ */
 router.post('/', authenticateToken, async (req, res) => {
   try {
     const { provider_id, rating, comment, booking_id } = req.body;
     const pool = getPool();
     
+    // Basic validation to prevent "Zero Star" or "6 Star" ratings
     if (!rating || rating < 1 || rating > 5) {
       return res.status(400).json({ message: 'Valid rating (1-5) is required.' });
     }
@@ -74,7 +102,5 @@ router.post('/', authenticateToken, async (req, res) => {
     res.status(500).json({ message: 'Internal Server Error' });
   }
 });
-
-
 
 module.exports = router;

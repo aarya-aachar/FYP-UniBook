@@ -1,3 +1,23 @@
+/**
+ * The Technical Support Hub (Provider-Admin Messaging)
+ * 
+ * relative path: /src/pages/ProviderChat.jsx
+ * 
+ * This component facilitates direct technical and operational coordination 
+ * between the service provider and the platform's administration team.
+ * 
+ * Technical Focus:
+ * - Rapid Polling Sync: Implements an 8-second polling cycle (accelerated 
+ *   compared to standard users) to ensure that time-sensitive business 
+ *   queries are handled with minimal latency.
+ * - Targeted Routing: Uses a special 'admin' alias logic in the backend to 
+ *   ensure messages are routed to the global administrative pool regardless 
+ *   of specific admin shift schedules.
+ * - Reactive "Snappy" Messaging: Employs an optimistic state management 
+ *   pattern to provide instant visual feedback during high-stakes business 
+ *   conversations.
+ */
+
 import { useState, useEffect, useRef } from 'react';
 import { Send, User, ShieldCheck, Clock, MessageSquareQuote } from 'lucide-react';
 import ProviderSidebar from '../components/ProviderSidebar';

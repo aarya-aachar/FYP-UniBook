@@ -1,11 +1,27 @@
+/**
+ * Multi-Factor Authentication Service (OTP)
+ * 
+ * relative path: /src/services/otpService.js
+ * 
+ * This file handles the "Security Gates" for registration and password resets.
+ * 
+ * How it works:
+ * 1. Generating a random 6-digit number.
+ * 2. Storing it in RAM (not DB) for 10 minutes.
+ * 3. Attaching "Pending Data" (like a user's signup info) to the code.
+ * 4. Validating the code and releasing the data to the next step.
+ */
+
 require('dotenv').config();
 const nodemailer = require('nodemailer');
 
-// In-memory OTP store: { email -> { otp, data, expiresAt } }
+/**
+ * --- IN-MEMORY VAULT ---
+ * We use a Map to store codes. This is faster than a DB and automatically 
+ * keeps sensitive temporary codes out of the permanent logs.
+ */
 const otpStore = new Map();
 
-// Shared transporter for all OTP-related emails
-// Created on demand to ensure process.env variables are loaded
 let transporter;
 
 function getTransporter() {
@@ -22,10 +38,10 @@ function getTransporter() {
 }
 
 /**
- * Generate a 6-digit OTP and store it with associated data
- * @param {string} email 
- * @param {object} data - Associated registration or reset data
- * @param {number} minutes - Expiration time in minutes
+ * createOTP
+ * Generates a fresh 100,000 - 999,999 range number.
+ * We can attach any 'data' (like user profile info) to the code so we 
+ * don't lose it while the user is checking their inbox.
  */
 function createOTP(email, data = {}, minutes = 10) {
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -35,24 +51,31 @@ function createOTP(email, data = {}, minutes = 10) {
 }
 
 /**
- * Verify an OTP for a given email
+ * verifyOTP
+ * The Guard. This checks if:
+ * 1. The email even has a code pending.
+ * 2. The code hasn't expired (over 10 mins).
+ * 3. The digits match exactly.
  */
 function verifyOTP(email, otp) {
   const record = otpStore.get(email);
   if (!record) return { valid: false, message: 'No pending request found. Please start over.' };
+  
   if (Date.now() > record.expiresAt) {
-    otpStore.delete(email);
+    otpStore.delete(email); // Clean up the expired trash
     return { valid: false, message: 'Code has expired. Please request a new one.' };
   }
+  
   if (record.otp !== otp) return { valid: false, message: 'Invalid code. Please try again.' };
   
-  // Valid OTP - clean up and return data
+  // SUCCESS: Remove from memory so it can't be used twice
   otpStore.delete(email);
   return { valid: true, data: record.data };
 }
 
 /**
- * Send the OTP email using a standard template
+ * sendOTPEmail
+ * Branded email delivery for the verification code.
  */
 async function sendOTPEmail(email, otp, title = 'Verify your email') {
   try {

@@ -1,34 +1,54 @@
+/**
+ * UniBook Database Configuration
+ * 
+ * This file manages the connection to the MySQL database.
+ * It also handles the "Auto-Migration" logic—meaning it automatically creates 
+ * tables and updates columns whenever the server starts up.
+ */
+
 require('dotenv').config();
 const mysql = require('mysql2/promise');
 
+// Database credentials pulled from the .env file with local fallback values
 const host = process.env.DB_HOST || '127.0.0.1';
 const user = process.env.DB_USER || 'root';
 const password = process.env.DB_PASSWORD || '';
 const database = process.env.DB_NAME || 'unibook';
 
-let pool;
+let pool; // This will hold our connection pool instance
 
+/**
+ * --- DATABASE INITIALIZATION ---
+ * This function is called by server.js at startup.
+ */
 async function initDB() {
   try {
-    // 1. Create a connection without database to ensure the DB exists
+    // 1. First, we connect to MySQL without a specific database 
+    // to ensure the 'unibook' database actually exists on the server.
     const connection = await mysql.createConnection({ host, user, password });
     await connection.query(`CREATE DATABASE IF NOT EXISTS \`${database}\`;`);
     await connection.end();
 
-    // 2. Initialize the connection pool pointing to the unibook database
+    // 2. Initialize the connection pool. 
+    // Using a pool is better for performance as it reuses existing connections.
     pool = mysql.createPool({
       host,
       user,
       password,
       database,
       waitForConnections: true,
-      connectionLimit: 10,
+      connectionLimit: 10, // Allows up to 10 simultaneous database queries
       queueLimit: 0
     });
 
     console.log(`Connected to MySQL database: ${database}`);
 
-    // 3. Create Tables
+    /**
+     * --- SCHEMA DEFINITIONS ---
+     * Defining the structure of our tables if they don't exist yet.
+     */
+
+    // Users table: Handles authentication for all roles
     const createUsers = `
       CREATE TABLE IF NOT EXISTS users (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -45,6 +65,7 @@ async function initDB() {
       )
     `;
 
+    // Providers table: Stores business details for verified service providers
     const createProviders = `
       CREATE TABLE IF NOT EXISTS providers (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -66,6 +87,7 @@ async function initDB() {
       )
     `;
 
+    // Provider Applications: Temporary storage for businesses waiting for Admin approval
     const createProviderApplications = `
       CREATE TABLE IF NOT EXISTS provider_applications (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -88,8 +110,7 @@ async function initDB() {
       )
     `;
 
-
-
+    // Bookings table: Links Users and Providers with specific time slots
     const createBookings = `
       CREATE TABLE IF NOT EXISTS bookings (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -109,6 +130,7 @@ async function initDB() {
       )
     `;
 
+    // Reviews table: Handles feedback left by users after a service
     const createReviews = `
       CREATE TABLE IF NOT EXISTS reviews (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -124,6 +146,7 @@ async function initDB() {
       )
     `;
 
+    // Notifications table: Stores alerts for low-priority events (e.g. "Booking Confirmed")
     const createNotifications = `
       CREATE TABLE IF NOT EXISTS notifications (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -138,6 +161,7 @@ async function initDB() {
       )
     `;
 
+    // Messages table: Handles direct communication between users/providers/admins
     const createMessages = `
       CREATE TABLE IF NOT EXISTS messages (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -152,6 +176,7 @@ async function initDB() {
       )
     `;
 
+    // Run all table creation queries sequentially
     await pool.query(createUsers);
     await pool.query(createProviders);
     await pool.query(createProviderApplications);
@@ -160,9 +185,13 @@ async function initDB() {
     await pool.query(createNotifications);
     await pool.query(createMessages);
 
-    // One-time column check for existing systems
+    /**
+     * --- SCHEMA MIGRATIONS & UPDATES ---
+     * This logic checks if the existing tables have the correct columns. 
+     * It allows us to add new features without losing existing data.
+     */
     try {
-      // Adding columns individually to handle cases where some might exist and others don't
+      // 1. Column updates for the User profile
       const cols = await pool.query("SHOW COLUMNS FROM users");
       const existingCols = cols[0].map(c => c.Field);
 
@@ -179,14 +208,14 @@ async function initDB() {
         await pool.query("ALTER TABLE users ADD COLUMN phone VARCHAR(20) AFTER gender");
       }
 
-      // Check notifications table for metadata column
+      // 2. Ensuring the notification metadata column exists for JSON data
       const notifCols = await pool.query("SHOW COLUMNS FROM notifications");
       const existingNotifCols = notifCols[0].map(c => c.Field);
       if (!existingNotifCols.includes('metadata')) {
         await pool.query("ALTER TABLE notifications ADD COLUMN metadata JSON AFTER is_read");
       }
 
-      // Check bookings table for payment columns
+      // 3. Adding Payment-related columns to the Bookings table
       const bookingCols = await pool.query("SHOW COLUMNS FROM bookings");
       const existingBookingCols = bookingCols[0].map(c => c.Field);
       if (!existingBookingCols.includes('payment_status')) {
@@ -198,13 +227,17 @@ async function initDB() {
       if (!existingBookingCols.includes('paid_amount')) {
         await pool.query("ALTER TABLE bookings ADD COLUMN paid_amount DECIMAL(10,2) DEFAULT 0.00 AFTER transaction_uuid");
       }
-      // CLEANUP: Drop unused service architecture
+
+      /**
+       * --- CLEANUP LOGIC ---
+       * Removing old columns or tables that are no longer used in the new architecture.
+       */
       try {
         const bookingsFullCols = await pool.query("SHOW COLUMNS FROM bookings");
         const hasServiceId = bookingsFullCols[0].some(c => c.Field === 'service_id');
         if (hasServiceId) {
           console.log(">>> [CLEANUP] Dropping unused service_id column...");
-          // Drop FK first (it might miss in some environments, so we try-catch individually)
+          // Drop FK first (it might fail if the constraint name is different, hence the try-catch)
           try { await pool.query("ALTER TABLE bookings DROP FOREIGN KEY fk_booking_service"); } catch(e) {}
           try { await pool.query("ALTER TABLE bookings DROP COLUMN service_id"); } catch(e) {}
         }
@@ -213,19 +246,18 @@ async function initDB() {
         console.log('Cleanup migration issues (non-fatal):', cleanupErr.message);
       }
 
-      // Check for duration column and ensure 60min default
+      // Ensure booking duration exists and defaults to 60 minutes
       try {
         const checkCols = await pool.query("SHOW COLUMNS FROM bookings");
         const existing = checkCols[0].map(c => c.Field);
         if (!existing.includes('duration')) {
            await pool.query("ALTER TABLE bookings ADD COLUMN duration INT DEFAULT 60 AFTER paid_amount");
         } else {
-           // Update existing 30s to 60s as requested by user
+           // Standardize all existing 30min slots to 60min as per project requirement
            await pool.query("UPDATE bookings SET duration = 60 WHERE duration = 30");
            await pool.query("ALTER TABLE bookings MODIFY COLUMN duration INT DEFAULT 60");
         }
 
-        // Cleanup: Drop redundant duration_minutes if it exists
         if (existing.includes('duration_minutes')) {
           console.log(">>> [CLEANUP] Dropping redundant duration_minutes column...");
           await pool.query("ALTER TABLE bookings DROP COLUMN duration_minutes");
@@ -234,7 +266,7 @@ async function initDB() {
         console.log('Duration migration skipped:', err.message);
       }
 
-      // Check providers table for gallery_images, capacity, and user_id columns
+      // Update provider table with modern features like Image Gallery and Capacity
       const providerCols = await pool.query("SHOW COLUMNS FROM providers");
       const existingProviderCols = providerCols[0].map(c => c.Field);
       if (!existingProviderCols.includes('gallery_images')) {
@@ -253,7 +285,7 @@ async function initDB() {
         await pool.query("ALTER TABLE providers ADD CONSTRAINT fk_provider_application FOREIGN KEY (application_id) REFERENCES provider_applications(id) ON DELETE SET NULL");
       }
 
-      // Expand users role ENUM to include provider
+      // Update user roles to support 'provider' role explicitly
       try {
         await pool.query("ALTER TABLE users MODIFY COLUMN role ENUM('user', 'admin', 'provider') DEFAULT 'user'");
       } catch(e) { /* already updated */ }
@@ -263,7 +295,11 @@ async function initDB() {
 
     console.log('Database tables successfully initialized.');
 
-    // Seed dummy providers if empty
+    /**
+     * --- SEEDING LOGIC ---
+     * If the providers table is empty, we add some default providers 
+     * so the dashboard doesn't look empty on the first run.
+     */
     const [rows] = await pool.query('SELECT COUNT(*) as count FROM providers');
     if (rows[0].count === 0) {
       console.log('Seeding dummy providers...');
@@ -276,14 +312,16 @@ async function initDB() {
       `);
     }
 
-    // Seed admins logic (removed admin2)
-
   } catch (error) {
     console.error('Database connection failed:', error);
     process.exit(1);
   }
 }
 
+/**
+ * Returns the active connection pool. 
+ * Allows other parts of the app to run SQL queries.
+ */
 function getPool() {
   if (!pool) {
     throw new Error('Database pool has not been initialized. Call initDB() first.');

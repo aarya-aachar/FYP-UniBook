@@ -1,3 +1,23 @@
+/**
+ * The Feedback Hub (User Reviews)
+ * 
+ * relative path: /src/pages/UserReports.jsx
+ * 
+ * This component acts as the user's personal archive of past experiences. 
+ * Its mission is twofold: 
+ * 1. Allow users to review their history.
+ * 2. Empower users to share verified feedback that impacts provider ratings.
+ * 
+ * Logic Highlights:
+ * - Experience Grouping: Merges individual booking slots into a single 
+ *   "Experience Card". This prevents users from being overwhelmed by multiple 
+ *   review requests for the same appointment.
+ * - Reactive Modals: Uses a lightweight local state to manage the review 
+ *   submission process without leaving the page.
+ * - Verified Badge logic: Only allows reviews for bookings that have actually 
+ *   passed in time (fetched via `getPastUserBookings`).
+ */
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import UserNavbar from "../components/UserNavbar";
@@ -13,7 +33,7 @@ const UserReports = () => {
   const [loading, setLoading] = useState(true);
   const [toasts, setToasts] = useState([]);
   
-  // Review Modal State
+  // Modal Orchestration State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeBooking, setActiveBooking] = useState(null);
   const [rating, setRating] = useState(0);
@@ -21,6 +41,7 @@ const UserReports = () => {
   const [comment, setComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Global ephemeral notification helper
   const toast = (message, type = 'success') => {
     const id = Date.now();
     setToasts(t => [...t, { id, message, type }]);
@@ -32,12 +53,20 @@ const UserReports = () => {
     fetchReports();
   }, []);
 
+  /**
+   * fetchReports
+   * Handles the retrieval and grouping of historical data.
+   */
   const fetchReports = async () => {
     try {
       setLoading(true);
       const data = await getPastUserBookings();
       
-      // Grouping Logic for Consecutive Slots
+      /**
+       * --- EXPERIENCE GROUPING ---
+       * Ensures that if a user booked multiple 30-min slots for one session,
+       * they only see ONE entry in their review list.
+       */
       const grouped = [];
       const sorted = [...(data || [])].sort((a, b) => {
         const dateDiff = new Date(b.booking_date) - new Date(a.booking_date);
@@ -59,7 +88,7 @@ const UserReports = () => {
           if (lastEndTimeStr === booking.booking_time.substring(0, 5)) {
             last.times.push(booking.booking_time);
             last.ids.push(booking.id);
-            // Prioritize keeping a review_id if any slot in the group has one
+            // Sync logic: If any part of the group was reviewed, the whole group is "reviewed"
             if (booking.review_id && !last.review_id) {
                last.review_id = booking.review_id;
                last.rating = booking.rating;
@@ -85,6 +114,10 @@ const UserReports = () => {
     }
   };
 
+  /**
+   * openReviewModal
+   * Pre-populates the modal if the user is editing an existing review.
+   */
   const openReviewModal = (booking) => {
     setActiveBooking(booking);
     setRating(booking.rating || 0);
@@ -100,6 +133,10 @@ const UserReports = () => {
     setComment("");
   };
 
+  /**
+   * handleReviewSubmit
+   * Pushes the user feedback to the global rating engine.
+   */
   const handleReviewSubmit = async () => {
     if (rating === 0) {
       toast("Please select a star rating", "error");
@@ -108,10 +145,11 @@ const UserReports = () => {
 
     try {
       setIsSubmitting(true);
+      // We use the first ID in the group as the primary reference for the review
       await submitReview(activeBooking.id, activeBooking.provider_id, rating, comment);
       toast("Review posted successfully!");
       closeReviewModal();
-      fetchReports();
+      fetchReports(); // Refresh to show the new review state
     } catch (err) {
       console.error(err);
       toast("Failed to submit review", "error");
@@ -145,7 +183,7 @@ const UserReports = () => {
           .fade-in { animation: fadeIn 0.3s ease-out forwards; }
         `}</style>
 
-        {/* Toast Notification */}
+        {/* Global Portal: Toast Notifications */}
         <div className="fixed top-6 right-6 z-[200] flex flex-col gap-3 pointer-events-none">
           {toasts.map(t => (
             <div key={t.id} className={`flex items-center gap-3 px-5 py-4 rounded-xl shadow-lg text-white text-sm font-medium pointer-events-auto
@@ -220,6 +258,7 @@ const UserReports = () => {
                       </div>
                     </div>
 
+                    {/* Published Feedback Preview */}
                     {hasReviewed && (
                       <div className={`border rounded-xl p-5 mt-2 max-w-xl transition-all ${isDark ? 'bg-slate-900/50 border-slate-700' : 'bg-slate-50 border-slate-200 shadow-inner'}`}>
                         <div className="flex text-amber-500 mb-3">
@@ -233,6 +272,7 @@ const UserReports = () => {
                   </div>
                 </div>
 
+                   {/* Call to Action: Only shows if the user hasn't left feedback yet */}
                    {!hasReviewed && (
                     <div className="flex flex-col items-end justify-center w-full md:w-auto mt-2 md:mt-0 pt-4 md:pt-0 border-t md:border-none transition-colors border-slate-200 dark:border-slate-700">
                       <button 
@@ -250,7 +290,7 @@ const UserReports = () => {
         </div>
       </main>
 
-      {/* Review Modal */}
+      {/* Review Modal: Clean, Backdrop-blurred Focus Container */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center fade-in p-4">
           <div className="absolute inset-0 bg-[#020617]/70 backdrop-blur-md" onClick={closeReviewModal} />

@@ -1,3 +1,20 @@
+/**
+ * The Provider Stewardship Hub (Admin Moderation)
+ * 
+ * relative path: /src/pages/ManageProviders.jsx
+ * 
+ * This component is the "Gatekeeper" of the UniBook platform. It provides 
+ * administrators with the tools to manage the lifecycle of a service provider.
+ * 
+ * Technical Rationale:
+ * - Dual-Tab Architecture: Separates the day-to-day management of active partners 
+ *   from the high-friction moderation of new applications.
+ * - Enrolment Logic: Includes document verification and automated email 
+ *   orchestration (via the backend) for approval/rejection.
+ * - Dynamic Branding: Maps provider categories to specific visual tokens 
+ *   (gradients, icons) for a professional, glanceable UI.
+ */
+
 import { useState, useEffect, useCallback } from 'react';
 import Sidebar from '../components/Sidebar';
 import { useAdminTheme } from '../context/AdminThemeContext';
@@ -11,6 +28,10 @@ import AdminTopHeader from '../components/AdminTopHeader';
 const CATEGORIES = ['Restaurants', 'Futsal', 'Hospitals', 'Salon / Spa'];
 const BACKEND_URL = 'http://localhost:4001';
 
+/**
+ * getCategoryIcon
+ * Semantic mapping of business types to visual markers.
+ */
 const getCategoryIcon = (cat) => {
   switch (cat) {
     case 'Restaurants': return Coffee;
@@ -21,6 +42,11 @@ const getCategoryIcon = (cat) => {
   }
 };
 
+/**
+ * Visual Token System (CAT)
+ * Provides industry-specific color palettes. This ensures that the Admin 
+ * sidebar and tables feel "Live" and tailored to each specific sector.
+ */
 const CAT = {
   'Restaurants': { gradient: 'bg-emerald-500',   bg: 'bg-emerald-500',   badge: 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20', badgeLight: 'bg-emerald-50 text-emerald-600 border border-emerald-100' },
   'Futsal':      { gradient: 'bg-teal-500',      bg: 'bg-teal-500',      badge: 'bg-teal-500/10 text-teal-400 border border-teal-500/20',     badgeLight: 'bg-teal-50 text-teal-600 border border-teal-100' },
@@ -45,15 +71,21 @@ const ManageProviders = () => {
 
 
 
-  const [actionLoading, setActionLoading] = useState(null); // stores id of app being processed
+  const [actionLoading, setActionLoading] = useState(null); // tracking ID for async approval/rejection
   const [toasts, setToasts] = useState([]);
 
+  // Simple internal notification portal
   const toast = (message, type = 'success') => {
     const id = Date.now();
     setToasts(t => [...t, { id, message, type }]);
     setTimeout(() => setToasts(t => t.filter(x => x.id !== id)), 4000);
   };
 
+  /**
+   * handleToggleStatus
+   * Emergency control logic. Allows an admin to instantly shut down a 
+   * service provider's visibility on the marketplace.
+   */
   const handleToggleStatus = async (provider) => {
     try {
       await toggleProviderStatus(provider.id, !provider.is_active);
@@ -64,6 +96,10 @@ const ManageProviders = () => {
     }
   };
 
+  /**
+   * fetchAll
+   * Syncs both active providers and the application queue.
+   */
   const fetchAll = useCallback(async () => {
     try { 
       setLoading(true); 
@@ -81,7 +117,9 @@ const ManageProviders = () => {
     fetchAll(); 
   }, [fetchAll]);
 
-  // Filtering for active providers
+  /**
+   * UI Filtering: Multi-Axis (Search + Category)
+   */
   const displayedActive = (providers || []).filter(p => {
     const mc = filter === 'All' || p.category === filter;
     const ms = !search || p.name.toLowerCase().includes(search.toLowerCase()) || (p.address || '').toLowerCase().includes(search.toLowerCase());
@@ -93,6 +131,11 @@ const ManageProviders = () => {
 
 
 
+  /**
+   * handleApprove
+   * Onboards the business. This triggers a backend sequence that creates 
+   * credentials and sends the official onboarding email.
+   */
   const handleApprove = async (id, name) => {
     if(actionLoading) return;
     try {
@@ -107,10 +150,14 @@ const ManageProviders = () => {
     }
   };
 
+  /**
+   * handleReject
+   * Denies access with a specified reason, fostering transparency with applicants.
+   */
   const handleReject = async (id, name) => {
     if(actionLoading) return;
     const reason = prompt(`Enter rejection reason for "${name}" (sent via email):`);
-    if(reason === null) return; // cancelled prompt
+    if(reason === null) return; // UX Safety: user cancelled the prompt
     
     try {
       setActionLoading(id);
@@ -140,6 +187,7 @@ const ManageProviders = () => {
         @keyframes fadeIn  { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
       `}</style>
 
+      {/* Ephemeral Toast Portal */}
       <div className="fixed top-6 right-6 z-[9999] flex flex-col gap-3 pointer-events-none">
         {toasts.map(t => (
           <div key={t.id} className={`flex items-center gap-3 pl-4 pr-5 py-3 rounded-lg shadow-lg text-white text-sm font-bold pointer-events-auto ${t.type === 'success' ? 'bg-emerald-600' : 'bg-red-600'}`} style={{ animation: 'toastIn 0.3s cubic-bezier(0.16, 1, 0.3, 1)' }}>
@@ -152,7 +200,7 @@ const ManageProviders = () => {
       <div className="flex-1 px-8 py-10 max-w-7xl mx-auto w-full overflow-hidden">
         <AdminTopHeader title="Service Providers" subtitle={`Manage ${providers.length} enrolled services and pending registrations.`} />
 
-        {/* Tab Navigation */}
+        {/* Dynamic Tab Navigation (Orchestrates current work focus) */}
         <div className="flex gap-4 mb-6 border-b border-transparent">
           <button 
             onClick={() => setActiveTab('active')}
@@ -169,6 +217,7 @@ const ManageProviders = () => {
 
         {activeTab === 'active' ? (
           <>
+            {/* Filtering Engine for Active Providers */}
             <div className={`p-4 rounded-xl rounded-tl-none border-b-0 border ${cardBase} flex flex-col md:flex-row gap-4 mb-0`} style={{ animation: 'fadeIn 0.6s ease-out' }}>
               <div className="relative flex-1">
                 <Search className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors ${textMuted}`} />
@@ -196,6 +245,7 @@ const ManageProviders = () => {
                 </thead>
                 <tbody>
                   {loading ? (
+                    // Persistent perceived performance via skeletons
                     Array.from({ length: 3 }).map((_, i) => (
                       <tr key={i} className={`border-b ${borderCol}`}>
                         <td className="px-6 py-4"><div className={`h-12 w-64 rounded-xl animate-pulse ${isDark ? 'bg-white/5' : 'bg-slate-200'}`} /></td>
@@ -265,7 +315,7 @@ const ManageProviders = () => {
             </div>
           </>
         ) : (
-          /* Pending Requests Tab */
+          /* Enrollment Application Queue (Moderation logic) */
           <div className={`overflow-x-auto rounded-xl rounded-tl-none border shadow-lg ${cardBase}`} style={{ animation: 'fadeIn 0.7s ease-out' }}>
             <table className="w-full text-left border-collapse">
               <thead>
@@ -301,6 +351,7 @@ const ManageProviders = () => {
                         </td>
                         <td className={`px-6 py-4 whitespace-nowrap text-sm font-black ${textPrimary}`}>{a.pan_number}</td>
                         <td className="px-6 py-4 whitespace-nowrap">
+                          {/* Document Review: Essential for legal verification */}
                           {a.document_path ? (
                             <a href={`${BACKEND_URL}${a.document_path}`} target="_blank" rel="noreferrer" className={`flex items-center gap-2 text-sm font-bold w-fit px-3 py-1.5 rounded-lg ${isDark ? 'bg-slate-800 text-blue-400 hover:text-blue-300' : 'bg-blue-50 text-blue-600 hover:bg-blue-100'}`}>
                               <FileText className="w-4 h-4" /> View File

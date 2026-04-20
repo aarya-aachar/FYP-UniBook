@@ -1,3 +1,22 @@
+/**
+ * The Global Reservation Log (Admin Booking Overview)
+ * 
+ * relative path: /src/pages/ManageBookings.jsx
+ * 
+ * This component provides a comprehensive, system-wide view of all confirmed 
+ * transactions. It acts as the "Black Box" for platform auditing and 
+ * operational monitoring.
+ * 
+ * Technical Design:
+ * - Session Grouping Algorithm: Implements an advanced reduction logic to 
+ *   group consecutive 1-hour booking slots into cohesive, multi-hour 
+ *   customer sessions for a cleaner administrative presentation.
+ * - Multi-Axis Filtering: Orchestrates data visualization across Customer ID, 
+ *   Provider Category, and Temporal schedule.
+ * - Live Metrics: Aggregates real-time operational capacity on-the-fly to 
+ *   provide the admin with a "Live Feed" of platform load.
+ */
+
 import { useState, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
 import { useAdminTheme } from '../context/AdminThemeContext';

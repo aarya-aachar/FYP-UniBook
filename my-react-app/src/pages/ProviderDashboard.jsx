@@ -1,3 +1,20 @@
+/**
+ * The Business Health Summary (Provider Dashboard)
+ * 
+ * relative path: /src/pages/ProviderDashboard.jsx
+ * 
+ * This is the primary visibility layer for service providers. it aggregates 
+ * dispersed operational data into a high-level performance cockpit.
+ * 
+ * Key Pillars:
+ * - KPI Snapshot: Immediate visibility into Total Bookings, Revenue, and 
+ *   Upcoming appointments.
+ * - Dynamic Sync: Uses background polling to keep the dashboard current 
+ *   without requiring manual refreshes.
+ * - Interaction Hub: Provides quick access to the full booking ledger and 
+ *   customer details.
+ */
+
 import { useState, useEffect } from 'react';
 import ProviderSidebar from '../components/ProviderSidebar';
 import { useAdminTheme } from '../context/AdminThemeContext';
@@ -17,6 +34,10 @@ const formatCurrency = (val) => {
   return `Rs. ${Number(val).toLocaleString()}`;
 };
 
+/**
+ * StatCard
+ * A reusable visual component for displaying operational KPIs.
+ */
 const StatCard = ({ title, value, icon: Icon, color, bg, border, isDark }) => (
   <div className={`rounded-2xl border p-6 flex items-center gap-5 ${bg} ${border} transition-all hover:shadow-md`}>
     <div className={`w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 ${color}`}>
@@ -39,9 +60,13 @@ const ProviderDashboard = () => {
   useEffect(() => {
     document.title = 'Provider Dashboard | UniBook';
     
+    /**
+     * fetchDashboard
+     * The "Heartbeat" of the portal. It fetches current stats and recent 
+     * activity. Uses a timestamp as a cache-buster.
+     */
     const fetchDashboard = () => {
       setLoading(true);
-      // Cache-busting with timestamp
       api.get(`/provider/dashboard?t=${Date.now()}`)
         .then(res => {
           console.log('>>> [FRONTEND] Dashboard Data Received:', res.data);
@@ -52,8 +77,9 @@ const ProviderDashboard = () => {
     };
 
     fetchDashboard();
-    // Auto-refresh every 5 minutes
-    const interval = setInterval(fetchDashboard, 5 * 60 * 1000);
+    
+    // Background Refresh: Ensures the dashboard remains "Live" for operational staff
+    const interval = setInterval(fetchDashboard, 5 * 60 * 1000); // 5-minute interval
     return () => clearInterval(interval);
   }, []);
 
@@ -66,19 +92,20 @@ const ProviderDashboard = () => {
       <ProviderSidebar isDark={isDark} />
 
       <div className="flex-1 px-8 py-10 max-w-7xl mx-auto w-full overflow-hidden flex flex-col">
-        {/* Header directly matched to Admin UI */}
+        {/* Dynamic Header: Reflects the provider's business identity */}
         <AdminTopHeader 
           title={data?.provider?.name || 'Dashboard'}
           subtitle={data ? `${data.provider.category} — Here's an overview of your service activity.` : 'Loading overview...'}
         />
 
         {loading ? (
+             // Content Skeletons: Maintains structural integrity during data refresh
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
             {[1,2,3,4].map(i => <div key={i} className={`h-28 rounded-2xl animate-pulse ${isDark ? 'bg-slate-800' : 'bg-slate-100'}`} />)}
           </div>
         ) : (
           <>
-            {/* Stat Cards */}
+            {/* Stat Cards: High-level business health summary */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
               <StatCard isDark={isDark} title="Total Bookings"   value={data?.stats?.total}    icon={Calendar}      color="bg-emerald-500/10 text-emerald-600" bg={isDark ? 'bg-slate-900' : 'bg-white'} border={isDark ? 'border-slate-800' : 'border-slate-200'} />
               <StatCard isDark={isDark} title="Upcoming"         value={data?.stats?.upcoming}  icon={TrendingUp}    color="bg-blue-500/10 text-blue-600"     bg={isDark ? 'bg-slate-900' : 'bg-white'} border={isDark ? 'border-slate-800' : 'border-slate-200'} />
@@ -86,7 +113,7 @@ const ProviderDashboard = () => {
               <StatCard isDark={isDark} title="Total Revenue"   value={formatCurrency(data?.stats?.revenue)}   icon={DollarSign}    color="bg-emerald-600/10 text-emerald-600"   bg={isDark ? 'bg-slate-900' : 'bg-white'} border={isDark ? 'border-slate-800' : 'border-slate-200'} />
             </div>
 
-            {/* Recent Bookings */}
+            {/* Recent Bookings: Glanceable ledger of current client activity */}
             <div className={`rounded-3xl border shadow-sm overflow-hidden ${cardBg}`}>
               <div className={`flex items-center justify-between px-8 py-5 border-b ${isDark ? 'border-slate-800' : 'border-slate-100'}`}>
                 <h2 className={`text-lg font-black tracking-tight ${textPrimary}`}>Recent Bookings</h2>

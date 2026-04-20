@@ -1,6 +1,22 @@
+/**
+ * The Navigation Bridge (Main Application Entry)
+ * 
+ * relative path: /src/App.jsx
+ * 
+ * This is the central hub of UniBook. It defines every single page 
+ * and ensures that users are directed to the right place.
+ * 
+ * Structure:
+ * - Theme Wrappers: We separate Admin and User themes to provide different aesthetics.
+ * - Protected Routes: We use a custom gateway to prevent unauthenticated access.
+ * - Role Segments: Pages are grouped into Public, User, Admin, and Provider sections.
+ */
+
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AdminThemeProvider } from './context/AdminThemeContext';
 import { UserThemeProvider } from './context/UserThemeContext';
+
+// --- PAGE IMPORTS ---
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -41,19 +57,36 @@ import ProviderServiceSettings from './pages/ProviderServiceSettings';
 function App() {
   return (
     <Router>
+      {/* 
+          We wrap the app in dynamic themes. 
+          This allows the Admin panel to look distinct from the public-facing site. 
+      */}
       <AdminThemeProvider>
         <UserThemeProvider>
           <Routes>
+            {/* --- OPEN PUBLIC ROUTES --- */}
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
+            
+            {/* --- REGULAR USER ROUTES --- */}
+            {/* These require 'user' role permissions and authentication */}
             <Route path="/profile" element={<ProtectedRoute requiredRole="user"><Profile /></ProtectedRoute>} />
             <Route path="/services" element={<ProtectedRoute><Services /></ProtectedRoute>} />
             <Route path="/services/:serviceName" element={<ProtectedRoute><ServiceProviders /></ProtectedRoute>} />
             <Route path="/service/:providerId" element={<ProtectedRoute><ServiceDetails /></ProtectedRoute>} />
             <Route path="/booking/:providerId" element={<ProtectedRoute requiredRole="user"><Booking /></ProtectedRoute>} />
             <Route path="/dashboard" element={<ProtectedRoute requiredRole="user"><UserDashboard /></ProtectedRoute>} />
+            <Route path="/notifications" element={<ProtectedRoute requiredRole="user"><UserNotifications /></ProtectedRoute>} />
+            <Route path="/payment/:providerId" element={<ProtectedRoute requiredRole="user"><Payment /></ProtectedRoute>} />
+            <Route path="/my-reports" element={<ProtectedRoute requiredRole="user"><UserReports /></ProtectedRoute>} />
+            <Route path="/my-appointments" element={<ProtectedRoute requiredRole="user"><ViewAppointments /></ProtectedRoute>} />
+            <Route path="/payment-success" element={<PaymentSuccess />} />
+            <Route path="/chat" element={<ProtectedRoute requiredRole="user"><ChatWithAdmin /></ProtectedRoute>} />
+
+            {/* --- ADMIN COMMAND CENTER --- */}
+            {/* Highly protected routes restricted strictly to 'admin' accounts */}
             <Route path="/dashboard/admin" element={<ProtectedRoute requiredRole="admin"><AdminDashboard /></ProtectedRoute>} />
             <Route path="/dashboard/admin/users" element={<ProtectedRoute requiredRole="admin"><ManageUsers /></ProtectedRoute>} />
             <Route path="/dashboard/admin/providers" element={<ProtectedRoute requiredRole="admin"><ManageProviders /></ProtectedRoute>} />
@@ -64,19 +97,12 @@ function App() {
             <Route path="/dashboard/admin/chats/providers" element={<ProtectedRoute requiredRole="admin"><AdminChats roleFilter="provider" /></ProtectedRoute>} />
             <Route path="/dashboard/admin/profile" element={<ProtectedRoute requiredRole="admin"><AdminProfile /></ProtectedRoute>} />
 
-            
-            <Route path="/notifications" element={<ProtectedRoute requiredRole="user"><UserNotifications /></ProtectedRoute>} />
-            <Route path="/payment/:providerId" element={<ProtectedRoute requiredRole="user"><Payment /></ProtectedRoute>} />
-            <Route path="/my-reports" element={<ProtectedRoute requiredRole="user"><UserReports /></ProtectedRoute>} />
-            <Route path="/my-appointments" element={<ProtectedRoute requiredRole="user"><ViewAppointments /></ProtectedRoute>} />
-            <Route path="/payment-success" element={<PaymentSuccess />} />
-            <Route path="/chat" element={<ProtectedRoute requiredRole="user"><ChatWithAdmin /></ProtectedRoute>} />
-
-            {/* Provider Public Routes */}
+            {/* --- PARTNER / PROVIDER ONBOARDING --- */}
             <Route path="/provider/register" element={<ProviderRegister />} />
             <Route path="/provider/waiting" element={<ProviderWaiting />} />
 
-            {/* Provider Protected Routes */}
+            {/* --- PROVIDER MANAGEMENT PORTAL --- */}
+            {/* Routes for Futsal/Hospital owners to manage their own business */}
             <Route path="/provider/dashboard" element={<ProtectedRoute requiredRole="provider"><ProviderDashboard /></ProtectedRoute>} />
             <Route path="/provider/bookings" element={<ProtectedRoute requiredRole="provider"><ProviderBookings /></ProtectedRoute>} />
             <Route path="/provider/availability" element={<ProtectedRoute requiredRole="provider"><ProviderAvailability /></ProtectedRoute>} />

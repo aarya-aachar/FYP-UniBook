@@ -1,3 +1,22 @@
+/**
+ * The Celebration Interface (Payment Success)
+ * 
+ * relative path: /src/pages/PaymentSuccess.jsx
+ * 
+ * This component serves as the high-fidelity confirmation screen for 
+ * clients after a successful financial transaction. It marks the final 
+ * "Closing Note" of the booking funnel.
+ * 
+ * Technical Design:
+ * - Motion-Orchestrated UI: Employs custom CSS keyframes (@keyframes celebrate, 
+ *   @keyframes drawCheck) to create a premium, affirmative user experience.
+ * - Non-Blocking Navigation: Provides immediate egress points to the 
+ *   appointment ledger, ensuring the user can verify their new reservation 
+ *   without friction.
+ * - Adaptive Visuals: Utilizes the UserThemeContext to maintain visual 
+ *   continuity, whether in high-contrast light mode or immersive dark mode.
+ */
+
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import UserNavbar from '../components/UserNavbar';

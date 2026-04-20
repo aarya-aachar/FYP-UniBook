@@ -1,3 +1,24 @@
+/**
+ * The Service Visualization Hub (Public Detailed View)
+ * 
+ * relative path: /src/pages/ServiceDetails.jsx
+ * 
+ * This component provides a high-fidelity, immersive view of a specific 
+ * service provider's profile. It acts as the final persuasion point before 
+ * a user commits to a booking.
+ * 
+ * Technical Design:
+ * - Dynamics Resource Fetching: Orchestrates temporal data fetching using 
+ *   React Router's useParams hooks to hydrate the UI with specific 
+ *   provider metadata (Images, Descriptions, Locations).
+ * - Immersive Media Banner: Implements a motion-orchestrated banner system 
+ *   with CSS transforms (scale-105 on hover) and gradient overlays to 
+ *   ensure professional readability over custom images.
+ * - Non-Blocking Navigation Flow: Provides a dual-path funnel—allowing for 
+ *   immediate transaction initiation (Book Appointment) or further 
+ *   discovery (Explore More).
+ */
+
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import UserNavbar from "../components/UserNavbar";

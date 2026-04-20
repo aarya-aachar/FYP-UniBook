@@ -1,18 +1,32 @@
+/**
+ * Provider Portal & Private Dashboard Routes
+ * 
+ * relative path: /api/provider
+ * 
+ * This file handles the internal "Office" for businesses. 
+ * Once a partner logs in, they use these routes to:
+ * - View their earnings and booking stats.
+ * - Update their business hours, description, and gallery.
+ * - Manage and reschedule client appointments.
+ * - Read notifications about new bookings.
+ */
+
 const express = require('express');
 const { getPool } = require('../config/db');
 const { authenticateToken, verifyProvider } = require('../middleware/authMiddleware');
 
 const router = express.Router();
 
-// ─────────────────────────────────────────────────────────────
-// GET /api/provider/profile
-// Returns the provider's own provider record + application data
-// ─────────────────────────────────────────────────────────────
+/**
+ * @route GET /api/provider/profile
+ * @desc Get the business profile and original application data for the logged-in provider.
+ */
 router.get('/provider/profile', authenticateToken, verifyProvider, async (req, res) => {
   try {
     const pool = getPool();
     const userId = req.user.id;
 
+    // Join with application data so they can see their PAN/Documents they submitted
     const [providers] = await pool.query(
       `SELECT p.*, pa.pan_number, pa.document_path 
        FROM providers p 
@@ -26,7 +40,6 @@ router.get('/provider/profile', authenticateToken, verifyProvider, async (req, r
       return res.status(404).json({ message: 'Provider profile not found.' });
     }
 
-    // Also get user info
     const [users] = await pool.query('SELECT id, name, email, profile_photo, created_at FROM users WHERE id = ?', [userId]);
     const user = users[0] || {};
 
@@ -41,7 +54,10 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
-// ─── Multer Setup ─────────────────────────────────────────────────────────────
+/**
+ * --- MULTER CONFIGURATION FOR PORTAL ---
+ * Identical to main provider routes, permitting gallery updates from the portal.
+ */
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const uploadDir = path.join(__dirname, '../../uploads');
@@ -68,10 +84,10 @@ const uploadImages = (req, res, next) => {
   });
 };
 
-// ─────────────────────────────────────────────────────────────
-// PUT /api/provider/profile
-// Update provider's own service details
-// ─────────────────────────────────────────────────────────────
+/**
+ * @route PUT /api/provider/profile
+ * @desc Allows the business owner to update their own contact info, prices and photos.
+ */
 router.put('/provider/profile', authenticateToken, verifyProvider, uploadImages, async (req, res) => {
   try {
     const pool = getPool();
@@ -81,7 +97,7 @@ router.put('/provider/profile', authenticateToken, verifyProvider, uploadImages,
     const fields = ['description = ?', 'address = ?', 'base_price = ?', 'opening_time = ?', 'closing_time = ?', 'capacity = ?'];
     const values = [description, address, base_price, opening_time, closing_time, capacity];
 
-    // Handle Image Gallery Uploads
+    // GALLERY UPDATE LOGIC
     let mergedGallery = [];
     let existingToKeep = [];
     
@@ -102,7 +118,7 @@ router.put('/provider/profile', authenticateToken, verifyProvider, uploadImages,
       mergedGallery = existingToKeep.slice(0, 4);
     }
 
-    // Update image and gallery_images
+    // Set the first image from the gallery as the primary banner
     fields.push('image = ?');
     values.push(mergedGallery.length > 0 ? mergedGallery[0] : '');
     
@@ -119,16 +135,15 @@ router.put('/provider/profile', authenticateToken, verifyProvider, uploadImages,
   }
 });
 
-// ─────────────────────────────────────────────────────────────
-// GET /api/provider/bookings
-// Returns all bookings for this provider's service
-// ─────────────────────────────────────────────────────────────
+/**
+ * @route GET /api/provider/bookings
+ * @desc Get a detailed list of all successful client bookings for this business.
+ */
 router.get('/provider/bookings', authenticateToken, verifyProvider, async (req, res) => {
   try {
     const pool = getPool();
     const userId = req.user.id;
 
-    // Get provider_id for this user
     const [providerRows] = await pool.query('SELECT id FROM providers WHERE user_id = ?', [userId]);
     if (providerRows.length === 0) {
       return res.status(404).json({ message: 'No provider linked to this account.' });
@@ -152,10 +167,12 @@ router.get('/provider/bookings', authenticateToken, verifyProvider, async (req, 
   }
 });
 
-// ─────────────────────────────────────────────────────────────
-// GET /api/provider/dashboard
-// Returns summary stats for provider dashboard
-// ─────────────────────────────────────────────────────────────
+/**
+ * @route GET /api/provider/dashboard
+ * @desc ANALYTICS ENGINE: 
+ *       Calculates revenue, upcoming vs completed counts, and groups 
+ *       consecutive hour-slots into readable "Sessions".
+ */
 router.get('/provider/dashboard', authenticateToken, verifyProvider, async (req, res) => {
   try {
     const pool = getPool();
@@ -168,17 +185,14 @@ router.get('/provider/dashboard', authenticateToken, verifyProvider, async (req,
     const provider = providerRows[0];
     const providerId = provider.id;
 
-    console.log(`\n>>> [DEBUG] DASHBOARD REQUEST FOR PROVIDER ID: ${providerId}`);
-
-    // 1. Fetch Definitive Revenue (Direct SQL Sum)
+    // 1. Calculate Revenue directly in the database
     const [revenueRows] = await pool.query(
       "SELECT SUM(paid_amount) AS total_revenue FROM bookings WHERE provider_id = ? AND status = 'confirmed'",
       [providerId]
     );
     const revenueVal = parseFloat(revenueRows[0]?.total_revenue || 0);
-    console.log(`>>> [DEBUG] Raw Total Revenue from SQL: ${revenueVal}`);
 
-    // 2. Fetch Raw Bookings (Ordered for grouping)
+    // 2. Fetch all individual booking records
     const [allConfirmed] = await pool.query(
       `SELECT id, user_id, DATE_FORMAT(booking_date, '%Y-%m-%d') as booking_date, booking_time, paid_amount 
        FROM bookings 
@@ -187,16 +201,19 @@ router.get('/provider/dashboard', authenticateToken, verifyProvider, async (req,
       [providerId]
     );
 
-    // 3. User Map for Names
     const [userRows] = await pool.query("SELECT id, name FROM users");
     const userMap = Object.fromEntries(userRows.map(u => [String(u.id), u.name]));
 
-    // 4. Hyper-Resilient Session Grouping
+    /**
+     * --- SMART SESSION GROUPING ---
+     * If a user books 4 PM, 5 PM, and 6 PM for Futsal, it shouldn't show as 
+     * 3 separate notifications. This logic groups them into 1 session 
+     * spanning 3 hours.
+     */
     const sessions = [];
     allConfirmed.forEach(booking => {
       const last = sessions[sessions.length - 1];
       
-      // Use String() for safety on all IDs and Dates
       const curUID  = String(booking.user_id);
       const curDate = String(booking.booking_date);
       const lastUID = last ? String(last.user_id) : null;
@@ -204,11 +221,10 @@ router.get('/provider/dashboard', authenticateToken, verifyProvider, async (req,
 
       if (last && curUID === lastUID && curDate === lastDate) {
         const lastSlot = last.slots[last.slots.length - 1];
-        // Handle '09:00:00' or '9:00' or '09:00'
         const lastH = parseInt(lastSlot.booking_time.split(':')[0], 10);
         const thisH = parseInt(booking.booking_time.split(':')[0], 10);
         
-        // Group if consecutive hours
+        // Group if the slots are back-to-back
         if (thisH === lastH + 1) {
           last.slots.push(booking);
           last.times.push(booking.booking_time);
@@ -224,7 +240,6 @@ router.get('/provider/dashboard', authenticateToken, verifyProvider, async (req,
       });
     });
 
-    // 5. Time-Sensitive Categorization
     const now = new Date();
     const todayStr = now.toISOString().split('T')[0];
     const nowTimeStr = now.toTimeString().substring(0, 5);
@@ -232,6 +247,7 @@ router.get('/provider/dashboard', authenticateToken, verifyProvider, async (req,
     let upcomingCount = 0;
     let completedCount = 0;
 
+    // Distinguish between past events and future ones for the dashboard chart
     sessions.forEach(s => {
       const bDate = String(s.booking_date);
       const bTime = String(s.booking_time).substring(0, 5);
@@ -253,8 +269,6 @@ router.get('/provider/dashboard', authenticateToken, verifyProvider, async (req,
       revenue: Math.round(revenueVal * 100) / 100 
     };
 
-    console.log(`>>> [SUCCESS] Final Metrics: Total=${finalStats.total}, Revenue=${finalStats.revenue}, Upcoming=${finalStats.upcoming}`);
-
     res.json({ 
       provider, 
       stats: finalStats, 
@@ -266,10 +280,10 @@ router.get('/provider/dashboard', authenticateToken, verifyProvider, async (req,
   }
 });
 
-// ─────────────────────────────────────────────────────────────
-// GET /api/provider/notifications
-// Returns notifications only for this provider
-// ─────────────────────────────────────────────────────────────
+/**
+ * @route GET /api/provider/notifications
+ * @desc Fetch alerts (e.g. "New Booking confirmed") specifically for this provider.
+ */
 router.get('/provider/notifications', authenticateToken, verifyProvider, async (req, res) => {
   try {
     const pool = getPool();
@@ -287,10 +301,10 @@ router.get('/provider/notifications', authenticateToken, verifyProvider, async (
   }
 });
 
-// ─────────────────────────────────────────────────────────────
-// PUT /api/provider/notifications/:id/read
-// Mark a provider notification as read
-// ─────────────────────────────────────────────────────────────
+/**
+ * @route PUT /api/provider/notifications/:id/read
+ * @desc Clear an individual notification dot.
+ */
 router.put('/provider/notifications/:id/read', authenticateToken, verifyProvider, async (req, res) => {
   try {
     const pool = getPool();
@@ -301,10 +315,11 @@ router.put('/provider/notifications/:id/read', authenticateToken, verifyProvider
   }
 });
 
-// ─────────────────────────────────────────────────────────────
-// PUT /api/provider/bookings/:id/reschedule
-// Allows provider to change date/time of a booking
-// ─────────────────────────────────────────────────────────────
+/**
+ * @route PUT /api/provider/bookings/:id/reschedule
+ * @desc Provider self-service: Reschedule an appointment. 
+ *       We verify ownership and double-booking (capacity) before saving.
+ */
 router.put('/provider/bookings/:id/reschedule', authenticateToken, verifyProvider, async (req, res) => {
   try {
     const { id } = req.params;
@@ -312,7 +327,7 @@ router.put('/provider/bookings/:id/reschedule', authenticateToken, verifyProvide
     const pool = getPool();
     const userId = req.user.id;
 
-    // 1. Verify this provider owns the booking
+    // 1. Verify this provider actually "owns" this booking
     const [providerRows] = await pool.query('SELECT id, name FROM providers WHERE user_id = ?', [userId]);
     if (providerRows.length === 0) return res.status(403).json({ message: 'Unauthorized' });
     const provider = providerRows[0];
@@ -321,7 +336,7 @@ router.put('/provider/bookings/:id/reschedule', authenticateToken, verifyProvide
     if (bookingCheck.length === 0) return res.status(404).json({ message: 'Booking not found.' });
     const booking = bookingCheck[0];
 
-    // 2. Validate: new date must not be in the past
+    // 2. Validate: New date cannot be in the past
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const selectedDate = new Date(booking_date);
@@ -329,7 +344,8 @@ router.put('/provider/bookings/:id/reschedule', authenticateToken, verifyProvide
       return res.status(400).json({ message: 'Cannot reschedule to a past date.' });
     }
 
-    // 3. Validate availability (Capacity check)
+    // 3. SECURE CAPACITY CHECK
+    // Ensure we aren't moving a booking to a slot that's already full
     const [existing] = await pool.query(
       "SELECT COUNT(*) as count FROM bookings WHERE provider_id = ? AND booking_date = ? AND booking_time = ? AND status = 'confirmed' AND id != ?",
       [provider.id, booking_date, booking_time, id]
@@ -341,13 +357,13 @@ router.put('/provider/bookings/:id/reschedule', authenticateToken, verifyProvide
       return res.status(400).json({ message: 'The selected slot is already full. Please choose another time.' });
     }
 
-    // 3. Update the booking
+    // 4. Update and notify the client
     await pool.query('UPDATE bookings SET booking_date = ?, booking_time = ? WHERE id = ?', [booking_date, booking_time, id]);
 
-    // 4. Notify User
     try {
       const dateStr = new Date(booking_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
       const timeStr = booking_time.substring(0, 5);
+      // Let the user know their appointment was moved
       await pool.query(
         'INSERT INTO notifications (user_id, type, title, message, metadata, booking_id) VALUES (?, ?, ?, ?, ?, ?)',
         [booking.user_id, 'booking_rescheduled', 'Booking Rescheduled', `Your booking for ${provider.name} has been rescheduled to ${dateStr} at ${timeStr}.`, JSON.stringify({ booking_id: id }), id]

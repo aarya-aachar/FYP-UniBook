@@ -1,3 +1,22 @@
+/**
+ * The Secure Communication Hub (Admin Messaging)
+ * 
+ * relative path: /src/pages/AdminChats.jsx
+ * 
+ * This component orchestrates real-time, bi-directional communication between 
+ * the platform administrators and the user base (both Clients and Providers). 
+ * It serves as the primary support and dispute resolution interface.
+ * 
+ * Technical Design:
+ * - Distributed Polling Architecture: Implements a tiered polling strategy—
+ *   refreshing the conversation list every 5s and the active chat every 3s 
+ *   to ensure low-latency message delivery without WebSockets.
+ * - Multi-Role Orchestration: A single interface that dynamically filters 
+ *   communications based on role (User vs Provider) to maintain organizational clarity.
+ * - Optimistic UI Pattern: Instantly injects sent messages into the local state 
+ *   for a responsive "snappy" feel before confirmation from the server.
+ */
+
 import { useState, useEffect, useRef } from 'react';
 import { Search, Send, User, MessageCircle, Clock, CheckCircle2 } from 'lucide-react';
 import Sidebar from '../components/Sidebar';

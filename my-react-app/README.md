@@ -1,16 +1,38 @@
-# React + Vite
+# UniBook - Frontend (React + Vite)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This is the frontend client for the UniBook Multi-Service Booking Platform.
 
-Currently, two official plugins are available:
+## UI/UX Features
+- **Responsive Dashboards**: Custom interfaces for Admins, Providers, and Clients.
+- **Dynamic Theming**: Integrated context-based theme management.
+- **Glassmorphic Design**: Modern, premium aesthetics with smooth transitions.
+- **Real-Time Feedback**: Toast notifications and loading states for all async actions.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Technical Implementation
+- **Vite**: Ultra-fast build tool and development server.
+- **Tailwind CSS**: Utility-first styling for high-performance UI components.
+- **React Context API**: Global state management for authentication and theme.
+- **Axios**: Promised-based HTTP client for API communication.
 
-## React Compiler
+## Key Directories
+- `/src/components`: Reusable UI components (Navbars, Sidebars, AI Bot).
+- `/src/pages`: Main application routes (Dashboard, Booking, Profile).
+- `/src/context`: Global state providers.
+- `/src/services`: API abstraction layer.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Getting Started
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
+2. Start the development server:
+   ```bash
+   npm start
+   ```
+3. Build for production:
+   ```bash
+   npm run build
+   ```
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+---
+*UniBook Frontend v1.0*

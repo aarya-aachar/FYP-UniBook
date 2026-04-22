@@ -33,6 +33,7 @@ router.get('/conversations', authenticateToken, async (req, res) => {
       FROM users u
       JOIN messages m ON (u.id = m.sender_id OR u.id = m.receiver_id)
       WHERE u.role = ?
+      
       ORDER BY last_message_time DESC
     `, [role]);
 
